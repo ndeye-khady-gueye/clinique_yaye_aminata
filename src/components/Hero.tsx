@@ -3,6 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Award, Users, Clock } from "lucide-react";
 
 const Hero = () => {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section id="accueil" className="relative bg-gradient-soft py-20 overflow-hidden">
       {/* Background decorative elements */}
@@ -23,11 +30,20 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in">
-            <Button size="lg" className="bg-gradient-clinic hover:opacity-90 text-white px-8 py-3 text-lg">
+            <Button 
+              size="lg" 
+              className="bg-gradient-clinic hover:opacity-90 text-white px-8 py-3 text-lg"
+              onClick={() => scrollToSection('rendez-vous')}
+            >
               <Calendar className="mr-2 h-5 w-5" />
               Prendre rendez-vous
             </Button>
-            <Button variant="outline" size="lg" className="border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 text-lg">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 text-lg"
+              onClick={() => scrollToSection('services')}
+            >
               Découvrir nos services
             </Button>
           </div>
