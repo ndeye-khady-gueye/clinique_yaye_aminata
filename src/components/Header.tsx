@@ -1,10 +1,12 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Calendar, Menu, X, Heart, Phone, Mail } from "lucide-react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -14,6 +16,10 @@ const Header = () => {
       element.scrollIntoView({ behavior: 'smooth' });
     }
     setIsMenuOpen(false);
+  };
+
+  const handleLoginClick = () => {
+    navigate('/login');
   };
 
   return (
@@ -36,6 +42,7 @@ const Header = () => {
               variant="secondary" 
               size="sm" 
               className="bg-white text-primary hover:bg-gray-100 rounded-full"
+              onClick={handleLoginClick}
             >
               Se connecter
             </Button>
@@ -64,7 +71,7 @@ const Header = () => {
           <button onClick={() => scrollToSection('contact')} className="text-gray-700 hover:text-primary transition-colors font-medium">Nous contacter</button>
           <Button 
             className="bg-gradient-clinic hover:opacity-90 text-white rounded-full px-6"
-            onClick={() => scrollToSection('rendez-vous')}
+            onClick={handleLoginClick}
           >
             Se connecter
           </Button>
@@ -90,7 +97,7 @@ const Header = () => {
             <button onClick={() => scrollToSection('contact')} className="block text-gray-700 hover:text-primary transition-colors">Nous contacter</button>
             <Button 
               className="w-full bg-gradient-clinic hover:opacity-90 text-white rounded-full"
-              onClick={() => scrollToSection('rendez-vous')}
+              onClick={handleLoginClick}
             >
               Se connecter
             </Button>
