@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +11,12 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
+import Appointments from "./pages/Appointments";
+import Users from "./pages/Users";
+import Reports from "./pages/Reports";
+import MyAppointments from "./pages/MyAppointments";
+import Patients from "./pages/Patients";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -39,36 +44,36 @@ const App = () => (
               {/* Routes admin */}
               <Route path="appointments" element={
                 <ProtectedRoute allowedRoles={['admin', 'receptionist']}>
-                  <div>Page des rendez-vous</div>
+                  <Appointments />
                 </ProtectedRoute>
               } />
               <Route path="users" element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <div>Gestion des utilisateurs</div>
+                  <Users />
                 </ProtectedRoute>
               } />
               <Route path="reports" element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <div>Rapports</div>
+                  <Reports />
                 </ProtectedRoute>
               } />
               
-              {/* Routes docteur */}
+              {/* Routes docteur et patient */}
               <Route path="my-appointments" element={
                 <ProtectedRoute allowedRoles={['doctor', 'patient']}>
-                  <div>Mes rendez-vous</div>
+                  <MyAppointments />
                 </ProtectedRoute>
               } />
               <Route path="patients" element={
                 <ProtectedRoute allowedRoles={['doctor', 'receptionist']}>
-                  <div>Patients</div>
+                  <Patients />
                 </ProtectedRoute>
               } />
               
               {/* Route patient */}
               <Route path="profile" element={
                 <ProtectedRoute allowedRoles={['patient']}>
-                  <div>Mon profil</div>
+                  <Profile />
                 </ProtectedRoute>
               } />
             </Route>
