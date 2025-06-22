@@ -78,16 +78,19 @@ const Users = () => {
   };
 
   const getStats = () => {
-    const stats = mockUsers.reduce((acc, user) => {
-      acc[user.role] = (acc[user.role] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    return {
+    const stats: { total: number; active: number; admin?: number; doctor?: number; receptionist?: number; patient?: number } = {
       total: mockUsers.length,
       active: mockUsers.filter(u => u.isActive).length,
-      ...stats
     };
+    
+    mockUsers.forEach(user => {
+      const role = user.role as keyof typeof stats;
+      if (role !== 'total' && role !== 'active') {
+        stats[role] = (stats[role] || 0) + 1;
+      }
+    });
+    
+    return stats;
   };
 
   const stats = getStats();

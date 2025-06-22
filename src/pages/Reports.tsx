@@ -1,56 +1,59 @@
 
 import React, { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { Calendar, Download, FileText, TrendingUp, Users, Activity } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { Calendar, Download, FileText, TrendingUp, Users, DollarSign, Clock } from 'lucide-react';
 
 const Reports = () => {
-  const [reportType, setReportType] = useState('appointments');
-  const [dateRange, setDateRange] = useState('month');
+  const { user } = useAuth();
+  const [selectedPeriod, setSelectedPeriod] = useState('30days');
+  const [selectedReport, setSelectedReport] = useState('appointments');
 
   // Données simulées pour les graphiques
-  const appointmentData = [
-    { name: 'Lun', rdv: 12, completed: 10 },
-    { name: 'Mar', rdv: 19, completed: 16 },
-    { name: 'Mer', rdv: 15, completed: 14 },
-    { name: 'Jeu', rdv: 22, completed: 18 },
-    { name: 'Ven', rdv: 18, completed: 17 },
-    { name: 'Sam', rdv: 8, completed: 7 },
-    { name: 'Dim', rdv: 5, completed: 4 }
+  const appointmentsData = [
+    { day: 'Lun', count: 12 },
+    { day: 'Mar', count: 19 },
+    { day: 'Mer', count: 15 },
+    { day: 'Jeu', count: 22 },
+    { day: 'Ven', count: 18 },
+    { day: 'Sam', count: 8 },
+    { day: 'Dim', count: 3 }
   ];
 
-  const doctorData = [
-    { name: 'Dr. Diop', patients: 45, rdv: 67 },
-    { name: 'Dr. Fall', patients: 38, rdv: 52 },
-    { name: 'Dr. Kane', patients: 32, rdv: 48 },
-    { name: 'Dr. Sy', patients: 28, rdv: 41 }
+  const monthlyData = [
+    { month: 'Jan', appointments: 145, patients: 89, revenue: 125000 },
+    { month: 'Fév', appointments: 167, patients: 102, revenue: 145000 },
+    { month: 'Mar', appointments: 189, patients: 115, revenue: 167000 },
+    { month: 'Avr', appointments: 156, patients: 94, revenue: 134000 },
+    { month: 'Mai', appointments: 201, patients: 128, revenue: 178000 },
+    { month: 'Juin', appointments: 178, patients: 107, revenue: 156000 }
   ];
 
-  const specialityData = [
-    { name: 'Cardiologie', value: 35, color: '#8884d8' },
-    { name: 'Généraliste', value: 28, color: '#82ca9d' },
-    { name: 'Pédiatrie', value: 20, color: '#ffc658' },
-    { name: 'Dermatologie', value: 17, color: '#ff7300' }
+  const specialtyData = [
+    { name: 'Cardiologie', value: 35, color: '#3B82F6' },
+    { name: 'Généraliste', value: 28, color: '#10B981' },
+    { name: 'Dermatologie', value: 20, color: '#F59E0B' },
+    { name: 'Pédiatrie', value: 12, color: '#EF4444' },
+    { name: 'Autres', value: 5, color: '#8B5CF6' }
   ];
 
-  const monthlyTrend = [
-    { month: 'Jan', patients: 234, rdv: 456 },
-    { month: 'Fév', patients: 267, rdv: 489 },
-    { month: 'Mar', patients: 298, rdv: 523 },
-    { month: 'Avr', patients: 321, rdv: 567 },
-    { month: 'Mai', patients: 345, rdv: 612 },
-    { month: 'Juin', patients: 367, rdv: 645 }
+  const doctorStats = [
+    { name: 'Dr. Fatou Diop', patients: 45, appointments: 67, satisfaction: 4.8 },
+    { name: 'Dr. Aminata Fall', patients: 38, appointments: 52, satisfaction: 4.6 },
+    { name: 'Dr. Moussa Kane', patients: 42, appointments: 61, satisfaction: 4.7 },
+    { name: 'Dr. Aïssatou Sy', patients: 35, appointments: 48, satisfaction: 4.5 }
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Rapports & Statistiques</h1>
-          <p className="text-gray-600">Analyse des données et tendances de la clinique</p>
+          <h1 className="text-3xl font-bold text-gray-900">Rapports et Analyses</h1>
+          <p className="text-gray-600">Statistiques détaillées et analyses de performance</p>
         </div>
         <div className="flex space-x-2">
           <Button variant="outline">
@@ -67,11 +70,22 @@ const Reports = () => {
       {/* Filtres */}
       <Card>
         <CardHeader>
-          <CardTitle>Paramètres du rapport</CardTitle>
+          <CardTitle>Filtres et paramètres</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Select value={reportType} onValueChange={setReportType}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger>
+                <SelectValue placeholder="Période" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7days">7 derniers jours</SelectItem>
+                <SelectItem value="30days">30 derniers jours</SelectItem>
+                <SelectItem value="3months">3 derniers mois</SelectItem>
+                <SelectItem value="year">Cette année</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedReport} onValueChange={setSelectedReport}>
               <SelectTrigger>
                 <SelectValue placeholder="Type de rapport" />
               </SelectTrigger>
@@ -79,37 +93,23 @@ const Reports = () => {
                 <SelectItem value="appointments">Rendez-vous</SelectItem>
                 <SelectItem value="patients">Patients</SelectItem>
                 <SelectItem value="doctors">Médecins</SelectItem>
-                <SelectItem value="revenue">Revenus</SelectItem>
+                <SelectItem value="financial">Financier</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={dateRange} onValueChange={setDateRange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Période" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="week">Cette semaine</SelectItem>
-                <SelectItem value="month">Ce mois</SelectItem>
-                <SelectItem value="quarter">Ce trimestre</SelectItem>
-                <SelectItem value="year">Cette année</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input type="date" placeholder="Date début" />
-            <Input type="date" placeholder="Date fin" />
+            <Input type="date" placeholder="Date spécifique" />
           </div>
         </CardContent>
       </Card>
 
-      {/* Indicateurs principaux */}
+      {/* Métriques principales */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              RDV ce mois
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">RDV ce mois</CardTitle>
             <Calendar className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">234</div>
+            <div className="text-2xl font-bold">178</div>
             <p className="text-xs text-green-600 flex items-center">
               <TrendingUp className="h-3 w-3 mr-1" />
               +12% vs mois dernier
@@ -119,13 +119,11 @@ const Reports = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Nouveaux patients
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Nouveaux patients</CardTitle>
             <Users className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">67</div>
+            <div className="text-2xl font-bold">24</div>
             <p className="text-xs text-green-600 flex items-center">
               <TrendingUp className="h-3 w-3 mr-1" />
               +8% vs mois dernier
@@ -135,32 +133,27 @@ const Reports = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Taux de réalisation
-            </CardTitle>
-            <Activity className="h-4 w-4 text-purple-600" />
+            <CardTitle className="text-sm font-medium">Revenus</CardTitle>
+            <DollarSign className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">87%</div>
+            <div className="text-2xl font-bold">156k FCFA</div>
             <p className="text-xs text-green-600 flex items-center">
               <TrendingUp className="h-3 w-3 mr-1" />
-              +3% vs mois dernier
+              +15% vs mois dernier
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Satisfaction moyenne
-            </CardTitle>
-            <Activity className="h-4 w-4 text-orange-600" />
+            <CardTitle className="text-sm font-medium">Temps moyen</CardTitle>
+            <Clock className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">4.2/5</div>
-            <p className="text-xs text-green-600 flex items-center">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              +0.2 vs mois dernier
+            <div className="text-2xl font-bold">32 min</div>
+            <p className="text-xs text-red-600">
+              +3 min vs mois dernier
             </p>
           </CardContent>
         </Card>
@@ -171,41 +164,36 @@ const Reports = () => {
         {/* Rendez-vous par jour */}
         <Card>
           <CardHeader>
-            <CardTitle>Rendez-vous par jour</CardTitle>
-            <CardDescription>Programmés vs Réalisés cette semaine</CardDescription>
+            <CardTitle>Rendez-vous par jour (cette semaine)</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={appointmentData}>
+              <BarChart data={appointmentsData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis dataKey="day" />
                 <YAxis />
                 <Tooltip />
-                <Legend />
-                <Bar dataKey="rdv" fill="#8884d8" name="Programmés" />
-                <Bar dataKey="completed" fill="#82ca9d" name="Réalisés" />
+                <Bar dataKey="count" fill="#3B82F6" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Performance par médecin */}
+        {/* Évolution mensuelle */}
         <Card>
           <CardHeader>
-            <CardTitle>Performance par médecin</CardTitle>
-            <CardDescription>Patients et rendez-vous ce mois</CardDescription>
+            <CardTitle>Évolution mensuelle</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={doctorData}>
+              <LineChart data={monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
-                <Legend />
-                <Bar dataKey="patients" fill="#8884d8" name="Patients uniques" />
-                <Bar dataKey="rdv" fill="#82ca9d" name="Total RDV" />
-              </BarChart>
+                <Line type="monotone" dataKey="appointments" stroke="#3B82F6" strokeWidth={2} />
+                <Line type="monotone" dataKey="patients" stroke="#10B981" strokeWidth={2} />
+              </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
@@ -214,21 +202,19 @@ const Reports = () => {
         <Card>
           <CardHeader>
             <CardTitle>Répartition par spécialité</CardTitle>
-            <CardDescription>Pourcentage des consultations</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={specialityData}
+                  data={specialtyData}
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
-                  fill="#8884d8"
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value}%`}
                 >
-                  {specialityData.map((entry, index) => (
+                  {specialtyData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -238,27 +224,62 @@ const Reports = () => {
           </CardContent>
         </Card>
 
-        {/* Évolution mensuelle */}
+        {/* Performance des médecins */}
         <Card>
           <CardHeader>
-            <CardTitle>Évolution mensuelle</CardTitle>
-            <CardDescription>Croissance des patients et rendez-vous</CardDescription>
+            <CardTitle>Performance des médecins</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={monthlyTrend}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="patients" stroke="#8884d8" name="Patients" />
-                <Line type="monotone" dataKey="rdv" stroke="#82ca9d" name="Rendez-vous" />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="space-y-4">
+              {doctorStats.map((doctor, index) => (
+                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{doctor.name}</p>
+                    <p className="text-sm text-gray-600">
+                      {doctor.patients} patients • {doctor.appointments} RDV
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-center">
+                      <span className="text-yellow-500">★</span>
+                      <span className="ml-1 font-medium">{doctor.satisfaction}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Rapport détaillé */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Rapport détaillé - Actions recommandées</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="font-medium text-blue-800">📈 Croissance positive</h4>
+              <p className="text-blue-700 text-sm mt-1">
+                Le nombre de rendez-vous a augmenté de 12% ce mois. Considérez l'ajout de créneaux supplémentaires.
+              </p>
+            </div>
+            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+              <h4 className="font-medium text-yellow-800">⚠️ Attention nécessaire</h4>
+              <p className="text-yellow-700 text-sm mt-1">
+                Le temps moyen de consultation a augmenté. Vérifiez la charge de travail des médecins.
+              </p>
+            </div>
+            <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+              <h4 className="font-medium text-green-800">✅ Performance excellente</h4>
+              <p className="text-green-700 text-sm mt-1">
+                Taux de satisfaction patient de 4.6/5 en moyenne. Continuez sur cette lancée !
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
