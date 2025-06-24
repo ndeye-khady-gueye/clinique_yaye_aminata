@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,10 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Users, Search, Plus, Eye, Calendar, FileText, Phone, Mail } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import PatientForm from '@/components/forms/PatientForm';
+import DetailsModal from '@/components/modals/DetailsModal';
 
 const Patients = () => {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [formData, setFormData] = useState<any>(null);
 
   // Données simulées des patients
   const mockPatients = [
@@ -74,6 +80,27 @@ const Patients = () => {
     patient.phone.includes(searchTerm)
   );
 
+  const handleCreatePatient = (data: any) => {
+    console.log('Nouveau patient:', data);
+    setIsFormOpen(false);
+    // Ici, vous ajouteriez la logique pour sauvegarder en base
+  };
+
+  const handleViewDetails = (patient: any) => {
+    setSelectedPatient(patient);
+    setIsDetailsOpen(true);
+  };
+
+  const handleCreateAppointment = (patientId: number) => {
+    console.log('Créer RDV pour patient:', patientId);
+    // Rediriger vers la page de création de RDV ou ouvrir une modal
+  };
+
+  const handleViewMedicalRecord = (patientId: number) => {
+    console.log('Voir dossier médical:', patientId);
+    // Ouvrir le dossier médical du patient
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -85,10 +112,19 @@ const Patients = () => {
             Gestion et suivi des patients de la clinique
           </p>
         </div>
-        <Button className="bg-gradient-clinic hover:opacity-90">
-          <Plus className="mr-2 h-4 w-4" />
-          Nouveau patient
-        </Button>
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-gradient-clinic hover:opacity-90" onClick={() => setFormData(null)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nouveau patient
+            </Button>
+          </DialogTrigger>
+          <PatientForm 
+            onSubmit={handleCreatePatient}
+            onCancel={() => setIsFormOpen(false)}
+            initialData={formData}
+          />
+        </Dialog>
       </div>
 
       {/* Statistiques */}
@@ -214,15 +250,30 @@ const Patients = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-3 w-3 mr-1" />
-                        Voir
-                      </Button>
-                      <Button variant="outline" size="sm">
+                      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={() => handleViewDetails(patient)}>
+                            <Eye className="h-3 w-3 mr-1" />
+                            Voir
+                          </Button>
+                        </DialogTrigger>
+                        {selectedPatient && (
+                          <DetailsModal type="patient" data={selectedPatient} />
+                        )}
+                      </Dialog>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleCreateAppointment(patient.id)}
+                      >
                         <Calendar className="h-3 w-3 mr-1" />
                         RDV
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleViewMedicalRecord(patient.id)}
+                      >
                         <FileText className="h-3 w-3 mr-1" />
                         Dossier
                       </Button>

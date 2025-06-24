@@ -1,17 +1,23 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users as UsersIcon, Plus, Search, Edit, Trash2, UserCheck, UserX } from 'lucide-react';
+import { Users as UsersIcon, Plus, Search, Edit, Trash2, UserCheck, UserX, Eye } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import UserForm from '@/components/forms/UserForm';
+import DetailsModal from '@/components/modals/DetailsModal';
 
 const Users = () => {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [formData, setFormData] = useState<any>(null);
 
   // Données simulées des utilisateurs
   const mockUsers = [
@@ -95,6 +101,34 @@ const Users = () => {
 
   const stats = getStats();
 
+  const handleCreateUser = (data: any) => {
+    console.log('Nouvel utilisateur:', data);
+    setIsFormOpen(false);
+    // Ici, vous ajouteriez la logique pour sauvegarder en base
+  };
+
+  const handleEditUser = (user: any) => {
+    setFormData(user);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteUser = (id: number) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+      console.log('Suppression de l\'utilisateur:', id);
+      // Ici, vous ajouteriez la logique pour supprimer en base
+    }
+  };
+
+  const handleViewDetails = (user: any) => {
+    setSelectedUser(user);
+    setIsDetailsOpen(true);
+  };
+
+  const handleExportCSV = () => {
+    console.log('Export CSV des utilisateurs');
+    // Logique d'export CSV
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -102,10 +136,19 @@ const Users = () => {
           <h1 className="text-3xl font-bold text-gray-900">Gestion des utilisateurs</h1>
           <p className="text-gray-600">Créer, modifier et gérer les comptes utilisateurs</p>
         </div>
-        <Button className="bg-gradient-clinic hover:opacity-90">
-          <Plus className="mr-2 h-4 w-4" />
-          Nouvel utilisateur
-        </Button>
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-gradient-clinic hover:opacity-90" onClick={() => setFormData(null)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nouvel utilisateur
+            </Button>
+          </DialogTrigger>
+          <UserForm 
+            onSubmit={handleCreateUser}
+            onCancel={() => setIsFormOpen(false)}
+            initialData={formData}
+          />
+        </Dialog>
       </div>
 
       {/* Statistiques */}
@@ -180,7 +223,7 @@ const Users = () => {
                 <SelectItem value="patient">Patient</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleExportCSV}>
               Exporter CSV
             </Button>
           </div>
@@ -239,10 +282,31 @@ const Users = () => {
                   <TableCell>{userData.createdAt}</TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-3 w-3" />
+                      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={() => handleViewDetails(userData)}>
+                            <Eye className="h-3 w-3 mr-1" />
+                            Voir
+                          </Button>
+                        </DialogTrigger>
+                        {selectedUser && (
+                          <DetailsModal type="user" data={selectedUser} />
+                        )}
+                      </Dialog>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleEditUser(userData)}
+                      >
+                        <Edit className="h-3 w-3 mr-1" />
+                        Modifier
                       </Button>
-                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-red-600 hover:text-red-700"
+                        onClick={() => handleDeleteUser(userData.id)}
+                      >
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>

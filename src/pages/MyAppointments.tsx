@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar, Clock, User, Search, Plus, Edit, Check, X, FileText, Phone, Mail } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import AppointmentForm from '@/components/forms/AppointmentForm';
 
 const MyAppointments = () => {
   const { user } = useAuth();
@@ -17,6 +17,7 @@ const MyAppointments = () => {
   const [filterDate, setFilterDate] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   const [consultationNote, setConsultationNote] = useState('');
+  const [isAppointmentFormOpen, setIsAppointmentFormOpen] = useState(false);
 
   // Données simulées pour les docteurs
   const doctorAppointments = [
@@ -118,9 +119,23 @@ const MyAppointments = () => {
 
   const handleMarkAsCompleted = (appointmentId: number) => {
     console.log('Marquer comme terminé:', appointmentId, consultationNote);
-    // Ici on intégrerait avec l'API
     setSelectedAppointment(null);
     setConsultationNote('');
+  };
+
+  const handleCreateAppointment = (data: any) => {
+    console.log('Nouveau rendez-vous patient:', data);
+    setIsAppointmentFormOpen(false);
+  };
+
+  const handleCancelAppointment = (appointmentId: number) => {
+    if (confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?')) {
+      console.log('Annulation du rendez-vous:', appointmentId);
+    }
+  };
+
+  const handleViewReport = (appointmentId: number) => {
+    console.log('Voir le rapport de consultation:', appointmentId);
   };
 
   const DoctorView = () => (
@@ -267,7 +282,7 @@ const MyAppointments = () => {
                         </Dialog>
                       )}
                       {appointment.status === 'completed' && (
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleViewReport(appointment.id)}>
                           <FileText className="h-3 w-3 mr-1" />
                           Rapport
                         </Button>
@@ -296,10 +311,18 @@ const MyAppointments = () => {
               <h3 className="text-xl font-semibold mb-2">Besoin d'un rendez-vous ?</h3>
               <p className="opacity-90">Réservez facilement votre prochaine consultation</p>
             </div>
-            <Button variant="secondary" size="lg">
-              <Plus className="mr-2 h-4 w-4" />
-              Prendre RDV
-            </Button>
+            <Dialog open={isAppointmentFormOpen} onOpenChange={setIsAppointmentFormOpen}>
+              <DialogTrigger asChild>
+                <Button variant="secondary" size="lg" onClick={() => setIsAppointmentFormOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Prendre RDV
+                </Button>
+              </DialogTrigger>
+              <AppointmentForm 
+                onSubmit={handleCreateAppointment}
+                onCancel={() => setIsAppointmentFormOpen(false)}
+              />
+            </Dialog>
           </div>
         </CardContent>
       </Card>
@@ -377,13 +400,18 @@ const MyAppointments = () => {
                   <TableCell>
                     <div className="flex items-center space-x-2">
                       {appointment.status === 'confirmed' && (
-                        <Button variant="outline" size="sm" className="text-red-600">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-red-600"
+                          onClick={() => handleCancelAppointment(appointment.id)}
+                        >
                           <X className="h-3 w-3 mr-1" />
                           Annuler
                         </Button>
                       )}
                       {appointment.status === 'completed' && appointment.report && (
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleViewReport(appointment.id)}>
                           <FileText className="h-3 w-3 mr-1" />
                           Rapport
                         </Button>

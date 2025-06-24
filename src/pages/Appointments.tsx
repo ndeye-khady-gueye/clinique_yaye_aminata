@@ -1,18 +1,24 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Clock, User, Search, Plus, Filter, FileText } from 'lucide-react';
+import { Calendar, Clock, User, Search, Plus, Filter, FileText, Edit, Trash2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import AppointmentForm from '@/components/forms/AppointmentForm';
+import DetailsModal from '@/components/modals/DetailsModal';
 
 const Appointments = () => {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterDate, setFilterDate] = useState('');
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [formData, setFormData] = useState<any>(null);
 
   // Données simulées des rendez-vous
   const mockAppointments = [
@@ -71,6 +77,34 @@ const Appointments = () => {
   const canModifyAppointments = user?.role === 'admin' || user?.role === 'receptionist';
   const canSeeAllAppointments = user?.role === 'admin' || user?.role === 'receptionist';
 
+  const handleCreateAppointment = (data: any) => {
+    console.log('Nouveau rendez-vous:', data);
+    setIsFormOpen(false);
+    // Ici, vous ajouteriez la logique pour sauvegarder en base
+  };
+
+  const handleEditAppointment = (appointment: any) => {
+    setFormData(appointment);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteAppointment = (id: number) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce rendez-vous ?')) {
+      console.log('Suppression du rendez-vous:', id);
+      // Ici, vous ajouteriez la logique pour supprimer en base
+    }
+  };
+
+  const handleViewDetails = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setIsDetailsOpen(true);
+  };
+
+  const handleExportCSV = () => {
+    console.log('Export CSV des rendez-vous');
+    // Logique d'export CSV
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -83,10 +117,19 @@ const Appointments = () => {
           </p>
         </div>
         {canModifyAppointments && (
-          <Button className="bg-gradient-clinic hover:opacity-90">
-            <Plus className="mr-2 h-4 w-4" />
-            Nouveau RDV
-          </Button>
+          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-gradient-clinic hover:opacity-90" onClick={() => setFormData(null)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nouveau RDV
+              </Button>
+            </DialogTrigger>
+            <AppointmentForm 
+              onSubmit={handleCreateAppointment}
+              onCancel={() => setIsFormOpen(false)}
+              initialData={formData}
+            />
+          </Dialog>
         )}
       </div>
 
@@ -126,7 +169,7 @@ const Appointments = () => {
               value={filterDate}
               onChange={(e) => setFilterDate(e.target.value)}
             />
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleExportCSV}>
               Exporter CSV
             </Button>
           </div>
@@ -181,16 +224,33 @@ const Appointments = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <Button variant="outline" size="sm">
-                        Détails
-                      </Button>
+                      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={() => handleViewDetails(appointment)}>
+                            Détails
+                          </Button>
+                        </DialogTrigger>
+                        {selectedAppointment && (
+                          <DetailsModal type="appointment" data={selectedAppointment} />
+                        )}
+                      </Dialog>
                       {canModifyAppointments && (
                         <>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleEditAppointment(appointment)}
+                          >
+                            <Edit className="h-3 w-3 mr-1" />
                             Modifier
                           </Button>
-                          <Button variant="outline" size="sm">
-                            <FileText className="h-3 w-3" />
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => handleDeleteAppointment(appointment.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </>
                       )}

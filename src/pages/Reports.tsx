@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,11 +6,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { Calendar, Download, FileText, TrendingUp, Users, DollarSign, Clock } from 'lucide-react';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import ReportForm from '@/components/forms/ReportForm';
 
 const Reports = () => {
   const { user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState('30days');
   const [selectedReport, setSelectedReport] = useState('appointments');
+  const [isReportFormOpen, setIsReportFormOpen] = useState(false);
 
   // Données simulées pour les graphiques
   const appointmentsData = [
@@ -48,6 +50,17 @@ const Reports = () => {
     { name: 'Dr. Aïssatou Sy', patients: 35, appointments: 48, satisfaction: 4.5 }
   ];
 
+  const handleExportPDF = () => {
+    console.log('Export PDF des rapports');
+    // Logique d'export PDF
+  };
+
+  const handleCreateReport = (data: any) => {
+    console.log('Nouveau rapport:', data);
+    setIsReportFormOpen(false);
+    // Logique pour générer le rapport
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -56,14 +69,22 @@ const Reports = () => {
           <p className="text-gray-600">Statistiques détaillées et analyses de performance</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExportPDF}>
             <Download className="mr-2 h-4 w-4" />
             Exporter PDF
           </Button>
-          <Button className="bg-gradient-clinic hover:opacity-90">
-            <FileText className="mr-2 h-4 w-4" />
-            Nouveau rapport
-          </Button>
+          <Dialog open={isReportFormOpen} onOpenChange={setIsReportFormOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-gradient-clinic hover:opacity-90" onClick={() => setIsReportFormOpen(true)}>
+                <FileText className="mr-2 h-4 w-4" />
+                Nouveau rapport
+              </Button>
+            </DialogTrigger>
+            <ReportForm 
+              onSubmit={handleCreateReport}
+              onCancel={() => setIsReportFormOpen(false)}
+            />
+          </Dialog>
         </div>
       </div>
 
