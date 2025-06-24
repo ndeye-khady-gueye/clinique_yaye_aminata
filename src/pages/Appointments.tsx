@@ -4,11 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Clock, User, Search, Plus, Filter, FileText, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Clock, User, Search, Plus, Filter, FileText, Edit, Trash2, Download } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import AppointmentForm from '@/components/forms/AppointmentForm';
 import DetailsModal from '@/components/modals/DetailsModal';
+import PDFExportForm from '@/components/forms/PDFExportForm';
 
 const Appointments = () => {
   const { user } = useAuth();
@@ -18,10 +19,9 @@ const Appointments = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isPDFExportOpen, setIsPDFExportOpen] = useState(false);
   const [formData, setFormData] = useState<any>(null);
-
-  // Données simulées des rendez-vous
-  const mockAppointments = [
+  const [appointments, setAppointments] = useState([
     {
       id: 1,
       patient: 'Aminata Sy',
@@ -30,7 +30,9 @@ const Appointments = () => {
       date: '2024-01-15',
       time: '09:00',
       status: 'confirmed',
-      notes: 'Consultation de suivi'
+      notes: 'Consultation de suivi',
+      phone: '+221 77 123 45 67',
+      email: 'aminata.sy@email.com'
     },
     {
       id: 2,
@@ -40,7 +42,9 @@ const Appointments = () => {
       date: '2024-01-15',
       time: '10:30',
       status: 'completed',
-      notes: 'Consultation générale'
+      notes: 'Consultation générale',
+      phone: '+221 77 234 56 78',
+      email: 'moussa.kane@email.com'
     },
     {
       id: 3,
@@ -50,9 +54,11 @@ const Appointments = () => {
       date: '2024-01-16',
       time: '14:00',
       status: 'pending',
-      notes: 'Premier rendez-vous'
+      notes: 'Premier rendez-vous',
+      phone: '+221 77 345 67 89',
+      email: 'fatoumata.diallo@email.com'
     }
-  ];
+  ]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -74,13 +80,26 @@ const Appointments = () => {
     }
   };
 
+  const filteredAppointments = appointments.filter(appointment => {
+    const matchesSearch = appointment.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         appointment.doctor.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || appointment.status === filterStatus;
+    const matchesDate = !filterDate || appointment.date === filterDate;
+    return matchesSearch && matchesStatus && matchesDate;
+  });
+
   const canModifyAppointments = user?.role === 'admin' || user?.role === 'receptionist';
   const canSeeAllAppointments = user?.role === 'admin' || user?.role === 'receptionist';
 
   const handleCreateAppointment = (data: any) => {
-    console.log('Nouveau rendez-vous:', data);
+    const newAppointment = {
+      id: appointments.length + 1,
+      ...data,
+      status: 'confirmed'
+    };
+    setAppointments([...appointments, newAppointment]);
     setIsFormOpen(false);
-    // Ici, vous ajouteriez la logique pour sauvegarder en base
+    console.log('Nouveau rendez-vous créé:', newAppointment);
   };
 
   const handleEditAppointment = (appointment: any) => {
@@ -90,8 +109,8 @@ const Appointments = () => {
 
   const handleDeleteAppointment = (id: number) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce rendez-vous ?')) {
-      console.log('Suppression du rendez-vous:', id);
-      // Ici, vous ajouteriez la logique pour supprimer en base
+      setAppointments(appointments.filter(app => app.id !== id));
+      console.log('Rendez-vous supprimé:', id);
     }
   };
 
@@ -101,18 +120,37 @@ const Appointments = () => {
   };
 
   const handleExportCSV = () => {
-    console.log('Export CSV des rendez-vous');
-    // Logique d'export CSV
+    const csvContent = [
+      ['Patient', 'Médecin', 'Spécialité', 'Date', 'Heure', 'Statut', 'Notes'],
+      ...filteredAppointments.map(app => [
+        app.patient, app.doctor, app.speciality, app.date, app.time, app.status, app.notes
+      ])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'rendez-vous.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleExportPDF = (data: any) => {
+    console.log('Export PDF avec options:', data);
+    setIsPDFExportOpen(false);
+    // Simulation de génération PDF
+    alert('PDF généré avec succès ! (Simulation)');
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             {canSeeAllAppointments ? 'Tous les rendez-vous' : 'Mes rendez-vous'}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             Gestion et suivi des rendez-vous
           </p>
         </div>
@@ -142,7 +180,7 @@ const Appointments = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
@@ -170,8 +208,22 @@ const Appointments = () => {
               onChange={(e) => setFilterDate(e.target.value)}
             />
             <Button variant="outline" onClick={handleExportCSV}>
+              <Download className="mr-2 h-4 w-4" />
               Exporter CSV
             </Button>
+            <Dialog open={isPDFExportOpen} onOpenChange={setIsPDFExportOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Exporter PDF
+                </Button>
+              </DialogTrigger>
+              <PDFExportForm 
+                onSubmit={handleExportPDF}
+                onCancel={() => setIsPDFExportOpen(false)}
+                type="appointments"
+              />
+            </Dialog>
           </div>
         </CardContent>
       </Card>
@@ -181,7 +233,7 @@ const Appointments = () => {
         <CardHeader>
           <CardTitle>Liste des rendez-vous</CardTitle>
           <CardDescription>
-            {mockAppointments.length} rendez-vous trouvés
+            {filteredAppointments.length} rendez-vous trouvés
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -197,7 +249,7 @@ const Appointments = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockAppointments.map((appointment) => (
+              {filteredAppointments.map((appointment) => (
                 <TableRow key={appointment.id}>
                   <TableCell>
                     <div className="flex items-center space-x-2">

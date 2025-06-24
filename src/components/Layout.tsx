@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import ThemeToggle from '@/components/ThemeToggle';
 import { 
   Heart, 
   LogOut, 
@@ -66,9 +66,9 @@ const Layout = () => {
   const navigationItems = getNavigationItems();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -77,23 +77,24 @@ const Layout = () => {
                 <Heart className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-primary">CABINET YAYE AMINATA</h1>
+                <h1 className="text-lg font-bold text-primary dark:text-white">CABINET YAYE AMINATA</h1>
               </div>
             </div>
 
-            {/* User info et logout */}
+            {/* User info et actions */}
             <div className="flex items-center space-x-4">
+              <ThemeToggle />
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role}</p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleLogout}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Déconnexion
@@ -105,7 +106,7 @@ const Layout = () => {
 
       <div className="flex">
         {/* Sidebar */}
-        <nav className="w-64 bg-white shadow-sm min-h-screen">
+        <nav className="w-64 bg-white dark:bg-gray-800 shadow-sm min-h-screen">
           <div className="p-4">
             <ul className="space-y-2">
               {navigationItems.map((item) => {
@@ -117,7 +118,7 @@ const Layout = () => {
                       className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-left transition-colors ${
                         isActive
                           ? 'bg-gradient-clinic text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                       }`}
                     >
                       <item.icon className="h-5 w-5" />
@@ -131,7 +132,7 @@ const Layout = () => {
         </nav>
 
         {/* Main content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
           <Outlet />
         </main>
       </div>
