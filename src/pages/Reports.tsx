@@ -75,7 +75,7 @@ const Reports = () => {
           </Button>
           <Dialog open={isReportFormOpen} onOpenChange={setIsReportFormOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-clinic hover:opacity-90" onClick={() => setIsReportFormOpen(true)}>
+              <Button className=" hover:opacity-90" onClick={() => setIsReportFormOpen(true)}>
                 <FileText className="mr-2 h-4 w-4" />
                 Nouveau rapport
               </Button>

@@ -154,7 +154,7 @@ const Contact = () => {
 
                   <Button 
                     type="submit" 
-                    className="bg-gradient-clinic hover:opacity-90 text-white px-8 py-3 rounded-full"
+                    className=" hover:opacity-90 text-white px-8 py-3 rounded-full"
                   >
                     Envoyer
                   </Button>
@@ -164,44 +164,7 @@ const Contact = () => {
           </div>
         </div>
 
-        {/* Footer avec carte */}
-        <div className="mt-16 bg-gradient-clinic text-white rounded-lg p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-2xl font-bold mb-6">CABINET YAYE AMINATA</h3>
-              
-              <div className="space-y-4 mb-8">
-                <p>A propos de nous</p>
-                <p>Nos services</p>
-                <p>Notre Équipe</p>
-              </div>
-
-              <div className="space-y-4 mb-8">
-                <h4 className="text-xl font-bold">NOUS CONTACTER</h4>
-                <div className="flex items-center space-x-3">
-                  <Phone className="h-5 w-5" />
-                  <span>(+221) 77 437 01 01</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Mail className="h-5 w-5" />
-                  <span>cabinetyayeaminata@gmail.com</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <MapPin className="h-5 w-5" />
-                  <span>sedima côté rond point</span>
-                </div>
-              </div>
-
-              <h4 className="text-xl font-bold mb-4">NOS RÉSEAUX SOCIAUX</h4>
-            </div>
-
-            <div className="bg-white rounded-lg p-4">
-              <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">Carte interactive</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </section>
   );

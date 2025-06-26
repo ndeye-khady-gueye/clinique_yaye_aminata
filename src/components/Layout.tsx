@@ -72,10 +72,15 @@ const Layout = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
+            
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-clinic rounded-full flex items-center justify-center">
-                <Heart className="h-5 w-5 text-white" />
-              </div>
+            <div className="w-14 h-14 rounded-full flex items-center justify-center overflow-hidden">
+            <img
+              src="/lovable-uploads/Logo_page-0001.jpg"
+              alt="Logo Clinique"
+              className="w-12 h-12 object-contain"
+            />
+          </div>
               <div>
                 <h1 className="text-lg font-bold text-primary dark:text-white">CABINET YAYE AMINATA</h1>
               </div>

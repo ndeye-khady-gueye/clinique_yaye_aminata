@@ -114,7 +114,7 @@ const Patients = () => {
         </div>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-clinic hover:opacity-90" onClick={() => setFormData(null)}>
+            <Button className=" hover:opacity-90" onClick={() => setFormData(null)}>
               <Plus className="mr-2 h-4 w-4" />
               Nouveau patient
             </Button>

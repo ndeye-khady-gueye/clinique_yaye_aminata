@@ -48,7 +48,7 @@ const ReceptionistDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Dialog open={isAppointmentFormOpen} onOpenChange={setIsAppointmentFormOpen}>
           <DialogTrigger asChild>
-            <Button className="h-24 bg-gradient-clinic hover:opacity-90 flex flex-col" onClick={() => setIsAppointmentFormOpen(true)}>
+            <Button className="h-24  hover:opacity-90 flex flex-col" onClick={() => setIsAppointmentFormOpen(true)}>
               <Plus className="h-6 w-6 mb-2" />
               Nouveau RDV
             </Button>
@@ -101,7 +101,7 @@ const ReceptionistDashboard = () => {
         <CardContent>
           <Dialog open={isPatientFormOpen} onOpenChange={setIsPatientFormOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-clinic hover:opacity-90" onClick={() => setIsPatientFormOpen(true)}>
+              <Button className=" hover:opacity-90" onClick={() => setIsPatientFormOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Ajouter un nouveau patient
               </Button>

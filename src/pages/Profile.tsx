@@ -72,7 +72,7 @@ const Profile = () => {
         <Button 
           onClick={() => setIsEditing(!isEditing)}
           variant={isEditing ? "outline" : "default"}
-          className={!isEditing ? "bg-gradient-clinic hover:opacity-90" : ""}
+          className={!isEditing ? "hover:opacity-90" : ""}
         >
           {isEditing ? 'Annuler' : 'Modifier'}
         </Button>

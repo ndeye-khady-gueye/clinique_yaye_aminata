@@ -7,25 +7,25 @@ const Services = () => {
     {
       title: "Consultations de routine",
       description: "Un petit souci de santé 7 jrs sur 7 pour vous écouter et vous rassurer",
-      image: "/lovable-uploads/233aa0b2-d473-4595-99da-0c7c560bf772.png",
+      image: "/lovable-uploads/consultations.jpg",
       featured: false
     },
     {
       title: "Maladies chroniques",
       description: "Ensemble, on veille sur vous, jours après jours",
-      image: "/lovable-uploads/233aa0b2-d473-4595-99da-0c7c560bf772.png",
+      image: "/lovable-uploads/gros-plan-d-un-garcon-se-faisant-examiner.jpg",
       featured: true
     },
     {
       title: "Vaccinations",
       description: "Un petit piqûre pour une grande protection",
-      image: "/lovable-uploads/233aa0b2-d473-4595-99da-0c7c560bf772.png",
+      image: "/lovable-uploads/vacciner.jpg",
       featured: false
     },
     {
       title: "Bilans de santé",
       description: "Juste un petit contrôle pour prendre soin de vous",
-      image: "/lovable-uploads/233aa0b2-d473-4595-99da-0c7c560bf772.png",
+      image: "/lovable-uploads/infirmiere-afro-americaine-et-femme-enceinte-parlant.jpg",
       featured: false
     }
   ];
@@ -66,43 +66,7 @@ const Services = () => {
         </div>
 
         {/* À Propos de Nous section */}
-        <div className="bg-white rounded-lg p-8 shadow-lg">
-          <h3 className="text-3xl font-bold mb-6 text-center text-gray-800">À Propos de Nous</h3>
-          
-          <div className="mb-8">
-            <h4 className="text-2xl font-semibold mb-4 text-primary">Notre Histoire</h4>
-            <div className="space-y-4 text-gray-600">
-              <p>
-                La clinique yaye aminata, autrefois « Clinique de la Vision » a été inaugurée en 2012. Elle était principalement axée sur la médecine oculaire.
-              </p>
-              <p>
-                Depuis quelques années, la clinique a décidé d'élargir ses horizons en accueillant d'autres spécialistes médicaux à offrir à la population un site garantissant des soins de qualité dans un cadre chaleureux et humain.
-              </p>
-              <p>
-                C'est ainsi qu'en 2018, la Clinique de la Vision devient la Clinique yaye aminata et accueillant dans son enceinte des cardiologues, traumatologues, chirurgiens ORL, oncologues, etc.
-              </p>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-2xl font-semibold mb-6 text-primary">Notre Équipe</h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                { title: "Responsable", image: "/lovable-uploads/233aa0b2-d473-4595-99da-0c7c560bf772.png" },
-                { title: "Médecin général", image: "/lovable-uploads/233aa0b2-d473-4595-99da-0c7c560bf772.png" },
-                { title: "Infirmière", image: "/lovable-uploads/233aa0b2-d473-4595-99da-0c7c560bf772.png" },
-                { title: "Sage femme", image: "/lovable-uploads/233aa0b2-d473-4595-99da-0c7c560bf772.png" }
-              ].map((member, index) => (
-                <div key={member.title} className="text-center">
-                  <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-3 overflow-hidden">
-                    <img src={member.image} alt={member.title} className="w-full h-full object-cover" />
-                  </div>
-                  <h5 className="font-semibold text-gray-800">{member.title}</h5>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        
       </div>
     </section>
   );

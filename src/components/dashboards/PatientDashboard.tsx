@@ -30,10 +30,7 @@ const PatientDashboard = () => {
               <h3 className="text-xl font-semibold mb-2">Prendre un rendez-vous</h3>
               <p className="opacity-90">Réservez votre consultation en quelques clics</p>
             </div>
-            <Button variant="secondary" size="lg">
-              <Plus className="mr-2 h-4 w-4" />
-              Nouveau RDV
-            </Button>
+            
           </div>
         </CardContent>
       </Card>

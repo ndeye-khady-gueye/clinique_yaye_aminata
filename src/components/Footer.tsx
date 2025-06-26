@@ -5,8 +5,9 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-16">
+        
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Logo et description */}
+          
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-6">
               <Heart className="h-8 w-8 text-primary" />

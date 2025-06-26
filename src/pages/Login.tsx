@@ -52,9 +52,32 @@ const Login = () => {
         {/* Logo et titre */}
         <div className="text-center lg:text-left">
           <div className="flex items-center justify-center lg:justify-start space-x-3 mb-6">
-            <div className="w-16 h-16 bg-gradient-clinic rounded-full flex items-center justify-center">
-              <Heart className="h-8 w-8 text-white" />
+            <div className="w-46 h-46 rounded-full flex items-center justify-center overflow-hidden bounce-logo">
+              <img
+                src="/lovable-uploads/Logo_page-0001.jpg"
+                alt="Logo Clinique"
+                className="w-44 h-44 object-contain"
+              />
+
+              <style>{`
+                @keyframes bounceUpDown {
+                  0% {
+                    transform: translateY(0px);
+                  }
+                  50% {
+                    transform: translateY(20px);
+                  }
+                  100% {
+                    transform: translateY(0px);
+                  }
+                }
+
+                .bounce-logo {
+                  animation: bounceUpDown 2s ease-in-out infinite;
+                }
+              `}</style>
             </div>
+
             <div>
               <h1 className="text-3xl font-bold text-primary">CABINET</h1>
               <p className="text-lg text-gray-600">YAYE AMINATA</p>
@@ -119,7 +142,7 @@ const Login = () => {
 
               <Button 
                 type="submit" 
-                className="w-full bg-gradient-clinic hover:opacity-90"
+                className="w-full  hover:opacity-90"
                 disabled={isLoading}
               >
                 {isLoading ? 'Connexion...' : 'Se connecter'}
