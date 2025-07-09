@@ -30,7 +30,7 @@ const About = () => {
             </h2>
             
             <p className="text-gray-600 mb-6 leading-relaxed">
-              De la première échographie aux soins de toute la famille, nous vous accompagnons avec douceur et expertise à chaque étape de la vie. Parce que votre bien-être et celui de vos petits méritent toute notre attention.
+              Dès le suivi de votre grossesse et tout au long de la vie de votre famille, nous sommes à vos côtés avec bienveillance et expertise. Pour vous offrir, à vous et à vos enfants, l’attention et les soins que vous méritez.
             </p>
             
             <Button 

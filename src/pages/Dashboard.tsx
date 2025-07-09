@@ -2,6 +2,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import AdminDashboard from '@/components/dashboards/AdminDashboard';
+import ResponsableCabinetDashboard from '@/components/dashboards/ResponsableCabinetDashboard';
 import DoctorDashboard from '@/components/dashboards/DoctorDashboard';
 import ReceptionistDashboard from '@/components/dashboards/ReceptionistDashboard';
 import PatientDashboard from '@/components/dashboards/PatientDashboard';
@@ -16,6 +17,8 @@ const Dashboard = () => {
   switch (user.role) {
     case 'admin':
       return <AdminDashboard />;
+    case 'responsable_cabinet':
+      return <ResponsableCabinetDashboard />;
     case 'doctor':
       return <DoctorDashboard />;
     case 'receptionist':

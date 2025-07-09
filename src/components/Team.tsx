@@ -5,60 +5,31 @@ import { Award, GraduationCap, Users, MapPin } from "lucide-react";
 const Team = () => {
   const doctors = [
     {
-      name: "Dr. Aminata DIOP",
-      specialty: "Directrice médicale - Cardiologie",
-      experience: "20 ans d'expérience",
-      education: "CHU Fann, Université de Bordeaux",
-      image: "AD",
-      description: "Spécialiste en cardiologie interventionnelle, Dr. Diop dirige notre équipe avec excellence."
+      name: "Mme. Daouda Seck",
+      specialty: "Sage-femme",
+      image: "DS",
+      description: "Spécialiste en Sage femme, Mme. Seck dirige notre équipe avec excellence."
     },
     {
-      name: "Dr. Moussa FALL",
-      specialty: "Neurologie",
-      experience: "15 ans d'expérience", 
-      education: "Université de Dakar, formation Paris",
-      image: "MF",
-      description: "Expert en neurologie, spécialisé dans les troubles neurologiques complexes."
+      name: "La Sécrétaire",
+      specialty: "Infirmière",
+      image: "LS",
+      description: "Expert en soins infirmiers, elle assure un suivi de qualité pour chaque patient."
     },
     {
-      name: "Dr. Fatou NDIAYE",
-      specialty: "Pédiatrie",
-      experience: "12 ans d'expérience",
-      education: "Université Cheikh Anta Diop",
-      image: "FN",
-      description: "Pédiatre dévoué, elle assure un suivi personnalisé pour chaque enfant."
-    },
-    {
-      name: "Dr. Ibrahima SARR",
-      specialty: "Ophtalmologie",
-      experience: "18 ans d'expérience",
-      education: "Université de Lyon, CHU Dakar",
-      image: "IS",
-      description: "Chirurgien ophtalmologue, spécialiste en chirurgie de la cataracte."
-    },
-    {
-      name: "Dr. Aïssa BA",
-      specialty: "Chirurgie générale",
-      experience: "22 ans d'expérience",
-      education: "Université de Montpellier",
-      image: "AB",
-      description: "Chirurgien expérimenté, maîtrise toutes les techniques chirurgicales modernes."
-    },
-    {
-      name: "Dr. Omar WADE",
-      specialty: "Médecine d'urgence",
-      experience: "14 ans d'expérience",
-      education: "SAMU Dakar, formation Europe",
-      image: "OW",
-      description: "Responsable du service des urgences, disponible 24h/24."
+      name: "Dr. Samba Sarr",
+      specialty: "Odontologie-Stomatologie",
+      image: "SS",
+      description: "Odontologue expérimenté, il assure des soins dentaires de qualité."
     }
+    
   ];
 
   const stats = [
     { icon: Users, number: "50+", label: "Professionnels de santé" },
-    { icon: Award, number: "25+", label: "Années d'expérience" },
+    { icon: Award, number: "1+", label: "Années d'expérience" },
     { icon: GraduationCap, number: "100%", label: "Médecins certifiés" },
-    { icon: MapPin, number: "1er", label: "Clinique privée de Dakar" }
+    { icon: MapPin, number: "1er", label: "Cabinet Kounoune Central" }
   ];
 
   return (
@@ -70,7 +41,7 @@ const Team = () => {
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Une équipe de professionnels qualifiés et expérimentés, formés dans les meilleures institutions 
-            médicales du Sénégal et d'Europe, à votre service pour des soins d'excellence.
+            médicales du Sénégal, à votre service pour des soins d'excellence.
           </p>
         </div>
 

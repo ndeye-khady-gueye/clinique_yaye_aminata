@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,10 +10,11 @@ import { useToast } from "@/hooks/use-toast";
 const Contact = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: ""
+    nom: "",
+    prenom: "",
+    age: "",
+    telephone: "",
+    motif: ""
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -23,8 +23,18 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.email || !formData.message) {
+
+    // Vérifications
+    const ageNumber = parseInt(formData.age, 10);
+    const telNumber = formData.telephone;
+
+    if (
+      !formData.nom ||
+      !formData.prenom ||
+      !formData.age ||
+      !formData.telephone ||
+      !formData.motif
+    ) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs obligatoires.",
@@ -33,18 +43,37 @@ const Contact = () => {
       return;
     }
 
-    console.log("Message envoyé:", formData);
-    
+    if (isNaN(ageNumber) || ageNumber <= 0) {
+      toast({
+        title: "Erreur",
+        description: "L'âge doit être un nombre positif.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!/^\d{9}$/.test(telNumber)) {
+      toast({
+        title: "Erreur",
+        description: "Le numéro de téléphone doit contenir exactement 9 chiffres.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    console.log("Formulaire envoyé:", formData);
+
     toast({
-      title: "Message envoyé",
-      description: "Votre message a été envoyé avec succès. Nous vous répondrons dans les plus brefs délais.",
+      title: "Formulaire envoyé",
+      description: "Votre demande a été envoyée avec succès. Nous vous recontacterons rapidement.",
     });
 
     setFormData({
-      name: "",
-      email: "",
-      subject: "",
-      message: ""
+      nom: "",
+      prenom: "",
+      age: "",
+      telephone: "",
+      motif: ""
     });
   };
 
@@ -61,11 +90,11 @@ const Contact = () => {
           {/* Informations de contact */}
           <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-8">
             <div className="mb-8">
-              <h3 className="text-2xl font-bold mb-4 text-primary">POUR TOUT URGENCE</h3>
+              <h3 className="text-2xl font-bold mb-4 text-primary">POUR TOUTE URGENCE</h3>
               <h4 className="text-3xl font-bold mb-6 text-primary">Nous Contacter</h4>
-              
+
               <p className="text-gray-600 mb-8">
-                La Clinique de famille est une clinique pluridisciplinaire. Des médecins spécialisés sont présents en permanence et elle dispose d'un laboratoire afin de réaliser les analyses les plus fréquentes.
+                Le Cabinet de Famille est un cabinet pluridisciplinaire. Des médecins spécialistes y sont présents en permanence pour assurer un suivi médical complet et de qualité.
               </p>
 
               <div className="space-y-6">
@@ -75,7 +104,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-primary">APPELEZ NOUS</p>
-                    <p className="text-gray-800 font-bold">(+221) 77 437 01 01</p>
+                    <p className="text-gray-800 font-bold">(+221) 78 437 01 01 - 33 893 47 89</p>
                   </div>
                 </div>
 
@@ -95,7 +124,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-primary">Adresse</p>
-                    <p className="text-gray-800">sedima côté rond point</p>
+                    <p className="text-gray-800">Cité Jaraaf 2, Rufisque Nord, Route Centrale Électrique Kounoune</p>
                   </div>
                 </div>
               </div>
@@ -108,53 +137,68 @@ const Contact = () => {
               <CardContent className="p-8">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <Label htmlFor="name">Votre Nom(obligatoire)</Label>
+                    <Label htmlFor="nom">Nom</Label>
                     <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange("name", e.target.value)}
+                      id="nom"
+                      value={formData.nom}
+                      onChange={(e) => handleInputChange("nom", e.target.value)}
                       required
                       className="mt-2"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="email">Votre Adresse Mail(obligatoire)</Label>
+                    <Label htmlFor="prenom">Prénom</Label>
                     <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      id="prenom"
+                      value={formData.prenom}
+                      onChange={(e) => handleInputChange("prenom", e.target.value)}
                       required
                       className="mt-2"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="subject">Objet</Label>
+                    <Label htmlFor="age">Âge</Label>
                     <Input
-                      id="subject"
-                      value={formData.subject}
-                      onChange={(e) => handleInputChange("subject", e.target.value)}
+                      id="age"
+                      type="number"
+                      min="1"
+                      value={formData.age}
+                      onChange={(e) => handleInputChange("age", e.target.value)}
+                      required
                       className="mt-2"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="message">Votre Message</Label>
+                    <Label htmlFor="telephone">Numéro de téléphone</Label>
+                    <Input
+                      id="telephone"
+                      type="tel"
+                      value={formData.telephone}
+                      onChange={(e) => handleInputChange("telephone", e.target.value)}
+                      required
+                      className="mt-2"
+                      maxLength={9}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="motif">Motif de la visite</Label>
                     <Textarea
-                      id="message"
-                      value={formData.message}
-                      onChange={(e) => handleInputChange("message", e.target.value)}
-                      rows={6}
+                      id="motif"
+                      value={formData.motif}
+                      onChange={(e) => handleInputChange("motif", e.target.value)}
+                      rows={4}
                       required
                       className="mt-2"
                     />
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    className=" hover:opacity-90 text-white px-8 py-3 rounded-full"
+                  <Button
+                    type="submit"
+                    className="hover:opacity-90 text-white px-8 py-3 rounded-full"
                   >
                     Envoyer
                   </Button>
@@ -163,8 +207,6 @@ const Contact = () => {
             </Card>
           </div>
         </div>
-
-        
       </div>
     </section>
   );

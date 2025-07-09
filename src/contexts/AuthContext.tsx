@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type UserRole = 'admin' | 'doctor' | 'receptionist' | 'patient';
+export type UserRole = 'admin' | 'responsable_cabinet' | 'doctor' | 'receptionist' | 'patient';
 
 export interface User {
   id: string;
@@ -58,17 +58,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     
-    // Simulation d'API - À remplacer par l'intégration Supabase
+    // Simulation d'API - À remplacer par l'intégration Django
     const mockUsers: User[] = [
       {
         id: '1',
-        email: 'admin@clinique.sn',
-        firstName: 'Admin',
-        lastName: 'Système',
+        email: 'admin@dev.clinique.sn',
+        firstName: 'Super',
+        lastName: 'Admin',
         role: 'admin'
       },
       {
         id: '2',
+        email: 'responsable@clinique.sn',
+        firstName: 'Mme Fatou',
+        lastName: 'Seck',
+        role: 'responsable_cabinet'
+      },
+      {
+        id: '3',
         email: 'dr.diop@clinique.sn',
         firstName: 'Dr. Fatou',
         lastName: 'Diop',
@@ -76,14 +83,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         speciality: 'Cardiologie'
       },
       {
-        id: '3',
+        id: '4',
         email: 'reception@clinique.sn',
         firstName: 'Aïssatou',
         lastName: 'Fall',
         role: 'receptionist'
       },
       {
-        id: '4',
+        id: '5',
         email: 'patient@example.com',
         firstName: 'Mamadou',
         lastName: 'Ba',

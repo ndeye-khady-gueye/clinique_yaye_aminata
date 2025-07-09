@@ -25,9 +25,9 @@ const Hero = () => {
           </h1>
 
           <p className="text-xl mb-4 opacity-90 fade-in-up delay-1">
-            Votre santé, notre priorité. Bienvenu dans un cabinet
+            Un espace d'écoute, de bienveillance et d'accompagnement
             <br />
-            où compassion et excellence se rencontrent.
+            pour vous et votre famille, à chaque étape de votre vie.
           </p>
 
           <Button

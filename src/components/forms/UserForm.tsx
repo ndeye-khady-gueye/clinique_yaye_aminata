@@ -74,7 +74,7 @@ const UserForm = ({ onSubmit, onCancel, initialData }: UserFormProps) => {
               <SelectValue placeholder="Sélectionner un rôle" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="admin">Administrateur</SelectItem>
+              <SelectItem value="responsable_cabinet">Responsable Cabinet</SelectItem>
               <SelectItem value="doctor">Docteur</SelectItem>
               <SelectItem value="receptionist">Réceptionniste</SelectItem>
               <SelectItem value="patient">Patient</SelectItem>

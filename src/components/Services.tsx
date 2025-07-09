@@ -27,6 +27,12 @@ const Services = () => {
       description: "Juste un petit contrôle pour prendre soin de vous",
       image: "/lovable-uploads/infirmiere-afro-americaine-et-femme-enceinte-parlant.jpg",
       featured: false
+    },
+    {
+      title: "Bilans de santé",
+      description: "Juste un petit contrôle pour prendre soin de vous",
+      image: "/lovable-uploads/infirmiere-afro-americaine-et-femme-enceinte-parlant.jpg",
+      featured: false
     }
   ];
 

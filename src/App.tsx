@@ -44,20 +44,44 @@ const App = () => (
               }>
                 <Route path="dashboard" element={<Dashboard />} />
                 
-                {/* Routes admin */}
+                {/* Routes admin système uniquement */}
+                <Route path="system-config" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <div>Configuration Système (Admin)</div>
+                  </ProtectedRoute>
+                } />
+                <Route path="all-users" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <div>Tous les utilisateurs (Admin)</div>
+                  </ProtectedRoute>
+                } />
+                <Route path="system-reports" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <div>Rapports Système (Admin)</div>
+                  </ProtectedRoute>
+                } />
+                
+                {/* Routes responsable cabinet et réceptionniste */}
                 <Route path="appointments" element={
-                  <ProtectedRoute allowedRoles={['admin', 'receptionist']}>
+                  <ProtectedRoute allowedRoles={['responsable_cabinet', 'receptionist']}>
                     <Appointments />
                   </ProtectedRoute>
                 } />
+                
+                {/* Routes responsable cabinet uniquement */}
                 <Route path="users" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
+                  <ProtectedRoute allowedRoles={['responsable_cabinet']}>
                     <Users />
                   </ProtectedRoute>
                 } />
                 <Route path="reports" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
+                  <ProtectedRoute allowedRoles={['responsable_cabinet']}>
                     <Reports />
+                  </ProtectedRoute>
+                } />
+                <Route path="cabinet-settings" element={
+                  <ProtectedRoute allowedRoles={['responsable_cabinet']}>
+                    <div>Paramètres Cabinet</div>
                   </ProtectedRoute>
                 } />
                 

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,7 +13,9 @@ import {
   Settings,
   Home,
   FileText,
-  Phone
+  Phone,
+  Shield,
+  Building
 } from 'lucide-react';
 
 const Layout = () => {
@@ -36,9 +39,17 @@ const Layout = () => {
       case 'admin':
         return [
           ...baseItems,
+          { path: '/system-config', icon: Settings, label: 'Configuration système' },
+          { path: '/all-users', icon: Shield, label: 'Tous les utilisateurs' },
+          { path: '/system-reports', icon: FileText, label: 'Rapports système' }
+        ];
+      case 'responsable_cabinet':
+        return [
+          ...baseItems,
           { path: '/appointments', icon: Calendar, label: 'Rendez-vous' },
-          { path: '/users', icon: Users, label: 'Utilisateurs' },
-          { path: '/reports', icon: FileText, label: 'Rapports' }
+          { path: '/users', icon: Users, label: 'Gestion équipe' },
+          { path: '/reports', icon: FileText, label: 'Rapports clinique' },
+          { path: '/cabinet-settings', icon: Building, label: 'Paramètres cabinet' }
         ];
       case 'doctor':
         return [
@@ -60,6 +71,17 @@ const Layout = () => {
         ];
       default:
         return baseItems;
+    }
+  };
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'admin': return 'Administrateur Système';
+      case 'responsable_cabinet': return 'Responsable Cabinet';
+      case 'doctor': return 'Docteur';
+      case 'receptionist': return 'Réceptionniste';
+      case 'patient': return 'Patient';
+      default: return role;
     }
   };
 
@@ -93,7 +115,7 @@ const Layout = () => {
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{getRoleLabel(user?.role || '')}</p>
               </div>
               <Button
                 variant="outline"

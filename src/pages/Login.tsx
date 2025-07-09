@@ -39,7 +39,8 @@ const Login = () => {
   };
 
   const demoAccounts = [
-    { role: 'Admin', email: 'admin@clinique.sn', password: '123456' },
+    { role: 'Admin Système', email: 'admin@dev.clinique.sn', password: '123456' },
+    { role: 'Responsable Cabinet', email: 'responsable@clinique.sn', password: '123456' },
     { role: 'Docteur', email: 'dr.diop@clinique.sn', password: '123456' },
     { role: 'Réceptionniste', email: 'reception@clinique.sn', password: '123456' },
     { role: 'Patient', email: 'patient@example.com', password: '123456' },
@@ -152,7 +153,7 @@ const Login = () => {
             {/* Comptes de démonstration */}
             <div className="mt-6 pt-6 border-t border-gray-200">
               <p className="text-sm text-gray-600 mb-3 text-center">Comptes de démonstration :</p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="grid grid-cols-1 gap-2 text-xs">
                 {demoAccounts.map((account, index) => (
                   <div 
                     key={index}

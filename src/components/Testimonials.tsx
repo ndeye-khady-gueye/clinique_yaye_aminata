@@ -6,24 +6,24 @@ const Testimonials = () => {
   const testimonials = [
     {
       name: "Fatou Diop",
-      role: "Patiente depuis 5 ans",
+      role: "Patiente depuis 1 mois",
       image: "FD",
       rating: 5,
-      comment: "L'équipe de la Clinique Yaye Aminata est exceptionnelle. J'ai toujours reçu des soins de qualité avec beaucoup d'attention et de professionnalisme."
+      comment: "L'équipe de le Cabinet Yaye Aminata est exceptionnelle. J'ai toujours reçu des soins de qualité avec beaucoup d'attention et de professionnalisme."
     },
     {
       name: "Mamadou Sall",
-      role: "Patient cardiologie",
+      role: "Professeur",
       image: "MS",
       rating: 5,
-      comment: "Grâce au service de cardiologie, ma santé s'est considérablement améliorée. Les médecins sont très compétents et à l'écoute."
+      comment: "Grâce au service de consultation, ma santé s'est considérablement améliorée. Les médecins sont très compétents et à l'écoute."
     },
     {
       name: "Aissatou Ba",
       role: "Mère de famille",
       image: "AB",
       rating: 5,
-      comment: "Le service pédiatrie est remarquable. Mes enfants sont entre de bonnes mains et l'équipe sait les rassurer lors des consultations."
+      comment: "Le service planning familial est remarquable. L'équipe est à l'écoute et propose des solutions adaptées."
     }
   ];
 
@@ -35,7 +35,7 @@ const Testimonials = () => {
             <span className="text-gradient">Témoignages</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Découvrez ce que nos patients disent de leur expérience à la Clinique Yaye Aminata
+            Découvrez ce que nos patients disent de leur expérience au Cabinet Yaye Aminata
           </p>
         </div>
 
@@ -74,17 +74,29 @@ const Testimonials = () => {
           ))}
         </div>
 
-        <div className="text-center mt-12">
+                <div className="text-center mt-12">
           <div className="bg-white rounded-lg p-8 max-w-2xl mx-auto shadow-clinic">
-            <h3 className="text-2xl font-semibold mb-4 text-gradient">Votre avis compte</h3>
-            <p className="text-gray-600 mb-4">
-              Partagez votre expérience pour aider d'autres patients à nous faire confiance
+            <h3 className="text-2xl font-semibold mb-4 text-gradient">Découvrez notre cabinet en vidéo</h3>
+            <div className="overflow-hidden rounded-lg shadow-lg mb-4">
+              <video
+                className="w-full h-60 object-cover"
+                controls
+                controlsList="nodownload"
+                autoPlay
+                muted
+                loop
+              >
+                <source src="/lovable-uploads/Video.mp4" type="video/mp4" />
+                Votre navigateur ne supporte pas la vidéo.
+              </video>
+            </div>
+            <p className="text-gray-600">
+              Regardez cette vidéo pour en savoir plus sur nos services et notre équipe.
             </p>
-            <button className="text-primary hover:text-secondary transition-colors font-medium">
-              Laisser un avis →
-            </button>
           </div>
         </div>
+
+
       </div>
     </section>
   );
