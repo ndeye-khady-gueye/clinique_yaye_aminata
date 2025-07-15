@@ -74,27 +74,29 @@ const Testimonials = () => {
           ))}
         </div>
 
-                <div className="text-center mt-12">
-          <div className="bg-white rounded-lg p-8 max-w-2xl mx-auto shadow-clinic">
-            <h3 className="text-2xl font-semibold mb-4 text-gradient">Découvrez notre cabinet en vidéo</h3>
-            <div className="overflow-hidden rounded-lg shadow-lg mb-4">
-              <video
-                className="w-full h-60 object-cover"
-                controls
-                controlsList="nodownload"
-                autoPlay
-                muted
-                loop
-              >
-                <source src="/lovable-uploads/Video.mp4" type="video/mp4" />
-                Votre navigateur ne supporte pas la vidéo.
-              </video>
-            </div>
-            <p className="text-gray-600">
-              Regardez cette vidéo pour en savoir plus sur nos services et notre équipe.
-            </p>
-          </div>
-        </div>
+     <div className="text-center mt-12">
+  <div className="bg-white rounded-lg p-8 max-w-6xl mx-auto shadow-clinic transition-all duration-700 ease-in-out hover:scale-105">
+    <h3 className="text-2xl font-semibold mb-4 text-gradient">Découvrez notre cabinet en vidéo</h3>
+    <div className="overflow-hidden rounded-lg shadow-lg mb-4">
+      <video
+        className="w-full h-96 object-cover transition-transform duration-700 ease-in-out hover:scale-105"
+        controls
+        controlsList="nodownload"
+        autoPlay
+        muted
+        loop
+      >
+        <source src="/lovable-uploads/Video.mp4" type="video/mp4" />
+        Votre navigateur ne supporte pas la vidéo.
+      </video>
+    </div>
+    <p className="text-gray-600">
+      Regardez cette vidéo pour en savoir plus sur nos services et notre équipe.
+    </p>
+  </div>
+</div>
+
+
 
 
       </div>

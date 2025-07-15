@@ -3,26 +3,23 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { User, Calendar, Phone, MapPin, FileText, Stethoscope, DollarSign, Clock } from 'lucide-react';
+import { User, Phone, MapPin, Calendar, Stethoscope, FileText, DollarSign, Clock } from 'lucide-react';
 
-interface PatientFormProps {
+interface PatientRegistrationFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
   initialData?: any;
 }
 
-const PatientForm = ({ onSubmit, onCancel, initialData }: PatientFormProps) => {
+const PatientRegistrationForm = ({ onSubmit, onCancel, initialData }: PatientRegistrationFormProps) => {
   const [formData, setFormData] = useState({
-    date: initialData?.date || new Date().toISOString().split('T')[0],
     nom: initialData?.nom || '',
     prenom: initialData?.prenom || '',
     age: initialData?.age || '',
-    motifVisite: initialData?.motifVisite || '',
     telephone: initialData?.telephone || '',
     adresse: initialData?.adresse || '',
     email: initialData?.email || '',
@@ -31,16 +28,15 @@ const PatientForm = ({ onSubmit, onCancel, initialData }: PatientFormProps) => {
     nombreEnfants: initialData?.nombreEnfants || '',
     personneAContacter: initialData?.personneAContacter || '',
     telephoneUrgence: initialData?.telephoneUrgence || '',
-    observationsNotes: initialData?.observationsNotes || '',
     typeConsultation: initialData?.typeConsultation || '',
     professionnelConsulte: initialData?.professionnelConsulte || '',
-    urgence: initialData?.urgence || false,
-    assurance: initialData?.assurance || '',
+    motifVisite: initialData?.motifVisite || '',
+    observationsNotes: initialData?.observationsNotes || '',
+    date: initialData?.date || new Date().toISOString().split('T')[0],
     registrationTime: initialData?.registrationTime || new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
     consultationPrice: initialData?.consultationPrice || 0
   });
 
-  // Types de consultations selon la grille tarifaire du cabinet
   const services = [
     { code: 'SAGE_FEMME', name: 'Consultation Sage femme', price: 5000 },
     { code: 'GYNECO', name: 'Consultation gynéco', price: 7500 },
@@ -67,15 +63,11 @@ const PatientForm = ({ onSubmit, onCancel, initialData }: PatientFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const selectedService = services.find(s => s.code === formData.typeConsultation);
-    
-    const patientData = {
+    const finalData = {
       ...formData,
-      consultationPrice: selectedService?.price || 0,
-      consultationName: selectedService?.name || '',
-      status: 'enregistré'
+      consultationPrice: selectedService ? selectedService.price : 0
     };
-    
-    onSubmit(patientData);
+    onSubmit(finalData);
   };
 
   const updatePrice = (serviceCode: string) => {
@@ -342,34 +334,6 @@ const PatientForm = ({ onSubmit, onCancel, initialData }: PatientFormProps) => {
                 className="focus:border-[#6C2476]"
               />
             </div>
-            <div className="mt-4">
-              <Label htmlFor="assurance">Assurance/Mutuelle</Label>
-              <Select value={formData.assurance} onValueChange={(value) => setFormData({...formData, assurance: value})}>
-                <SelectTrigger className="focus:border-[#6C2476]">
-                  <SelectValue placeholder="Type d'assurance" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="aucune">Aucune</SelectItem>
-                  <SelectItem value="ipres">IPRES</SelectItem>
-                  <SelectItem value="css">CSS</SelectItem>
-                  <SelectItem value="ipm">IPM</SelectItem>
-                  <SelectItem value="mutuelle">Mutuelle privée</SelectItem>
-                  <SelectItem value="autre">Autre</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="mt-4 flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="urgence"
-                checked={formData.urgence}
-                onChange={(e) => setFormData({...formData, urgence: e.target.checked})}
-                className="h-4 w-4"
-              />
-              <Label htmlFor="urgence" className="text-red-600 font-medium">
-                Cas urgent / Prioritaire
-              </Label>
-            </div>
             {formData.consultationPrice > 0 && (
               <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: '#F4E6F7' }}>
                 <div className="flex justify-between items-center">
@@ -392,7 +356,7 @@ const PatientForm = ({ onSubmit, onCancel, initialData }: PatientFormProps) => {
             style={{ backgroundColor: '#6C2476' }} 
             className="hover:opacity-90 text-white px-8"
           >
-            Enregistrer le Patient
+            Enregistrer le Client
           </Button>
         </div>
       </form>
@@ -400,4 +364,4 @@ const PatientForm = ({ onSubmit, onCancel, initialData }: PatientFormProps) => {
   );
 };
 
-export default PatientForm;
+export default PatientRegistrationForm;
