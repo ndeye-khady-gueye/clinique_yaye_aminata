@@ -75,8 +75,7 @@ const Team = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-2 text-gray-800">{doctor.name}</h3>
                 <p className="text-primary font-medium mb-2">{doctor.specialty}</p>
-                <p className="text-sm text-gray-600 mb-2">{doctor.experience}</p>
-                <p className="text-xs text-gray-500 mb-3">{doctor.education}</p>
+                
                 <p className="text-sm text-gray-600 leading-relaxed">{doctor.description}</p>
               </CardContent>
             </Card>
