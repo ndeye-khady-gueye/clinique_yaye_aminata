@@ -1,72 +1,72 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Star, Quote } from "lucide-react";
+import { Star, Quote, Heart, Shield, Clock } from "lucide-react";
 
 const Testimonials = () => {
   const testimonials = [
     {
       name: "Fatou Diop",
-      role: "Patiente depuis 1 mois",
-      image: "FD",
+      role: "Patiente",
+      image: "/lovable-uploads/femmes.jpg",
       rating: 5,
-      comment: "L'équipe de le Cabinet Yaye Aminata est exceptionnelle. J'ai toujours reçu des soins de qualité avec beaucoup d'attention et de professionnalisme."
+      comment: "L'équipe du Cabinet Yaye Aminata est exceptionnelle. J'ai toujours reçu des soins de qualité avec beaucoup d'attention et de professionnalisme. Je recommande vivement !",
+      service: "Suivi de grossesse"
     },
     {
       name: "Mamadou Sall",
       role: "Professeur",
-      image: "MS",
+      image: "/lovable-uploads/consultations.jpg",
       rating: 5,
-      comment: "Grâce au service de consultation, ma santé s'est considérablement améliorée. Les médecins sont très compétents et à l'écoute."
+      comment: "Grâce au service de consultation, ma santé s'est considérablement améliorée. Les médecins sont très compétents et à l'écoute de mes besoins.",
+      service: "Consultation générale"
     },
     {
       name: "Aissatou Ba",
       role: "Mère de famille",
-      image: "AB",
+      image: "/lovable-uploads/gros-plan-d-un-garcon-se-faisant-examiner.jpg",
       rating: 5,
-      comment: "Le service planning familial est remarquable. L'équipe est à l'écoute et propose des solutions adaptées."
+      comment: "Le service planning familial est remarquable. L'équipe est à l'écoute et propose des solutions adaptées à chaque situation.",
+      service: "Planning familial"
     }
   ];
 
+
+
   return (
-    <section className="py-20 bg-gradient-soft">
-      <div className="container mx-auto px-4">
+    <section className="bg-gradient-to-br from-purple-50 to-pink-50">
+      <div className="container mx-auto px-4 py-20">
+        {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">
-            <span className="text-gradient">Témoignages</span>
+          <h2 className="text-5xl font-bold mb-8 text-gray-900">
+            Ce que disent nos patients
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Découvrez ce que nos patients disent de leur expérience au Cabinet Yaye Aminata
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Découvrez les témoignages de nos patients qui font confiance à notre équipe 
+            pour leurs soins de santé et leur bien-être.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {/* Témoignages */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-0">
           {testimonials.map((testimonial, index) => (
             <Card 
               key={testimonial.name}
-              className="hover-scale border-0 shadow-clinic hover:shadow-2xl transition-all duration-300 animate-fade-in"
-              style={{ animationDelay: `${index * 0.2}s` }}
+              className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white"
             >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <Quote className="h-8 w-8 text-primary/20" />
-                  <div className="flex space-x-1">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                </div>
-                
-                <p className="text-gray-600 mb-6 italic leading-relaxed">
+              <CardContent className="p-8">
+                <p className="text-gray-600 leading-relaxed mb-6 text-lg">
                   "{testimonial.comment}"
                 </p>
                 
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gradient-clinic rounded-full flex items-center justify-center text-white font-semibold mr-4">
-                    {testimonial.image}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-500">{testimonial.role}</p>
+                <div className="border-t border-gray-100 pt-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-gray-800 text-lg">{testimonial.name}</h4>
+                      <p className="text-gray-500">{testimonial.role}</p>
+                    </div>
+                    <span className="inline-block px-3 py-1 bg-gradient-soft text-primary text-sm rounded-full font-medium">
+                      {testimonial.service}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -74,31 +74,58 @@ const Testimonials = () => {
           ))}
         </div>
 
-     <div className="text-center mt-12">
-  <div className="bg-white rounded-lg p-8 max-w-6xl mx-auto shadow-clinic transition-all duration-700 ease-in-out hover:scale-105">
-    <h3 className="text-2xl font-semibold mb-4 text-gradient">Découvrez notre cabinet en vidéo</h3>
-    <div className="overflow-hidden rounded-lg shadow-lg mb-4">
-      <video
-        className="w-full h-96 object-cover transition-transform duration-700 ease-in-out hover:scale-105"
-        controls
-        controlsList="nodownload"
-        autoPlay
-        muted
-        loop
-      >
-        <source src="/lovable-uploads/Video.mp4" type="video/mp4" />
-        Votre navigateur ne supporte pas la vidéo.
-      </video>
-    </div>
-    <p className="text-gray-600">
-      Regardez cette vidéo pour en savoir plus sur nos services et notre équipe.
-    </p>
-  </div>
-</div>
+        {/* Vidéo de présentation - Style Senelec */}
+        <div className="bg-white">
+          <div className="container mx-auto px-4 py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-center">
+              {/* Colonne gauche - Vidéo */}
+              <div className="relative">
+                <div className="bg-primary w-4 h-full absolute left-0 top-0"></div>
+                <div className="pl-8 pr-4">
+                  <div className="overflow-hidden rounded-xl shadow-lg">
+                    <video
+                      className="w-full h-96 object-cover"
+                      controls
+                      controlsList="nodownload"
+                      autoPlay
+                      muted
+                      loop
+                    >
+                      <source src="/lovable-uploads/Video.mp4" type="video/mp4" />
+                      Votre navigateur ne supporte pas la vidéo.
+                    </video>
+                  </div>
+                </div>
+              </div>
 
-
-
-
+              {/* Colonne droite - Texte */}
+              <div className="p-6 lg:p-8 relative">
+                <div className="absolute top-6 right-6 opacity-10">
+                  <div className="w-24 h-24 border-2 border-gray-300 border-dotted rounded-lg"></div>
+                </div>
+                
+                <div className="relative z-10">
+                  <span className="inline-block px-3 py-1 bg-gradient-soft text-primary text-sm rounded-full mb-4">
+                    Notre Mission
+                  </span>
+                  
+                  <h3 className="text-4xl font-bold text-primary mb-6">
+                    MOT DE LA RESPONSABLE
+                  </h3>
+                  
+                  <div className="space-y-4 text-gray-700 leading-relaxed">
+                    <p>
+                      C'est avec un grand plaisir que je vous souhaite la bienvenue au Cabinet Yaye Aminata. Notre mission est de vous offrir des soins de santé de qualité dans un environnement bienveillant et professionnel.
+                    </p>
+                    <p>
+                      Que vous soyez enceinte et en quête d'un suivi de grossesse, en recherche de conseils en planning familial, ou simplement pour une consultation générale, notre équipe pluridisciplinaire est là pour vous accompagner à chaque étape de votre vie.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

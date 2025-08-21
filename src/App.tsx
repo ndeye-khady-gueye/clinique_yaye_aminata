@@ -10,6 +10,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
@@ -19,6 +20,9 @@ import Reports from "./pages/Reports";
 import MyAppointments from "./pages/MyAppointments";
 import Patients from "./pages/Patients";
 import Profile from "./pages/Profile";
+import SystemConfig from "./pages/admin/SystemConfig";
+import AllUsers from "./pages/admin/AllUsers";
+import SystemReports from "./pages/admin/SystemReports";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +38,7 @@ const App = () => (
               {/* Routes publiques */}
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
               
               {/* Routes protégées avec layout */}
@@ -47,17 +52,17 @@ const App = () => (
                 {/* Routes admin système uniquement */}
                 <Route path="system-config" element={
                   <ProtectedRoute allowedRoles={['admin']}>
-                    <div>Configuration Système (Admin)</div>
+                    <SystemConfig />
                   </ProtectedRoute>
                 } />
                 <Route path="all-users" element={
                   <ProtectedRoute allowedRoles={['admin']}>
-                    <div>Tous les utilisateurs (Admin)</div>
+                    <AllUsers />
                   </ProtectedRoute>
                 } />
                 <Route path="system-reports" element={
                   <ProtectedRoute allowedRoles={['admin']}>
-                    <div>Rapports Système (Admin)</div>
+                    <SystemReports />
                   </ProtectedRoute>
                 } />
                 

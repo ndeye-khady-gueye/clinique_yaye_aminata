@@ -3,208 +3,265 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Phone, Mail, MapPin } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
 
 const Contact = () => {
-  const { toast } = useToast();
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [displayText, setDisplayText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showCursor, setShowCursor] = useState(true);
+  
+  const fullText = "Contactez-nous";
+  
   const [formData, setFormData] = useState({
     nom: "",
-    prenom: "",
-    age: "",
-    telephone: "",
-    motif: ""
+    email: "",
+    sujet: "",
+    message: ""
   });
+
+  const [errors, setErrors] = useState({
+    nom: "",
+    email: "",
+    sujet: "",
+    message: ""
+  });
+
+  // Animation de type curseur pour le titre
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (currentIndex < fullText.length) {
+        setDisplayText(fullText.slice(0, currentIndex + 1));
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        // Réinitialiser l'animation après 3 secondes
+        setTimeout(() => {
+          setDisplayText("");
+          setCurrentIndex(0);
+        }, 3000);
+      }
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [currentIndex, fullText]);
+
+  // Animation du curseur clignotant
+  useEffect(() => {
+    const cursorTimer = setInterval(() => {
+      setShowCursor(prev => !prev);
+    }, 600);
+    return () => clearInterval(cursorTimer);
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: "" }));
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateForm = () => {
+    const newErrors = {
+      nom: "",
+      email: "",
+      sujet: "",
+      message: ""
+    };
 
-    // Vérifications
-    const ageNumber = parseInt(formData.age, 10);
-    const telNumber = formData.telephone;
-
-    if (
-      !formData.nom ||
-      !formData.prenom ||
-      !formData.age ||
-      !formData.telephone ||
-      !formData.motif
-    ) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires.",
-        variant: "destructive"
-      });
-      return;
+    // Validation du nom (3-20 caractères)
+    if (!formData.nom) {
+      newErrors.nom = "Le nom est requis";
+    } else if (formData.nom.length < 3 || formData.nom.length > 20) {
+      newErrors.nom = "Le nom doit contenir entre 3 et 20 caractères";
     }
 
-    if (isNaN(ageNumber) || ageNumber <= 0) {
-      toast({
-        title: "Erreur",
-        description: "L'âge doit être un nombre positif.",
-        variant: "destructive"
-      });
-      return;
+    // Validation de l'email ou téléphone
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(\+221|221)?[0-9]{9}$/;
+    
+    if (!formData.email) {
+      newErrors.email = "L'email ou téléphone est requis";
+    } else if (!emailRegex.test(formData.email) && !phoneRegex.test(formData.email)) {
+      newErrors.email = "L'email ou téléphone n'est pas valide";
     }
 
-    if (!/^\d{9}$/.test(telNumber)) {
-      toast({
-        title: "Erreur",
-        description: "Le numéro de téléphone doit contenir exactement 9 chiffres.",
-        variant: "destructive"
-      });
+    // Validation du sujet
+    if (!formData.sujet) {
+      newErrors.sujet = "Le sujet est requis";
+    }
+
+    // Validation du message
+    if (!formData.message) {
+      newErrors.message = "Le message est requis";
+    }
+
+    setErrors(newErrors);
+    return Object.values(newErrors).every(error => error === "");
+  };
+
+  const handleSubmit = () => {
+    if (!validateForm()) {
       return;
     }
 
     console.log("Formulaire envoyé:", formData);
 
-    toast({
-      title: "Formulaire envoyé",
-      description: "Votre demande a été envoyée avec succès. Nous vous recontacterons rapidement.",
-    });
+    // Afficher le message de succès
+    setShowSuccessMessage(true);
+    
+    // Masquer le message après 5 secondes
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 5000);
 
     setFormData({
       nom: "",
-      prenom: "",
-      age: "",
-      telephone: "",
-      motif: ""
+      email: "",
+      sujet: "",
+      message: ""
+    });
+    setErrors({
+      nom: "",
+      email: "",
+      sujet: "",
+      message: ""
     });
   };
 
+  const services = [
+    "Suivi de Grossesse",
+    "Préparation à la Naissance",
+    "Monitoring Fœtal",
+    "Education à la Santé durant la grossesse",
+    "Soin Post Natal",
+    "Echographie",
+    "Planification Familiale",
+    "Dépistage Cancer : Sein / Col de l'utérus",
+    "Traitement des IST",
+    "Vaccination",
+    "Consultation Générale",
+    "Consultation en ligne",
+    "Autre"
+  ];
+
   return (
-    <section id="contact" className="py-20 bg-white">
+    <section id="contact" className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
       <div className="container mx-auto px-4">
+        {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 text-gray-800">
-            Pour prendre rendez-vous
+          <h2 className="text-5xl font-bold mb-8 text-gray-900">
+            <span className="inline-block">
+              {displayText}
+              <span 
+                className={`inline-block w-1 h-12 bg-primary ml-1 transition-opacity duration-200 ${
+                  showCursor ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+            </span>
           </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Pour toute question ou information supplémentaire, n'hésitez pas à nous 
+            contacter. Nous sommes là pour vous aider.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Informations de contact */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-8">
-            <div className="mb-8">
-              <h3 className="text-2xl font-bold mb-4 text-primary">POUR TOUTE URGENCE</h3>
-              <h4 className="text-3xl font-bold mb-6 text-primary">Nous Contacter</h4>
-
-              <p className="text-gray-600 mb-8">
-                Le Cabinet de Famille est un cabinet pluridisciplinaire. Des médecins spécialistes y sont présents en permanence pour assurer un suivi médical complet et de qualité.
-              </p>
-
-              <div className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                    <Phone className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-primary">APPELEZ NOUS</p>
-                    <p className="text-gray-800 font-bold">(+221) 78 437 01 01 - 33 893 47 89</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                    <Mail className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-primary">EMAIL</p>
-                    <p className="text-gray-800">cabinetyayeaminata25@gmail.com</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                    <MapPin className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-primary">Adresse</p>
-                    <p className="text-gray-800">Cité Jaraaf 2, Rufisque Nord, Route Centrale Électrique Kounoune</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           {/* Formulaire de contact */}
-          <div>
-            <Card className="shadow-lg border-0">
-              <CardContent className="p-8">
-                <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="order-2 lg:order-1">
+            <Card className="shadow-xl border-0 bg-white h-fit">
+              <CardContent className="p-10">
+                <div className="space-y-8">
                   <div>
-                    <Label htmlFor="nom">Nom</Label>
                     <Input
                       id="nom"
+                      placeholder="Votre nom et prénom"
                       value={formData.nom}
                       onChange={(e) => handleInputChange("nom", e.target.value)}
-                      required
-                      className="mt-2"
+                      className={`h-14 text-lg border-2 ${
+                        errors.nom ? 'border-red-500' : 'border-gray-200'
+                      } focus:border-primary rounded-lg`}
                     />
+                    {errors.nom && (
+                      <p className="text-red-500 text-sm mt-2">{errors.nom}</p>
+                    )}
                   </div>
 
                   <div>
-                    <Label htmlFor="prenom">Prénom</Label>
                     <Input
-                      id="prenom"
-                      value={formData.prenom}
-                      onChange={(e) => handleInputChange("prenom", e.target.value)}
-                      required
-                      className="mt-2"
+                      id="email"
+                      type="text"
+                      placeholder="Votre email ou numéro de téléphone"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      className={`h-14 text-lg border-2 ${
+                        errors.email ? 'border-red-500' : 'border-gray-200'
+                      } focus:border-primary rounded-lg`}
                     />
+                    {errors.email && (
+                      <p className="text-red-500 text-sm mt-2">{errors.email}</p>
+                    )}
                   </div>
 
                   <div>
-                    <Label htmlFor="age">Âge</Label>
-                    <Input
-                      id="age"
-                      type="number"
-                      min="1"
-                      value={formData.age}
-                      onChange={(e) => handleInputChange("age", e.target.value)}
-                      required
-                      className="mt-2"
-                    />
+                    <Select value={formData.sujet} onValueChange={(value) => handleInputChange("sujet", value)}>
+                      <SelectTrigger className={`h-14 text-lg border-2 ${
+                        errors.sujet ? 'border-red-500' : 'border-gray-200'
+                      } focus:border-primary rounded-lg`}>
+                        <SelectValue placeholder="Sujet du message" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {services.map((service) => (
+                          <SelectItem key={service} value={service}>
+                            {service}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.sujet && (
+                      <p className="text-red-500 text-sm mt-2">{errors.sujet}</p>
+                    )}
                   </div>
 
                   <div>
-                    <Label htmlFor="telephone">Numéro de téléphone</Label>
-                    <Input
-                      id="telephone"
-                      type="tel"
-                      value={formData.telephone}
-                      onChange={(e) => handleInputChange("telephone", e.target.value)}
-                      required
-                      className="mt-2"
-                      maxLength={9}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="motif">Motif de la visite</Label>
                     <Textarea
-                      id="motif"
-                      value={formData.motif}
-                      onChange={(e) => handleInputChange("motif", e.target.value)}
-                      rows={4}
-                      required
-                      className="mt-2"
+                      id="message"
+                      placeholder="Votre message"
+                      value={formData.message}
+                      onChange={(e) => handleInputChange("message", e.target.value)}
+                      rows={6}
+                      className={`text-lg border-2 ${
+                        errors.message ? 'border-red-500' : 'border-gray-200'
+                      } focus:border-primary rounded-lg resize-none`}
                     />
+                    {errors.message && (
+                      <p className="text-red-500 text-sm mt-2">{errors.message}</p>
+                    )}
                   </div>
 
                   <Button
-                    type="submit"
-                    className="hover:opacity-90 text-white px-8 py-3 rounded-full"
+                    onClick={handleSubmit}
+                    className="w-full h-14 bg-gradient-clinic hover:opacity-90 text-white text-lg font-semibold rounded-lg transition-all duration-300"
                   >
                     Envoyer
                   </Button>
-                </form>
+                </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Image */}
+          <div className="order-1 lg:order-2 relative">
+            {/* Image de fond avec bordure bleue */}
+            <div className="relative lg:h-[600px] h-96 rounded-2xl overflow-hidden border-4 border-primary transform lg:-translate-x-8 lg:translate-y-8">
+              <img
+                src="/lovable-uploads/contact.png"
+                alt="Contact"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -1,0 +1,176 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | Clinique Yaye Aminata{% endblock %}
+
+{% block extrastyle %}
+<style>
+    :root {
+        --primary: #2563eb;
+        --secondary: #64748b;
+        --accent: #f59e0b;
+        --primary-fg: #ffffff;
+        --body-fg: #333333;
+        --body-bg: #f8fafc;
+        --header-color: #ffffff;
+        --header-branding-color: #ffffff;
+        --header-bg: #1e40af;
+        --header-link-color: #ffffff;
+    }
+
+    #header {
+        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    #branding h1 {
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    .module h2, .module caption, .inline-group h2 {
+        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+        color: #ffffff;
+    }
+
+    div.breadcrumbs {
+        background: #f1f5f9;
+        color: #64748b;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    div.breadcrumbs a {
+        color: #2563eb;
+    }
+
+    div.breadcrumbs a:hover {
+        color: #1e40af;
+    }
+
+    .button, input[type=submit], input[type=button], .submit-row input, a.button {
+        background: #2563eb;
+        color: #ffffff;
+        border-radius: 6px;
+        border: none;
+        padding: 8px 16px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
+        background: #1e40af;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+    }
+
+    .button.default, input[type=submit].default, .submit-row input.default {
+        background: #059669;
+    }
+
+    .button.default:hover, input[type=submit].default:hover, .submit-row input.default:hover {
+        background: #047857;
+    }
+
+    .object-tools a:link, .object-tools a:visited {
+        background: #2563eb;
+        color: #ffffff;
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .object-tools a:hover {
+        background: #1e40af;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+    }
+
+    .module {
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+    }
+
+    .module h2 {
+        border-radius: 8px 8px 0 0;
+    }
+
+    table {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    thead th {
+        background: #f8fafc;
+        color: #374151;
+        font-weight: 600;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    tbody tr:hover {
+        background: #f1f5f9;
+    }
+
+    .field-get_user_link a {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .field-get_user_link a:hover {
+        color: #1e40af;
+        text-decoration: underline;
+    }
+
+    /* Badges pour les statuts */
+    .field-statut {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .field-statut.confirme {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .field-statut.annule {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .field-statut.en_attente {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        #header {
+            padding: 10px;
+        }
+        
+        #branding h1 {
+            font-size: 18px;
+        }
+        
+        .module {
+            margin: 10px 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    🏥 Clinique Yaye Aminata - Administration
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

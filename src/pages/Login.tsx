@@ -1,31 +1,89 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Heart, Mail, Lock, AlertCircle } from 'lucide-react';
+import { Mail, Lock, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [currentStep, setCurrentStep] = useState(1);
+  const [identifier, setIdentifier] = useState(''); // email ou téléphone
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [displayText, setDisplayText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showCursor, setShowCursor] = useState(true);
+  
+  const fullText = "Bienvenue dans votre espace médical";
+  
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Animation de type curseur pour le titre
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (currentIndex < fullText.length) {
+        setDisplayText(fullText.slice(0, currentIndex + 1));
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        setTimeout(() => {
+          setDisplayText("");
+          setCurrentIndex(0);
+        }, 3000);
+      }
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [currentIndex, fullText]);
+
+  // Animation du curseur clignotant
+  useEffect(() => {
+    const cursorTimer = setInterval(() => {
+      setShowCursor(prev => !prev);
+    }, 600);
+    return () => clearInterval(cursorTimer);
+  }, []);
+
+  // Étape 1 : Validation de l'identifiant
+  const handleIdentifierSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    console.log('handleIdentifierSubmit - identifier:', identifier); // Debug log
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(77|76|78|70|75)[0-9]{7}$/;
+    
+    if (!identifier) {
+      setError("L'email ou téléphone est requis");
+      return;
+    }
+    if (!emailRegex.test(identifier) && !phoneRegex.test(identifier)) {
+      setError("L'email ou téléphone n'est pas valide");
+      return;
+    }
+
+    console.log('Identifier validated, moving to step 2'); // Debug log
+    setCurrentStep(2); // passage à l'étape mot de passe
+  };
+
+  // Étape 2 : Validation + login
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!email || !password) {
-      setError('Veuillez remplir tous les champs');
+    console.log('handleSubmit - current identifier:', identifier); // Debug log
+
+    if (!identifier || !password) {
+      setError("Veuillez remplir tous les champs");
       return;
     }
 
-    const success = await login(email, password);
+    console.log('Login attempt with identifier:', identifier); // Debug log
+    
+    const success = await login(identifier, password);
     
     if (success) {
       toast({
@@ -34,143 +92,169 @@ const Login = () => {
       });
       navigate('/dashboard');
     } else {
-      setError('Email ou mot de passe incorrect');
+      setError('Email/téléphone ou mot de passe incorrect');
     }
   };
 
-  const demoAccounts = [
-    { role: 'Admin Système', email: 'admin@dev.clinique.sn', password: '123456' },
-    { role: 'Responsable Cabinet', email: 'responsable@clinique.sn', password: '123456' },
-    { role: 'Docteur', email: 'dr.diop@clinique.sn', password: '123456' },
-    { role: 'Réceptionniste', email: 'reception@clinique.sn', password: '123456' },
-    { role: 'Patient', email: 'patient@example.com', password: '123456' },
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-        
-        {/* Logo et titre */}
-        <div className="text-center lg:text-left">
-          <div className="flex items-center justify-center lg:justify-start space-x-3 mb-6">
-            <div className="w-46 h-46 rounded-full flex items-center justify-center overflow-hidden bounce-logo">
-              <img
-                src="/lovable-uploads/Logo_page-0001.jpg"
-                alt="Logo Clinique"
-                className="w-44 h-44 object-contain"
-              />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+      {/* Flèche de retour vers l'accueil */}
+      <div className="absolute top-6 right-6">
+        <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-primary transition-colors">
+          <ArrowLeft className="h-4 w-4" />
+          <span className="text-sm">Retour à l'accueil</span>
+        </Link>
+      </div>
 
-              <style>{`
-                @keyframes bounceUpDown {
-                  0% {
-                    transform: translateY(0px);
-                  }
-                  50% {
-                    transform: translateY(20px);
-                  }
-                  100% {
-                    transform: translateY(0px);
-                  }
-                }
-
-                .bounce-logo {
-                  animation: bounceUpDown 2s ease-in-out infinite;
-                }
-              `}</style>
-            </div>
-
-            <div>
+      <div className="flex items-center justify-center p-4 min-h-screen">
+        <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          
+          {/* Logo et titre */}
+          <div className="text-center lg:text-left">
+            <div className="mb-6">
               <h1 className="text-3xl font-bold text-primary">CABINET</h1>
               <p className="text-lg text-gray-600">YAYE AMINATA</p>
             </div>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+              <span className="inline-block">
+                {displayText}
+                <span 
+                  className={`inline-block w-1 h-8 bg-primary ml-1 transition-opacity duration-200 ${
+                    showCursor ? 'opacity-100' : 'opacity-0'
+                  }`}
+                />
+              </span>
+            </h2>
+            <p className="text-gray-600">
+              Connectez-vous pour accéder à votre tableau de bord personnalisé
+            </p>
           </div>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            Bienvenue dans votre espace médical
-          </h2>
-          <p className="text-gray-600">
-            Connectez-vous pour accéder à votre tableau de bord personnalisé
-          </p>
-        </div>
 
-        {/* Formulaire de connexion */}
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">Se connecter</CardTitle>
-            <CardDescription className="text-center">
-              Entrez vos identifiants pour accéder à votre compte
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">Email</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="votre@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
+          {/* Formulaire de connexion */}
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle className="text-2xl text-center">Se connecter</CardTitle>
+              <CardDescription className="text-center">
+                Entrez vos identifiants pour accéder à votre compte
+              </CardDescription>
               
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium">Mot de passe</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
-                    disabled={isLoading}
-                  />
+              {/* Indicateur d'étapes */}
+              <div className="flex items-center justify-center mt-4">
+                <div className="flex items-center">
+                  <div className="flex flex-col items-center">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
+                      currentStep >= 1 ? 'bg-primary text-white' : 'bg-gray-300 text-gray-600'
+                    }`}>
+                      1
+                    </div>
+                    <span className={`text-xs font-medium mt-1 ${
+                      currentStep >= 1 ? 'text-primary' : 'text-gray-500'
+                    }`}>
+                      Identification
+                    </span>
+                  </div>
+                  <div className="w-8 h-0.5 bg-gray-300 mx-2"></div>
+                  <div className="flex flex-col items-center">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
+                      currentStep >= 2 ? 'bg-primary text-white' : 'bg-gray-300 text-gray-600'
+                    }`}>
+                      2
+                    </div>
+                    <span className={`text-xs font-medium mt-1 ${
+                      currentStep >= 2 ? 'text-primary' : 'text-gray-500'
+                    }`}>
+                      Mot de passe
+                    </span>
+                  </div>
                 </div>
               </div>
+            </CardHeader>
+            <CardContent>
+              {currentStep === 1 ? (
+                // Étape 1 : Identification
+                <form onSubmit={handleIdentifierSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <label htmlFor="identifier" className="text-sm font-medium">
+                      Email ou numéro de téléphone
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="identifier"
+                        type="text"
+                        placeholder="votre@email.com ou 771234567"
+                        value={identifier}
+                        onChange={(e) => setIdentifier(e.target.value)}
+                        className="pl-10"
+                        disabled={isLoading}
+                      />
+                    </div>
+                    {error && (
+                      <p className="text-red-600 text-sm mt-1">{error}</p>
+                    )}
+                  </div>
 
-              {error && (
-                <div className="flex items-center space-x-2 text-red-600 text-sm">
-                  <AlertCircle className="h-4 w-4" />
-                  <span>{error}</span>
-                </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full hover:opacity-90"
+                    disabled={isLoading}
+                  >
+                    Continuer
+                  </Button>
+                </form>
+              ) : (
+                // Étape 2 : Mot de passe
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <label htmlFor="password" className="text-sm font-medium">Mot de passe</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10"
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div className="flex items-center space-x-2 text-red-600 text-sm">
+                      <AlertCircle className="h-4 w-4" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  <Button 
+                    type="submit" 
+                    className="w-full hover:opacity-90"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Connexion...' : 'Se connecter'}
+                  </Button>
+                </form>
               )}
 
-              <Button 
-                type="submit" 
-                className="w-full  hover:opacity-90"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Connexion...' : 'Se connecter'}
-              </Button>
-            </form>
-
-            {/* Comptes de démonstration */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-600 mb-3 text-center">Comptes de démonstration :</p>
-              <div className="grid grid-cols-1 gap-2 text-xs">
-                {demoAccounts.map((account, index) => (
-                  <div 
-                    key={index}
-                    className="p-2 bg-gray-50 rounded cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => {
-                      setEmail(account.email);
-                      setPassword(account.password);
-                    }}
+              {/* Lien inscription */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-3">
+                    Vous n'avez pas encore de compte ?
+                  </p>
+                  <Link 
+                    to="/register" 
+                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-md hover:bg-primary/20 transition-colors"
                   >
-                    <p className="font-medium text-primary">{account.role}</p>
-                    <p className="text-gray-600">{account.email}</p>
-                  </div>
-                ))}
+                    Créer un compte patient
+                  </Link>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
