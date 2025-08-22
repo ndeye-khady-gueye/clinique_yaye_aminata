@@ -140,11 +140,25 @@ class ApiService {
 
   // Authentification
   async login(identifier: string, password: string): Promise<LoginResponse> {
-    // Toujours envoyer l'identifiant dans le champ email
-    // Le backend gère la détection email/téléphone
+    // Détecter si l'identifiant est un email ou un numéro de téléphone
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(77|76|78|70|75)[0-9]{7}$/;
     
-    const payload = { email: identifier, password };
-    console.log('Login payload:', payload); // Debug log
+    let payload: any;
+    
+    if (emailRegex.test(identifier)) {
+      // C'est un email
+      payload = { email: identifier, password };
+      console.log('Login payload (email):', payload); // Debug log
+    } else if (phoneRegex.test(identifier)) {
+      // C'est un numéro de téléphone
+      payload = { phone: identifier, password };
+      console.log('Login payload (phone):', payload); // Debug log
+    } else {
+      // Fallback: envoyer comme email (comportement par défaut)
+      payload = { email: identifier, password };
+      console.log('Login payload (fallback):', payload); // Debug log
+    }
     
     const response = await this.request<LoginResponse>('/auth/login/', {
       method: 'POST',

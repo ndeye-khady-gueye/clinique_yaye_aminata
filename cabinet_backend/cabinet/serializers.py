@@ -8,8 +8,8 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'phone', 'speciality', 'avatar', 'is_active', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        fields = ['id', 'user_id', 'username', 'email', 'first_name', 'last_name', 'role', 'phone', 'speciality', 'avatar', 'is_active', 'created_at']
+        read_only_fields = ['id', 'user_id', 'created_at']
 
 class UserCreateSerializer(serializers.ModelSerializer):
     """Sérialiseur pour la création d'utilisateurs"""
@@ -148,52 +148,76 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class LoginSerializer(serializers.Serializer):
-    """Sérialiseur pour la connexion - accepte username, email ou identifier"""
+    """Sérialiseur pour la connexion - accepte username, email, phone ou identifier"""
     username = serializers.CharField(required=False, allow_blank=True)
     email = serializers.CharField(required=False, allow_blank=True)
+    phone = serializers.CharField(required=False, allow_blank=True)
     identifier = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
         # Récupérer l'identifiant depuis n'importe quel champ
-        identifier = data.get('identifier') or data.get('email') or data.get('username')
+        identifier = data.get('identifier') or data.get('email') or data.get('phone') or data.get('username')
         password = data.get('password')
 
+        print(f"🔍 LoginSerializer validate - Données reçues: {data}")  # Debug log
+        print(f"🔍 LoginSerializer validate - identifier: '{identifier}', password: '{password}'")  # Debug log
+
         if not identifier:
-            raise serializers.ValidationError('Identifiant requis (email, username ou identifier)')
+            raise serializers.ValidationError('Identifiant requis (email, téléphone, username ou identifier)')
         
         if not password:
             raise serializers.ValidationError('Mot de passe requis')
 
-        print(f"LoginSerializer validate - identifier: '{identifier}', password: '{password}'")  # Debug log
-
-        # Vérifier si c'est email ou téléphone
-        if '@' in identifier:
-            print(f"Trying to find user by email: {identifier}")  # Debug log
+        # Déterminer le type d'identifiant et construire les kwargs appropriés
+        email_regex = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+        phone_regex = r'^(77|76|78|70|75)[0-9]{7}$'
+        
+        if re.match(email_regex, identifier):
+            print(f"📧 Détecté comme EMAIL: {identifier}")  # Debug log
             kwargs = {'email': identifier}
-        else:
-            print(f"Trying to find user by phone: {identifier}")  # Debug log
+        elif re.match(phone_regex, identifier):
+            print(f"📱 Détecté comme TÉLÉPHONE: {identifier}")  # Debug log
             kwargs = {'phone': identifier}
+        else:
+            print(f"⚠️ Non reconnu, essai par email: {identifier}")  # Debug log
+            kwargs = {'email': identifier}
 
-        try:
-            user = User.objects.get(**kwargs)
-            print(f"User found: {user.username}")  # Debug log
-        except User.DoesNotExist:
-            print(f"User not found for: {identifier}")  # Debug log
-            raise serializers.ValidationError('Email/téléphone ou mot de passe incorrect')
+        print(f"🔍 Recherche avec kwargs: {kwargs}")  # Debug log
 
-        user = authenticate(username=user.username, password=password)
-        print(f"Authentication result: {user}")  # Debug log
+        # Essayer de trouver l'utilisateur
+        user = None
+        # Utiliser filter().first() pour éviter l'erreur MultipleObjectsReturned
+        user = User.objects.filter(**kwargs).first()
+        if user:
+            print(f"✅ Utilisateur trouvé: {user.username} (Email: {user.email}, Phone: {user.phone})")  # Debug log
+        else:
+            print(f"❌ Utilisateur non trouvé pour: {identifier}")  # Debug log
+            # Essayer de trouver l'utilisateur par email ou téléphone
+            user = User.objects.filter(email=identifier).first()
+            if user:
+                print(f"✅ Utilisateur trouvé par email: {user.username}")  # Debug log
+            else:
+                user = User.objects.filter(phone=identifier).first()
+                if user:
+                    print(f"✅ Utilisateur trouvé par téléphone: {user.username}")  # Debug log
+                else:
+                    print(f"❌ Aucun utilisateur trouvé avec email ou téléphone: {identifier}")  # Debug log
+                    raise serializers.ValidationError('Email/téléphone ou mot de passe incorrect')
+
+        # Authentifier l'utilisateur
+        authenticated_user = authenticate(username=user.username, password=password)
+        print(f"🔐 Résultat authentification: {authenticated_user}")  # Debug log
         
-        if not user:
-            print("Authentication failed")  # Debug log
+        if not authenticated_user:
+            print("❌ Échec de l'authentification")  # Debug log
             raise serializers.ValidationError('Email/téléphone ou mot de passe incorrect')
         
-        if not user.is_active:
-            print("User is inactive")  # Debug log
+        if not authenticated_user.is_active:
+            print("❌ Utilisateur inactif")  # Debug log
             raise serializers.ValidationError('Compte désactivé')
         
-        data['user'] = user
+        data['user'] = authenticated_user
         return data
 
 class PatientSerializer(serializers.ModelSerializer):

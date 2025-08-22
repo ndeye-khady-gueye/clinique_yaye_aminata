@@ -437,6 +437,7 @@ const UserManagement = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>ID</TableHead>
                 <TableHead>Utilisateur</TableHead>
                 <TableHead>Rôle</TableHead>
                 <TableHead>Contact</TableHead>
@@ -448,6 +449,11 @@ const UserManagement = () => {
             <TableBody>
               {filteredUsers.map((user) => (
                 <TableRow key={user.id}>
+                  <TableCell>
+                    <div className="font-mono font-medium text-center">
+                      {user.user_id || 'N/A'}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-3">
                       <Avatar>
@@ -592,6 +598,10 @@ const UserManagement = () => {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>ID Utilisateur</Label>
+                  <p className="text-sm font-mono">{selectedUser.user_id || 'N/A'}</p>
+                </div>
                 <div>
                   <Label>Email</Label>
                   <p className="text-sm">{selectedUser.email}</p>

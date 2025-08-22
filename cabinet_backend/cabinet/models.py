@@ -13,6 +13,7 @@ class User(AbstractUser):
         ('patient', 'Patient'),
     ]
     
+    user_id = models.PositiveIntegerField(unique=True, null=True, blank=True, verbose_name="ID Utilisateur")
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='patient')
     phone = models.CharField(max_length=15, blank=True, null=True)
     speciality = models.CharField(max_length=100, blank=True, null=True)  # Pour les docteurs
@@ -25,8 +26,18 @@ class User(AbstractUser):
         verbose_name = "Utilisateur"
         verbose_name_plural = "Utilisateurs"
     
+    def save(self, *args, **kwargs):
+        if not self.user_id:
+            # Générer automatiquement l'ID utilisateur
+            last_user = User.objects.order_by('-user_id').first()
+            if last_user and last_user.user_id:
+                self.user_id = last_user.user_id + 1
+            else:
+                self.user_id = 1
+        super().save(*args, **kwargs)
+    
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.get_role_display()})"
+        return f"{self.user_id} - {self.first_name} {self.last_name} ({self.get_role_display()})"
 
 class Patient(models.Model):
     """Modèle pour les patients"""
