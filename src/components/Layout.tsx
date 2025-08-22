@@ -40,7 +40,7 @@ const Layout = () => {
         return [
           ...baseItems,
           { path: '/system-config', icon: Settings, label: 'Configuration système' },
-          { path: '/all-users', icon: Shield, label: 'Tous les utilisateurs' },
+          { path: '/user-management', icon: Users, label: 'Gestion utilisateurs' },
           { path: '/system-reports', icon: FileText, label: 'Rapports système' }
         ];
       case 'responsable_cabinet':

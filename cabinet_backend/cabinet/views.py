@@ -15,7 +15,7 @@ import psutil
 
 from .models import User, Patient, Service, RendezVous, Consultation, Prescription, Paiement, DossierMedical
 from .serializers import (
-    UserSerializer, UserCreateSerializer, RegisterSerializer, LoginSerializer, PatientSerializer, PatientCreateSerializer,
+    UserSerializer, UserCreateSerializer, UserUpdateSerializer, RegisterSerializer, LoginSerializer, PatientSerializer, PatientCreateSerializer,
     ServiceSerializer, RendezVousSerializer, RendezVousCreateSerializer, ConsultationSerializer,
     PrescriptionSerializer, PaiementSerializer, DossierMedicalSerializer, StatistiquesSerializer
 )
@@ -271,6 +271,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'create':
             return UserCreateSerializer
+        elif self.action in ['update', 'partial_update']:
+            return UserUpdateSerializer
         return UserSerializer
     
     def get_queryset(self):

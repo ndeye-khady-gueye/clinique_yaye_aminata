@@ -21,7 +21,7 @@ import MyAppointments from "./pages/MyAppointments";
 import Patients from "./pages/Patients";
 import Profile from "./pages/Profile";
 import SystemConfig from "./pages/admin/SystemConfig";
-import AllUsers from "./pages/admin/AllUsers";
+import UserManagement from "./pages/admin/UserManagement";
 import SystemReports from "./pages/admin/SystemReports";
 
 const queryClient = new QueryClient();
@@ -55,9 +55,10 @@ const App = () => (
                     <SystemConfig />
                   </ProtectedRoute>
                 } />
-                <Route path="all-users" element={
+
+                <Route path="user-management" element={
                   <ProtectedRoute allowedRoles={['admin']}>
-                    <AllUsers />
+                    <UserManagement />
                   </ProtectedRoute>
                 } />
                 <Route path="system-reports" element={

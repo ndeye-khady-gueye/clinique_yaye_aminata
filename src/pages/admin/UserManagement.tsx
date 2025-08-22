@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +25,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -47,16 +47,21 @@ import {
   UserX,
   Mail,
   Phone,
-  Calendar
+  Calendar,
+  ArrowLeft
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { adminApi, User as UserType } from '@/services/adminApi';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import UserForm from '@/components/forms/UserForm';
 
 type User = UserType;
 
-const AllUsers = () => {
+const UserManagement = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -64,21 +69,7 @@ const AllUsers = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  
-  // État pour le formulaire de création
-  const [newUser, setNewUser] = useState({
-    username: '',
-    email: '',
-    first_name: '',
-    last_name: '',
-    phone: '',
-    role: 'patient',
-    password: '',
-    password_confirm: '',
-    is_active: true
-  });
-
-  const queryClient = useQueryClient();
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
   // Charger les utilisateurs depuis l'API
   const { data: users = [], isLoading, error } = useQuery({
@@ -86,6 +77,11 @@ const AllUsers = () => {
     queryFn: adminApi.getAllUsers,
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
+
+  // Debug: Afficher les informations de débogage
+  console.log('UserManagement - users:', users);
+  console.log('UserManagement - isLoading:', isLoading);
+  console.log('UserManagement - error:', error);
 
   // Mutation pour supprimer un utilisateur
   const deleteUserMutation = useMutation({
@@ -97,6 +93,7 @@ const AllUsers = () => {
         variant: "default",
       });
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['userStats'] });
     },
     onError: (error) => {
       toast({
@@ -117,6 +114,7 @@ const AllUsers = () => {
         variant: "default",
       });
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['userStats'] });
     },
     onError: (error) => {
       toast({
@@ -137,33 +135,45 @@ const AllUsers = () => {
         variant: "default",
       });
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['userStats'] });
       setIsCreateDialogOpen(false);
-      // Réinitialiser le formulaire
-      setNewUser({
-        username: '',
-        email: '',
-        first_name: '',
-        last_name: '',
-        phone: '',
-        role: 'patient',
-        password: '',
-        password_confirm: '',
-        is_active: true
-      });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Erreur",
-        description: "Impossible de créer l'utilisateur.",
+        description: error.response?.data?.message || "Impossible de créer l'utilisateur.",
         variant: "destructive",
       });
     }
   });
 
-  useEffect(() => {
+  // Mutation pour mettre à jour un utilisateur
+  const updateUserMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => adminApi.updateUser(id, data),
+    onSuccess: () => {
+      toast({
+        title: "Utilisateur mis à jour",
+        description: "Les modifications ont été enregistrées avec succès.",
+        variant: "default",
+      });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['userStats'] });
+      setIsEditDialogOpen(false);
+      setSelectedUser(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description: error.response?.data?.message || "Impossible de mettre à jour l'utilisateur.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Filtrer les utilisateurs
+  React.useEffect(() => {
     let filtered = users;
 
-    // Filtre par recherche
     if (searchTerm) {
       filtered = filtered.filter(user =>
         user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -173,12 +183,10 @@ const AllUsers = () => {
       );
     }
 
-    // Filtre par rôle
     if (roleFilter !== 'all') {
       filtered = filtered.filter(user => user.role === roleFilter);
     }
 
-    // Filtre par statut
     if (statusFilter !== 'all') {
       const isActive = statusFilter === 'active';
       filtered = filtered.filter(user => user.is_active === isActive);
@@ -189,15 +197,15 @@ const AllUsers = () => {
 
   const getRoleBadge = (role: string) => {
     const roleConfig = {
-      admin: { label: 'Administrateur', variant: 'destructive' as const },
-      responsable_cabinet: { label: 'Responsable', variant: 'default' as const },
-      doctor: { label: 'Docteur', variant: 'secondary' as const },
-      receptionist: { label: 'Réceptionniste', variant: 'outline' as const },
-      patient: { label: 'Patient', variant: 'secondary' as const }
+      admin: { label: 'Administrateur', variant: 'destructive' as const, color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
+      responsable_cabinet: { label: 'Responsable', variant: 'default' as const, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
+      doctor: { label: 'Docteur', variant: 'secondary' as const, color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
+      receptionist: { label: 'Réceptionniste', variant: 'outline' as const, color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
+      patient: { label: 'Patient', variant: 'secondary' as const, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }
     };
     
     const config = roleConfig[role as keyof typeof roleConfig];
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    return <Badge className={config.color}>{config.label}</Badge>;
   };
 
   const getInitials = (firstName: string, lastName: string) => {
@@ -209,41 +217,19 @@ const AllUsers = () => {
   };
 
   const handleDeleteUser = async (userId: number) => {
-    deleteUserMutation.mutate(userId);
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+      deleteUserMutation.mutate(userId);
+    }
   };
 
-  const handleCreateUser = async () => {
-    if (newUser.password !== newUser.password_confirm) {
-      toast({
-        title: "Erreur",
-        description: "Les mots de passe ne correspondent pas.",
-        variant: "destructive",
-      });
-      return;
+  const handleCreateUser = async (data: any) => {
+    await createUserMutation.mutateAsync(data);
+  };
+
+  const handleUpdateUser = async (data: any) => {
+    if (selectedUser) {
+      await updateUserMutation.mutateAsync({ id: selectedUser.id, data });
     }
-
-    if (newUser.password.length < 8) {
-      toast({
-        title: "Erreur",
-        description: "Le mot de passe doit contenir au moins 8 caractères.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const userData = {
-      username: newUser.username,
-      email: newUser.email,
-      first_name: newUser.first_name,
-      last_name: newUser.last_name,
-      phone: newUser.phone,
-      role: newUser.role,
-      password: newUser.password,
-      password_confirm: newUser.password_confirm,
-      is_active: newUser.is_active
-    };
-
-    createUserMutation.mutate(userData);
   };
 
   const stats = {
@@ -267,14 +253,47 @@ const AllUsers = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-red-600 mb-2">Erreur lors du chargement</h3>
+          <p className="text-muted-foreground mb-4">
+            Impossible de charger les utilisateurs. Veuillez vérifier votre connexion.
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            Réessayer
+          </Button>
+          <div className="mt-4 p-4 bg-gray-100 rounded text-sm">
+            <strong>Détails de l'erreur:</strong>
+            <pre className="mt-2 text-xs overflow-auto">
+              {JSON.stringify(error, null, 2)}
+            </pre>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* En-tête */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gestion des Utilisateurs</h1>
-          <p className="text-muted-foreground">
-            Gérez tous les utilisateurs du système
-          </p>
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/dashboard')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour au Dashboard
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Gestion des Utilisateurs</h1>
+            <p className="text-muted-foreground">
+              Gérez tous les utilisateurs du système avec une interface moderne
+            </p>
+          </div>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
@@ -283,135 +302,18 @@ const AllUsers = () => {
               Nouvel Utilisateur
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Créer un nouvel utilisateur</DialogTitle>
               <DialogDescription>
-                Ajoutez un nouvel utilisateur au système
+                Ajoutez un nouvel utilisateur au système avec toutes les informations nécessaires
               </DialogDescription>
             </DialogHeader>
-            
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="username">Nom d'utilisateur *</Label>
-                  <Input
-                    id="username"
-                    value={newUser.username}
-                    onChange={(e) => setNewUser({...newUser, username: e.target.value})}
-                    placeholder="nom_utilisateur"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={newUser.email}
-                    onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                    placeholder="email@exemple.com"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="first_name">Prénom *</Label>
-                  <Input
-                    id="first_name"
-                    value={newUser.first_name}
-                    onChange={(e) => setNewUser({...newUser, first_name: e.target.value})}
-                    placeholder="Prénom"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="last_name">Nom *</Label>
-                  <Input
-                    id="last_name"
-                    value={newUser.last_name}
-                    onChange={(e) => setNewUser({...newUser, last_name: e.target.value})}
-                    placeholder="Nom"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Téléphone</Label>
-                  <Input
-                    id="phone"
-                    value={newUser.phone}
-                    onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
-                    placeholder="+221 77 123 45 67"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Rôle *</Label>
-                  <Select value={newUser.role} onValueChange={(value) => setNewUser({...newUser, role: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner un rôle" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">Administrateur Système</SelectItem>
-                      <SelectItem value="responsable_cabinet">Responsable Cabinet</SelectItem>
-                      <SelectItem value="doctor">Docteur</SelectItem>
-                      <SelectItem value="receptionist">Réceptionniste</SelectItem>
-                      <SelectItem value="patient">Patient</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password">Mot de passe *</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={newUser.password}
-                    onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-                    placeholder="Mot de passe"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password_confirm">Confirmer le mot de passe *</Label>
-                  <Input
-                    id="password_confirm"
-                    type="password"
-                    value={newUser.password_confirm}
-                    onChange={(e) => setNewUser({...newUser, password_confirm: e.target.value})}
-                    placeholder="Confirmer le mot de passe"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="is_active"
-                  checked={newUser.is_active}
-                  onCheckedChange={(checked) => setNewUser({...newUser, is_active: checked})}
-                />
-                <Label htmlFor="is_active">Utilisateur actif</Label>
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                Annuler
-              </Button>
-              <Button 
-                onClick={handleCreateUser}
-                disabled={createUserMutation.isPending}
-              >
-                {createUserMutation.isPending ? 'Création...' : 'Créer'}
-              </Button>
-            </DialogFooter>
+            <UserForm
+              onSubmit={handleCreateUser}
+              onCancel={() => setIsCreateDialogOpen(false)}
+              isLoading={createUserMutation.isPending}
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -506,7 +408,15 @@ const AllUsers = () => {
               </Select>
             </div>
             <div className="flex items-end">
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  setSearchTerm('');
+                  setRoleFilter('all');
+                  setStatusFilter('all');
+                }}
+              >
                 <Filter className="h-4 w-4 mr-2" />
                 Réinitialiser
               </Button>
@@ -578,6 +488,7 @@ const AllUsers = () => {
                       <Switch
                         checked={user.is_active}
                         onCheckedChange={() => handleToggleStatus(user.id)}
+                        disabled={toggleUserStatusMutation.isPending}
                       />
                       <Badge variant={user.is_active ? 'default' : 'secondary'}>
                         {user.is_active ? 'Actif' : 'Inactif'}
@@ -599,7 +510,10 @@ const AllUsers = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => setSelectedUser(user)}>
+                        <DropdownMenuItem onClick={() => {
+                          setSelectedUser(user);
+                          setIsViewDialogOpen(true);
+                        }}>
                           <Eye className="h-4 w-4 mr-2" />
                           Voir détails
                         </DropdownMenuItem>
@@ -628,8 +542,31 @@ const AllUsers = () => {
         </CardContent>
       </Card>
 
-      {/* Dialog de détails utilisateur */}
-      <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+      {/* Dialog de modification */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Modifier l'utilisateur</DialogTitle>
+            <DialogDescription>
+              Modifiez les informations de l'utilisateur sélectionné
+            </DialogDescription>
+          </DialogHeader>
+          {selectedUser && (
+            <UserForm
+              user={selectedUser}
+              onSubmit={handleUpdateUser}
+              onCancel={() => {
+                setIsEditDialogOpen(false);
+                setSelectedUser(null);
+              }}
+              isLoading={updateUserMutation.isPending}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de détails */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Détails de l'utilisateur</DialogTitle>
@@ -682,4 +619,4 @@ const AllUsers = () => {
   );
 };
 
-export default AllUsers;
+export default UserManagement;

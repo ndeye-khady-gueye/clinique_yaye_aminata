@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserCreateSerializer(serializers.ModelSerializer):
     """Sérialiseur pour la création d'utilisateurs"""
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True)
     
     class Meta:
@@ -32,15 +32,87 @@ class UserCreateSerializer(serializers.ModelSerializer):
         if User.objects.filter(username=attrs['username']).exists():
             raise serializers.ValidationError("Ce nom d'utilisateur est déjà pris")
         
+        # Validation du mot de passe
+        password = attrs['password']
+        if len(password) < 8:
+            raise serializers.ValidationError("Le mot de passe doit contenir au moins 8 caractères")
+        
+        # Vérifier la complexité du mot de passe
+        if not any(c.isupper() for c in password):
+            raise serializers.ValidationError("Le mot de passe doit contenir au moins une lettre majuscule")
+        if not any(c.islower() for c in password):
+            raise serializers.ValidationError("Le mot de passe doit contenir au moins une lettre minuscule")
+        if not any(c.isdigit() for c in password):
+            raise serializers.ValidationError("Le mot de passe doit contenir au moins un chiffre")
+        
         return attrs
     
     def create(self, validated_data):
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
+        
+        # Créer l'utilisateur avec is_active=True par défaut
+        validated_data.setdefault('is_active', True)
+        
         user = User(**validated_data)
+        # Hashage sécurisé du mot de passe
         user.set_password(password)
         user.save()
+        
         return user
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    """Sérialiseur pour la mise à jour d'utilisateurs"""
+    password = serializers.CharField(write_only=True, required=False, min_length=8)
+    password_confirm = serializers.CharField(write_only=True, required=False)
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'role', 'phone', 'speciality', 'password', 'password_confirm', 'is_active']
+        read_only_fields = ['username']  # Le nom d'utilisateur ne peut pas être modifié
+    
+    def validate(self, attrs):
+        # Vérifier les mots de passe seulement s'ils sont fournis
+        if 'password' in attrs and 'password_confirm' in attrs:
+            if attrs['password'] != attrs['password_confirm']:
+                raise serializers.ValidationError("Les mots de passe ne correspondent pas")
+            
+            # Validation du mot de passe
+            password = attrs['password']
+            if len(password) < 8:
+                raise serializers.ValidationError("Le mot de passe doit contenir au moins 8 caractères")
+            
+            # Vérifier la complexité du mot de passe
+            if not any(c.isupper() for c in password):
+                raise serializers.ValidationError("Le mot de passe doit contenir au moins une lettre majuscule")
+            if not any(c.islower() for c in password):
+                raise serializers.ValidationError("Le mot de passe doit contenir au moins une lettre minuscule")
+            if not any(c.isdigit() for c in password):
+                raise serializers.ValidationError("Le mot de passe doit contenir au moins un chiffre")
+        
+        # Vérifier que l'email n'existe pas déjà (sauf pour l'utilisateur actuel)
+        if 'email' in attrs:
+            user_id = self.instance.id if self.instance else None
+            if User.objects.filter(email=attrs['email']).exclude(id=user_id).exists():
+                raise serializers.ValidationError("Un utilisateur avec cet email existe déjà")
+        
+        return attrs
+    
+    def update(self, instance, validated_data):
+        # Gérer le mot de passe séparément
+        password = validated_data.pop('password', None)
+        validated_data.pop('password_confirm', None)
+        
+        # Mettre à jour les autres champs
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        # Mettre à jour le mot de passe si fourni
+        if password:
+            instance.set_password(password)
+        
+        instance.save()
+        return instance
 
 class RegisterSerializer(serializers.ModelSerializer):
     """Sérialiseur pour l'inscription publique (patients uniquement)"""

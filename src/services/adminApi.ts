@@ -156,8 +156,27 @@ class AdminApiService {
 
   // Gestion des utilisateurs
   async getAllUsers(): Promise<User[]> {
-    const response = await api.get('/users/');
-    return response.data.results || response.data;
+    let allUsers: User[] = [];
+    let page = 1;
+    let hasNextPage = true;
+
+    while (hasNextPage) {
+      const response = await api.get(`/users/?page=${page}`);
+      const data = response.data;
+      
+      if (data.results) {
+        // Pagination activée
+        allUsers = [...allUsers, ...data.results];
+        hasNextPage = !!data.next; // data.next contient l'URL de la page suivante
+        page++;
+      } else {
+        // Pas de pagination
+        allUsers = data;
+        hasNextPage = false;
+      }
+    }
+
+    return allUsers;
   }
 
   async getUserById(id: number): Promise<User> {

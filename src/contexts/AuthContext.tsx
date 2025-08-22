@@ -29,19 +29,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Charger l’utilisateur depuis le localStorage au démarrage
+  // Charger l'utilisateur depuis le localStorage au démarrage
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     const userData = localStorage.getItem('userData');
     
+    console.log('AuthContext - Token:', token ? 'Present' : 'Absent');
+    console.log('AuthContext - UserData:', userData ? 'Present' : 'Absent');
+    
     if (token && userData) {
       try {
-        setUser(JSON.parse(userData));
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        console.log('AuthContext - User loaded:', parsedUser);
+        
+        // Vérifier si le token est encore valide en testant l'API
+        apiService.getCurrentUser().then(() => {
+          console.log('AuthContext - Token valide, utilisateur connecté');
+        }).catch((error) => {
+          console.log('AuthContext - Token expiré, déconnexion automatique:', error);
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('userData');
+          setUser(null);
+        });
       } catch (error) {
+        console.error('AuthContext - Erreur lors du chargement des données utilisateur:', error);
         localStorage.removeItem('authToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('userData');
       }
+    } else {
+      console.log('AuthContext - Aucun token ou données utilisateur trouvés');
     }
     setIsLoading(false);
   }, []);
