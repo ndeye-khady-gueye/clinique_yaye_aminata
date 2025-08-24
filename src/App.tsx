@@ -14,7 +14,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
-import Appointments from "./pages/Appointments";
+import RendezVousManagement from "./pages/admin/RendezVousManagement";
 import Users from "./pages/Users";
 import Reports from "./pages/Reports";
 import MyAppointments from "./pages/MyAppointments";
@@ -23,6 +23,8 @@ import Profile from "./pages/Profile";
 import SystemConfig from "./pages/admin/SystemConfig";
 import UserManagement from "./pages/admin/UserManagement";
 import SystemReports from "./pages/admin/SystemReports";
+import ContactManagement from "./pages/admin/ContactManagement";
+import TeamManagement from "./pages/TeamManagement";
 
 const queryClient = new QueryClient();
 
@@ -67,17 +69,29 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 
+                <Route path="admin/contacts" element={
+                  <ProtectedRoute allowedRoles={['admin', 'responsable_cabinet']}>
+                    <ContactManagement />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="admin/rendez-vous" element={
+                  <ProtectedRoute allowedRoles={['admin', 'responsable_cabinet']}>
+                    <RendezVousManagement />
+                  </ProtectedRoute>
+                } />
+                
                 {/* Routes responsable cabinet et réceptionniste */}
                 <Route path="appointments" element={
-                  <ProtectedRoute allowedRoles={['responsable_cabinet', 'receptionist']}>
-                    <Appointments />
+                  <ProtectedRoute allowedRoles={['responsable_cabinet', 'receptionist', 'admin']}>
+                    <RendezVousManagement />
                   </ProtectedRoute>
                 } />
                 
                 {/* Routes responsable cabinet uniquement */}
                 <Route path="users" element={
                   <ProtectedRoute allowedRoles={['responsable_cabinet']}>
-                    <Users />
+                    <TeamManagement />
                   </ProtectedRoute>
                 } />
                 <Route path="reports" element={

@@ -59,13 +59,15 @@ interface UserFormProps {
   onSubmit: (data: UserFormData) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
+  allowedRoles?: string[]; // Rôles autorisés pour la création/modification
 }
 
 const UserForm: React.FC<UserFormProps> = ({ 
   user, 
   onSubmit, 
   onCancel, 
-  isLoading = false 
+  isLoading = false,
+  allowedRoles 
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -340,36 +342,46 @@ const UserForm: React.FC<UserFormProps> = ({
               <SelectValue placeholder="Sélectionner un rôle" />
             </SelectTrigger>
             <SelectContent>
-                  <SelectItem value="admin">
-                    <div className="flex items-center space-x-2">
-                      <Shield className="h-4 w-4" />
-                      <span>Administrateur Système</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="responsable_cabinet">
-                    <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4" />
-                      <span>Responsable Cabinet</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="doctor">
-                    <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4" />
-                      <span>Docteur</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="receptionist">
-                    <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4" />
-                      <span>Réceptionniste</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="patient">
-                    <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4" />
-                      <span>Patient</span>
-                    </div>
-                  </SelectItem>
+                  {(!allowedRoles || allowedRoles.includes('admin')) && (
+                    <SelectItem value="admin">
+                      <div className="flex items-center space-x-2">
+                        <Shield className="h-4 w-4" />
+                        <span>Administrateur Système</span>
+                      </div>
+                    </SelectItem>
+                  )}
+                  {(!allowedRoles || allowedRoles.includes('responsable_cabinet')) && (
+                    <SelectItem value="responsable_cabinet">
+                      <div className="flex items-center space-x-2">
+                        <User className="h-4 w-4" />
+                        <span>Responsable Cabinet</span>
+                      </div>
+                    </SelectItem>
+                  )}
+                  {(!allowedRoles || allowedRoles.includes('doctor')) && (
+                    <SelectItem value="doctor">
+                      <div className="flex items-center space-x-2">
+                        <User className="h-4 w-4" />
+                        <span>Docteur</span>
+                      </div>
+                    </SelectItem>
+                  )}
+                  {(!allowedRoles || allowedRoles.includes('receptionist')) && (
+                    <SelectItem value="receptionist">
+                      <div className="flex items-center space-x-2">
+                        <User className="h-4 w-4" />
+                        <span>Réceptionniste</span>
+                      </div>
+                    </SelectItem>
+                  )}
+                  {(!allowedRoles || allowedRoles.includes('patient')) && (
+                    <SelectItem value="patient">
+                      <div className="flex items-center space-x-2">
+                        <User className="h-4 w-4" />
+                        <span>Patient</span>
+                      </div>
+                    </SelectItem>
+                  )}
             </SelectContent>
           </Select>
               {errors.role && (

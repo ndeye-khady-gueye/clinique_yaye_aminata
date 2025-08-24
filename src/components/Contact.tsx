@@ -1,17 +1,18 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, Mail, MapPin } from "lucide-react";
 import { useState, useEffect } from "react";
+import { toast } from "@/hooks/use-toast";
+import { contactApi } from "@/services/api";
 
 const Contact = () => {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [displayText, setDisplayText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showCursor, setShowCursor] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const fullText = "Contactez-nous";
   
@@ -19,14 +20,16 @@ const Contact = () => {
     nom: "",
     email: "",
     sujet: "",
-    message: ""
+    message: "",
+    date_heure_souhaitee: ""
   });
 
   const [errors, setErrors] = useState({
     nom: "",
     email: "",
     sujet: "",
-    message: ""
+    message: "",
+    date_heure_souhaitee: ""
   });
 
   // Animation de type curseur pour le titre
@@ -68,7 +71,8 @@ const Contact = () => {
       nom: "",
       email: "",
       sujet: "",
-      message: ""
+      message: "",
+      date_heure_souhaitee: ""
     };
 
     // Validation du nom (3-20 caractères)
@@ -98,37 +102,93 @@ const Contact = () => {
       newErrors.message = "Le message est requis";
     }
 
+    // Validation de la date et heure (optionnelle)
+    if (formData.date_heure_souhaitee) {
+      const selectedDate = new Date(formData.date_heure_souhaitee);
+      const now = new Date();
+      if (selectedDate <= now) {
+        newErrors.date_heure_souhaitee = "La date et heure doivent être dans le futur";
+      }
+    }
+
     setErrors(newErrors);
     return Object.values(newErrors).every(error => error === "");
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) {
       return;
     }
 
-    console.log("Formulaire envoyé:", formData);
+    setIsSubmitting(true);
 
-    // Afficher le message de succès
-    setShowSuccessMessage(true);
-    
-    // Masquer le message après 5 secondes
-    setTimeout(() => {
-      setShowSuccessMessage(false);
-    }, 5000);
+    try {
+      await contactApi.createMessage({
+        nom: formData.nom,
+        email: formData.email,
+        sujet: formData.sujet,
+        message: formData.message,
+        date_heure_souhaitee: formData.date_heure_souhaitee || null
+      });
 
-    setFormData({
-      nom: "",
-      email: "",
-      sujet: "",
-      message: ""
-    });
-    setErrors({
-      nom: "",
-      email: "",
-      sujet: "",
-      message: ""
-    });
+      toast({
+        title: "Succès",
+        description: "Votre demande de rendez-vous a été envoyée avec succès. Nous vous contacterons pour confirmer.",
+      });
+
+      // Afficher le message de succès
+      setShowSuccessMessage(true);
+      
+      // Masquer le message après 5 secondes
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+
+      // Réinitialiser le formulaire
+      setFormData({
+        nom: "",
+        email: "",
+        sujet: "",
+        message: "",
+        date_heure_souhaitee: ""
+      });
+      setErrors({
+        nom: "",
+        email: "",
+        sujet: "",
+        message: "",
+        date_heure_souhaitee: ""
+      });
+    } catch (error: any) {
+      console.error('Erreur lors de l\'envoi:', error);
+      
+      // Gérer les erreurs de validation du backend
+      if (error.message) {
+        if (error.message.includes('nom')) {
+          setErrors(prev => ({ ...prev, nom: error.message }));
+        }
+        if (error.message.includes('email')) {
+          setErrors(prev => ({ ...prev, email: error.message }));
+        }
+        if (error.message.includes('sujet')) {
+          setErrors(prev => ({ ...prev, sujet: error.message }));
+        }
+        if (error.message.includes('message')) {
+          setErrors(prev => ({ ...prev, message: error.message }));
+        }
+        if (error.message.includes('date_heure_souhaitee')) {
+          setErrors(prev => ({ ...prev, date_heure_souhaitee: error.message }));
+        }
+      }
+
+      toast({
+        title: "Erreur",
+        description: "Une erreur s'est produite lors de l'envoi du message. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const services = [
@@ -226,6 +286,25 @@ const Contact = () => {
                   </div>
 
                   <div>
+                    <Input
+                      id="date_heure_souhaitee"
+                      type="datetime-local"
+                      placeholder="Date et heure souhaitée (optionnel)"
+                      value={formData.date_heure_souhaitee}
+                      onChange={(e) => handleInputChange("date_heure_souhaitee", e.target.value)}
+                      className={`h-14 text-lg border-2 ${
+                        errors.date_heure_souhaitee ? 'border-red-500' : 'border-gray-200'
+                      } focus:border-primary rounded-lg`}
+                    />
+                    {errors.date_heure_souhaitee && (
+                      <p className="text-red-500 text-sm mt-2">{errors.date_heure_souhaitee}</p>
+                    )}
+                    <p className="text-gray-500 text-sm mt-1">
+                      Si vous souhaitez un rendez-vous, indiquez une date et heure préférée
+                    </p>
+                  </div>
+
+                  <div>
                     <Textarea
                       id="message"
                       placeholder="Votre message"
@@ -243,9 +322,10 @@ const Contact = () => {
 
                   <Button
                     onClick={handleSubmit}
-                    className="w-full h-14 bg-gradient-clinic hover:opacity-90 text-white text-lg font-semibold rounded-lg transition-all duration-300"
+                    disabled={isSubmitting}
+                    className="w-full h-14 bg-gradient-clinic hover:opacity-90 text-white text-lg font-semibold rounded-lg transition-all duration-300 disabled:opacity-50"
                   >
-                    Envoyer
+                    {isSubmitting ? "Envoi en cours..." : "Envoyer"}
                   </Button>
                 </div>
               </CardContent>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import AppointmentForm from '@/components/forms/AppointmentForm';
 import DetailsModal from '@/components/modals/DetailsModal';
 import PDFExportForm from '@/components/forms/PDFExportForm';
+import { rdvResponsableApi } from '@/services/api';
+import { toast } from '@/hooks/use-toast';
 
 const Appointments = () => {
   const { user } = useAuth();
@@ -21,85 +23,95 @@ const Appointments = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isPDFExportOpen, setIsPDFExportOpen] = useState(false);
   const [formData, setFormData] = useState<any>(null);
-  const [appointments, setAppointments] = useState([
-    {
-      id: 1,
-      patient: 'Aminata Sy',
-      doctor: 'Dr. Fatou Diop',
-      speciality: 'Cardiologie',
-      date: '2024-01-15',
-      time: '09:00',
-      status: 'confirmed',
-      notes: 'Consultation de suivi',
-      phone: '+221 77 123 45 67',
-      email: 'aminata.sy@email.com'
-    },
-    {
-      id: 2,
-      patient: 'Moussa Kane',
-      doctor: 'Dr. Aminata Fall',
-      speciality: 'Généraliste',
-      date: '2024-01-15',
-      time: '10:30',
-      status: 'completed',
-      notes: 'Consultation générale',
-      phone: '+221 77 234 56 78',
-      email: 'moussa.kane@email.com'
-    },
-    {
-      id: 3,
-      patient: 'Fatoumata Diallo',
-      doctor: 'Dr. Fatou Diop',
-      speciality: 'Cardiologie',
-      date: '2024-01-16',
-      time: '14:00',
-      status: 'pending',
-      notes: 'Premier rendez-vous',
-      phone: '+221 77 345 67 89',
-      email: 'fatoumata.diallo@email.com'
-    }
-  ]);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'confirme': return 'bg-blue-100 text-blue-800';
+      case 'realise': return 'bg-green-100 text-green-800';
+      case 'en_attente': return 'bg-yellow-100 text-yellow-800';
+      case 'annule': return 'bg-red-100 text-red-800';
+      case 'assigne': return 'bg-purple-100 text-purple-800';
+      case 'absent': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'Confirmé';
-      case 'completed': return 'Terminé';
-      case 'pending': return 'En attente';
-      case 'cancelled': return 'Annulé';
+      case 'confirme': return 'Confirmé';
+      case 'realise': return 'Terminé';
+      case 'en_attente': return 'En attente';
+      case 'annule': return 'Annulé';
+      case 'assigne': return 'Assigné';
+      case 'absent': return 'Absent';
       default: return status;
     }
   };
 
   const filteredAppointments = appointments.filter(appointment => {
-    const matchesSearch = appointment.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         appointment.doctor.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || appointment.status === filterStatus;
-    const matchesDate = !filterDate || appointment.date === filterDate;
+    const patientName = appointment.patient?.user?.first_name + ' ' + appointment.patient?.user?.last_name || 
+                       appointment.client_nom || '';
+    const doctorName = appointment.docteur?.first_name + ' ' + appointment.docteur?.last_name || '';
+    
+    const matchesSearch = patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         appointment.service?.nom?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || appointment.statut === filterStatus;
+    const matchesDate = !filterDate || appointment.date_confirmee?.startsWith(filterDate) || 
+                       appointment.date_souhaitee?.startsWith(filterDate);
     return matchesSearch && matchesStatus && matchesDate;
   });
 
   const canModifyAppointments = user?.role === 'admin' || user?.role === 'receptionist';
   const canSeeAllAppointments = user?.role === 'admin' || user?.role === 'receptionist';
 
-  const handleCreateAppointment = (data: any) => {
-    const newAppointment = {
-      id: appointments.length + 1,
-      ...data,
-      status: 'confirmed'
-    };
-    setAppointments([...appointments, newAppointment]);
-    setIsFormOpen(false);
-    console.log('Nouveau rendez-vous créé:', newAppointment);
+  // Charger les vraies données depuis l'API
+  useEffect(() => {
+    loadAppointments();
+  }, []);
+
+  const loadAppointments = async () => {
+    try {
+      setLoading(true);
+      const data = await rdvResponsableApi.getAllRendezVous();
+      setAppointments(data);
+    } catch (error) {
+      console.error('Erreur lors du chargement des rendez-vous:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les rendez-vous",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateAppointment = async (data: any) => {
+    try {
+      // Utiliser l'API pour créer un rendez-vous
+      await rdvResponsableApi.confirmerRendezVous({
+        rendez_vous_id: data.id,
+        date_confirmee: data.date_confirmee,
+        notes: data.notes,
+      });
+      
+      toast({
+        title: "Succès",
+        description: "Rendez-vous créé avec succès",
+      });
+      
+      setIsFormOpen(false);
+      loadAppointments(); // Recharger les données
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la création",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEditAppointment = (appointment: any) => {
@@ -196,10 +208,12 @@ const Appointments = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les statuts</SelectItem>
-                <SelectItem value="confirmed">Confirmé</SelectItem>
-                <SelectItem value="completed">Terminé</SelectItem>
-                <SelectItem value="pending">En attente</SelectItem>
-                <SelectItem value="cancelled">Annulé</SelectItem>
+                <SelectItem value="confirme">Confirmé</SelectItem>
+                <SelectItem value="realise">Terminé</SelectItem>
+                <SelectItem value="en_attente">En attente</SelectItem>
+                <SelectItem value="annule">Annulé</SelectItem>
+                <SelectItem value="assigne">Assigné</SelectItem>
+                <SelectItem value="absent">Absent</SelectItem>
               </SelectContent>
             </Select>
             <Input
@@ -237,7 +251,12 @@ const Appointments = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
+          {loading ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="text-lg">Chargement des rendez-vous...</div>
+            </div>
+          ) : (
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Patient</TableHead>
@@ -249,31 +268,36 @@ const Appointments = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAppointments.map((appointment) => (
-                <TableRow key={appointment.id}>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4 text-gray-400" />
-                      <span className="font-medium">{appointment.patient}</span>
-                    </div>
-                  </TableCell>
-                  {canSeeAllAppointments && (
-                    <TableCell>{appointment.doctor}</TableCell>
-                  )}
-                  <TableCell>{appointment.speciality}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="h-4 w-4 text-gray-400" />
-                      <span>{appointment.date}</span>
-                      <Clock className="h-4 w-4 text-gray-400" />
-                      <span>{appointment.time}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(appointment.status)}`}>
-                      {getStatusText(appointment.status)}
-                    </span>
-                  </TableCell>
+              {filteredAppointments.map((appointment) => {
+                const patientName = appointment.patient?.user?.first_name + ' ' + appointment.patient?.user?.last_name || 
+                                   appointment.client_nom || 'N/A';
+                const doctorName = appointment.docteur?.first_name + ' ' + appointment.docteur?.last_name || 'Non assigné';
+                const dateTime = appointment.date_confirmee || appointment.date_souhaitee || 'N/A';
+                const formattedDateTime = dateTime !== 'N/A' ? new Date(dateTime).toLocaleString('fr-FR') : 'N/A';
+                
+                return (
+                  <TableRow key={appointment.id}>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <User className="h-4 w-4 text-gray-400" />
+                        <span className="font-medium">{patientName}</span>
+                      </div>
+                    </TableCell>
+                    {canSeeAllAppointments && (
+                      <TableCell>{doctorName}</TableCell>
+                    )}
+                    <TableCell>{appointment.service?.nom || 'N/A'}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="h-4 w-4 text-gray-400" />
+                        <span>{formattedDateTime}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(appointment.statut)}`}>
+                        {getStatusText(appointment.statut)}
+                      </span>
+                    </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
                       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
@@ -309,9 +333,11 @@ const Appointments = () => {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              );
+            })}
             </TableBody>
           </Table>
+          )}
         </CardContent>
       </Card>
     </div>

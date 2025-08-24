@@ -2,12 +2,15 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, UserCheck, Activity, Shield, UserX } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Users, Calendar, UserCheck, Activity, Shield, UserX, Mail, Settings, BarChart3, Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '@/services/adminApi';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Récupérer les vraies données depuis l'API
   const { data: userStats, isLoading: statsLoading } = useQuery({
@@ -136,6 +139,49 @@ const AdminDashboard = () => {
       )}
 
       {/* Actions rapides */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Actions Rapides</CardTitle>
+          <CardDescription>Accès rapide aux fonctionnalités principales</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col items-center justify-center space-y-2"
+              onClick={() => navigate('/admin/contacts')}
+            >
+              <Mail className="h-6 w-6" />
+              <span>Messages de Contact</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col items-center justify-center space-y-2"
+              onClick={() => navigate('/admin/rendez-vous')}
+            >
+              <Clock className="h-6 w-6" />
+              <span>Gestion RDV</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col items-center justify-center space-y-2"
+              onClick={() => navigate('/admin/config')}
+            >
+              <Settings className="h-6 w-6" />
+              <span>Configuration</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col items-center justify-center space-y-2"
+              onClick={() => navigate('/admin/reports')}
+            >
+              <BarChart3 className="h-6 w-6" />
+              <span>Rapports</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>

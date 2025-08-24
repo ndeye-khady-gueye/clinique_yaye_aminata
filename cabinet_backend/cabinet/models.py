@@ -94,30 +94,58 @@ class RendezVous(models.Model):
     STATUT_CHOICES = [
         ('en_attente', 'En attente'),
         ('confirme', 'Confirmé'),
+        ('assigne', 'Assigné à un médecin'),
+        ('realise', 'Réalisé'),
         ('annule', 'Annulé'),
-        ('termine', 'Terminé'),
         ('absent', 'Absent'),
     ]
     
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='rendez_vous')
-    docteur = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rdv_docteur', limit_choices_to={'role': 'doctor'})
+    # Champs pour les patients avec compte
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='rendez_vous', null=True, blank=True)
+    
+    # Champs pour les clients/visiteurs sans compte
+    client_nom = models.CharField(max_length=100, blank=True, null=True)
+    client_email = models.EmailField(blank=True, null=True)
+    client_telephone = models.CharField(max_length=15, blank=True, null=True)
+    
+    # Champs communs
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
-    date_rdv = models.DateField()
-    heure_rdv = models.TimeField()
-    motif = models.TextField()
+    message = models.TextField(blank=True, null=True)
+    date_souhaitee = models.DateTimeField(blank=True, null=True)
+    date_confirmee = models.DateTimeField(blank=True, null=True)
+    docteur = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rdv_docteur', limit_choices_to={'role': 'doctor'}, null=True, blank=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='en_attente')
     notes = models.TextField(blank=True, null=True)
-    prix_consultation = models.DecimalField(max_digits=10, decimal_places=2)
+    prix_consultation = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         verbose_name = "Rendez-vous"
         verbose_name_plural = "Rendez-vous"
-        ordering = ['-date_rdv', '-heure_rdv']
+        ordering = ['-created_at']
+    
+    def clean(self):
+        """Validation personnalisée"""
+        from django.core.exceptions import ValidationError
+        
+        # Vérifier qu'on a soit un patient soit les informations client
+        if not self.patient and not (self.client_nom and (self.client_email or self.client_telephone)):
+            raise ValidationError("Vous devez fournir soit un patient soit les informations client (nom + email ou téléphone)")
+        
+        # Si on a un patient, ne pas avoir les champs client
+        if self.patient and (self.client_nom or self.client_email or self.client_telephone):
+            raise ValidationError("Un rendez-vous ne peut pas avoir à la fois un patient et des informations client")
+    
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
     
     def __str__(self):
-        return f"RDV {self.patient} - {self.docteur} - {self.date_rdv}"
+        if self.patient:
+            return f"RDV {self.patient} - {self.service} - {self.date_confirmee or self.date_souhaitee}"
+        else:
+            return f"RDV {self.client_nom} - {self.service} - {self.date_confirmee or self.date_souhaitee}"
 
 class Consultation(models.Model):
     """Modèle pour les consultations"""
@@ -207,3 +235,34 @@ class DossierMedical(models.Model):
     
     def __str__(self):
         return f"Dossier {self.numero_dossier} - {self.patient}"
+
+class Contact(models.Model):
+    """Modèle pour les messages de contact"""
+    
+    nom = models.CharField(max_length=100, verbose_name="Nom et prénom")
+    email = models.CharField(max_length=100, verbose_name="Email ou téléphone")
+    sujet = models.CharField(max_length=200, verbose_name="Sujet")
+    message = models.TextField(verbose_name="Message")
+    date_heure_souhaitee = models.DateTimeField(blank=True, null=True, verbose_name="Date et heure souhaitée")
+    statut = models.CharField(
+        max_length=20, 
+        choices=[
+            ('nouveau', 'Nouveau'),
+            ('lu', 'Lu'),
+            ('repondu', 'Répondu'),
+            ('traite', 'Traité'),
+        ],
+        default='nouveau',
+        verbose_name="Statut"
+    )
+    notes_admin = models.TextField(blank=True, null=True, verbose_name="Notes administrateur")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Date de modification")
+    
+    class Meta:
+        verbose_name = "Message de contact"
+        verbose_name_plural = "Messages de contact"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Message de {self.nom} - {self.sujet} ({self.created_at.strftime('%d/%m/%Y %H:%M')})"

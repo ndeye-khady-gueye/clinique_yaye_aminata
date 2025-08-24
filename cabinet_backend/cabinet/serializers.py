@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import User, Patient, Service, RendezVous, Consultation, Prescription, Paiement, DossierMedical
+from .models import User, Patient, Service, RendezVous, Consultation, Prescription, Paiement, DossierMedical, Contact
 import re
 
 class UserSerializer(serializers.ModelSerializer):
@@ -265,15 +265,101 @@ class RendezVousSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = RendezVous
-        fields = '__all__'
+        fields = [
+            'id', 'patient', 'client_nom', 'client_email', 'client_telephone',
+            'service', 'message', 'date_souhaitee', 'date_confirmee',
+            'docteur', 'statut', 'notes', 'prix_consultation',
+            'created_at', 'updated_at'
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 class RendezVousCreateSerializer(serializers.ModelSerializer):
-    """Sérialiseur pour la création de rendez-vous"""
+    """Sérialiseur pour la création de rendez-vous (clients/visiteurs)"""
     
     class Meta:
         model = RendezVous
-        fields = ['patient', 'docteur', 'service', 'date_rdv', 'heure_rdv', 'motif', 'prix_consultation']
+        fields = [
+            'client_nom', 'client_email', 'client_telephone',
+            'service', 'message', 'date_souhaitee'
+        ]
+    
+    def validate(self, attrs):
+        """Validation personnalisée"""
+        # Vérifier qu'on a au moins un moyen de contact
+        if not attrs.get('client_email') and not attrs.get('client_telephone'):
+            raise serializers.ValidationError("Vous devez fournir au moins un email ou un numéro de téléphone")
+        
+        # Vérifier qu'on a un nom
+        if not attrs.get('client_nom'):
+            raise serializers.ValidationError("Le nom est obligatoire")
+        
+        return attrs
+    
+    def create(self, validated_data):
+        """Créer un rendez-vous avec statut en_attente"""
+        validated_data['statut'] = 'en_attente'
+        return super().create(validated_data)
+
+class RendezVousResponsableSerializer(serializers.ModelSerializer):
+    """Sérialiseur pour la gestion des rendez-vous par le responsable"""
+    patient = PatientSerializer(read_only=True)
+    docteur = UserSerializer(read_only=True)
+    service = ServiceSerializer(read_only=True)
+    docteur_id = serializers.IntegerField(write_only=True, required=False)
+    date_confirmee = serializers.DateTimeField(required=False)
+    
+    class Meta:
+        model = RendezVous
+        fields = [
+            'id', 'patient', 'client_nom', 'client_email', 'client_telephone',
+            'service', 'message', 'date_souhaitee', 'date_confirmee',
+            'docteur', 'docteur_id', 'statut', 'notes', 'prix_consultation',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at', 'patient', 'service']
+
+class RendezVousConfirmationSerializer(serializers.Serializer):
+    """Sérialiseur pour la confirmation d'un rendez-vous"""
+    rendez_vous_id = serializers.IntegerField()
+    docteur_id = serializers.IntegerField(required=False)
+    date_confirmee = serializers.DateTimeField(required=False)
+    notes = serializers.CharField(required=False, allow_blank=True)
+    envoyer_notification = serializers.BooleanField(default=True)
+
+class RendezVousModificationSerializer(serializers.Serializer):
+    """Sérialiseur pour la modification d'un rendez-vous"""
+    rendez_vous_id = serializers.IntegerField()
+    date_confirmee = serializers.DateTimeField()
+    docteur_id = serializers.IntegerField(required=False)
+    notes = serializers.CharField(required=False, allow_blank=True)
+    raison_modification = serializers.CharField(required=False, allow_blank=True)
+
+class PatientCreationFromRendezVousSerializer(serializers.Serializer):
+    """Sérialiseur pour créer un patient à partir d'un rendez-vous"""
+    rendez_vous_id = serializers.IntegerField()
+    username = serializers.CharField()
+    password = serializers.CharField(min_length=8)
+    password_confirm = serializers.CharField()
+    date_naissance = serializers.DateField()
+    profession = serializers.CharField(required=False, allow_blank=True)
+    situation_matrimoniale = serializers.CharField(required=False, allow_blank=True)
+    nombre_enfants = serializers.IntegerField(required=False, min_value=0)
+    personne_contact = serializers.CharField(required=False, allow_blank=True)
+    telephone_urgence = serializers.CharField(required=False, allow_blank=True)
+    adresse = serializers.CharField(required=False, allow_blank=True)
+    groupe_sanguin = serializers.CharField(required=False, allow_blank=True)
+    allergies = serializers.CharField(required=False, allow_blank=True)
+    antecedents_medicaux = serializers.CharField(required=False, allow_blank=True)
+    
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password_confirm']:
+            raise serializers.ValidationError("Les mots de passe ne correspondent pas")
+        
+        # Vérifier que le nom d'utilisateur n'existe pas déjà
+        if User.objects.filter(username=attrs['username']).exists():
+            raise serializers.ValidationError("Ce nom d'utilisateur est déjà pris")
+        
+        return attrs
 
 class ConsultationSerializer(serializers.ModelSerializer):
     """Sérialiseur pour les consultations"""
@@ -318,4 +404,51 @@ class StatistiquesSerializer(serializers.Serializer):
     total_docteurs = serializers.IntegerField()
     total_consultations_mois = serializers.IntegerField()
     revenus_mois = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+class ContactSerializer(serializers.ModelSerializer):
+    """Sérialiseur pour les messages de contact"""
+    
+    class Meta:
+        model = Contact
+        fields = ['id', 'nom', 'email', 'sujet', 'message', 'date_heure_souhaitee', 'statut', 'created_at']
+        read_only_fields = ['id', 'statut', 'created_at']
+
+class ContactCreateSerializer(serializers.ModelSerializer):
+    """Sérialiseur pour la création de messages de contact"""
+    
+    class Meta:
+        model = Contact
+        fields = ['nom', 'email', 'sujet', 'message', 'date_heure_souhaitee']
+    
+    def validate(self, attrs):
+        """Validation personnalisée"""
+        # Validation du nom (3-20 caractères)
+        nom = attrs.get('nom', '')
+        if len(nom) < 3 or len(nom) > 20:
+            raise serializers.ValidationError("Le nom doit contenir entre 3 et 20 caractères")
+        
+        # Validation de l'email ou téléphone
+        email = attrs.get('email', '')
+        email_regex = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+        phone_regex = r'^(\+221|221)?[0-9]{9}$'
+        
+        if not email:
+            raise serializers.ValidationError("L'email ou téléphone est requis")
+        elif not re.match(email_regex, email) and not re.match(phone_regex, email):
+            raise serializers.ValidationError("L'email ou téléphone n'est pas valide")
+        
+        # Validation du sujet
+        if not attrs.get('sujet'):
+            raise serializers.ValidationError("Le sujet est requis")
+        
+        # Validation du message
+        if not attrs.get('message'):
+            raise serializers.ValidationError("Le message est requis")
+        
+        return attrs
+    
+    def create(self, validated_data):
+        """Créer un message de contact avec statut nouveau"""
+        validated_data['statut'] = 'nouveau'
+        return super().create(validated_data)
 

@@ -394,3 +394,267 @@ class ApiService {
 // Instance singleton
 export const apiService = new ApiService(API_BASE_URL);
 
+// API pour les contacts
+export const contactApi = {
+  createMessage: async (data: {
+    nom: string;
+    email: string;
+    sujet: string;
+    message: string;
+    date_heure_souhaitee?: string | null;
+  }) => {
+    const response = await fetch(`${API_BASE_URL}/contacts/create_message/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Erreur lors de l\'envoi du message');
+    }
+    
+    return response.json();
+  },
+
+  getMessages: async (token: string) => {
+    const response = await fetch(`${API_BASE_URL}/contacts/`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erreur lors de la récupération des messages');
+    }
+    
+    return response.json();
+  },
+
+  getMessageStats: async (token: string) => {
+    const response = await fetch(`${API_BASE_URL}/contacts/statistiques/`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erreur lors de la récupération des statistiques');
+    }
+    
+    return response.json();
+  },
+
+  markAsRead: async (messageId: number, token: string) => {
+    const response = await fetch(`${API_BASE_URL}/contacts/${messageId}/marquer_comme_lu/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erreur lors du marquage du message');
+    }
+    
+    return response.json();
+  },
+
+  markAsReplied: async (messageId: number, token: string) => {
+    const response = await fetch(`${API_BASE_URL}/contacts/${messageId}/marquer_comme_repondu/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erreur lors du marquage du message');
+    }
+    
+    return response.json();
+  },
+
+  markAsProcessed: async (messageId: number, token: string) => {
+    const response = await fetch(`${API_BASE_URL}/contacts/${messageId}/marquer_comme_traite/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erreur lors du marquage du message');
+    }
+    
+    return response.json();
+  },
+};
+
+// Fonction utilitaire pour récupérer le token
+const getToken = (): string | null => {
+  return localStorage.getItem('authToken');
+};
+
+// Service pour la gestion des rendez-vous par le responsable
+export const rdvResponsableApi = {
+  // Récupérer toutes les demandes en attente
+  getDemandesEnAttente: async (): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/rdv-responsable/demandes_en_attente/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erreur lors de la récupération des demandes');
+    }
+    
+    return response.json();
+  },
+
+  // Confirmer un rendez-vous
+  confirmerRendezVous: async (data: {
+    rendez_vous_id: number;
+    docteur_id?: number;
+    date_confirmee?: string;
+    notes?: string;
+    envoyer_notification?: boolean;
+  }): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/rdv-responsable/confirmer_rendez_vous/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(data),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Erreur lors de la confirmation');
+    }
+    
+    return response.json();
+  },
+
+  // Modifier un rendez-vous
+  modifierRendezVous: async (data: {
+    rendez_vous_id: number;
+    date_confirmee: string;
+    docteur_id?: number;
+    notes?: string;
+    raison_modification?: string;
+  }): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/rdv-responsable/modifier_rendez_vous/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(data),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Erreur lors de la modification');
+    }
+    
+    return response.json();
+  },
+
+  // Créer un patient à partir d'un rendez-vous
+  creerPatient: async (data: {
+    rendez_vous_id: number;
+    username: string;
+    password: string;
+    password_confirm: string;
+    date_naissance: string;
+    profession?: string;
+    situation_matrimoniale?: string;
+    nombre_enfants?: number;
+    personne_contact?: string;
+    telephone_urgence?: string;
+    adresse?: string;
+    groupe_sanguin?: string;
+    allergies?: string;
+    antecedents_medicaux?: string;
+  }): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/rdv-responsable/creer_patient/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(data),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Erreur lors de la création du patient');
+    }
+    
+    return response.json();
+  },
+
+  // Récupérer les statistiques
+  getStatistiques: async (): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/rdv-responsable/statistiques/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erreur lors de la récupération des statistiques');
+    }
+    
+    return response.json();
+  },
+
+  // Récupérer tous les rendez-vous
+  getAllRendezVous: async (): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/rdv-responsable/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erreur lors de la récupération des rendez-vous');
+    }
+    
+    return response.json();
+  },
+
+  // Supprimer un rendez-vous
+  supprimerRendezVous: async (rdvId: number): Promise<any> => {
+    const response = await fetch(`${API_BASE_URL}/rdv-responsable/${rdvId}/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erreur lors de la suppression');
+    }
+    
+    return response.json();
+  },
+};
+

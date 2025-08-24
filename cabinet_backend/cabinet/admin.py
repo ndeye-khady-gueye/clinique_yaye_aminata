@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.contrib.admin.models import LogEntry, CHANGE, ADDITION
 from django.contrib.contenttypes.models import ContentType
-from .models import User, Patient, Service, RendezVous, Consultation, Prescription, Paiement, DossierMedical
+from .models import User, Patient, Service, RendezVous, Consultation, Prescription, Paiement, DossierMedical, Contact
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
@@ -74,17 +74,38 @@ class ServiceAdmin(admin.ModelAdmin):
 
 @admin.register(RendezVous)
 class RendezVousAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'docteur', 'service', 'date_rdv', 'heure_rdv', 'statut', 'prix_consultation')
-    list_filter = ('statut', 'date_rdv', 'docteur', 'service')
-    search_fields = ('patient__user__first_name', 'patient__user__last_name', 'docteur__username')
-    date_hierarchy = 'date_rdv'
+    list_display = ('get_client_info', 'service', 'get_date_info', 'statut', 'docteur', 'prix_consultation')
+    list_filter = ('statut', 'service', 'docteur', 'created_at')
+    search_fields = ('client_nom', 'client_email', 'client_telephone', 'patient__user__first_name', 'patient__user__last_name', 'docteur__username')
+    date_hierarchy = 'created_at'
     actions = ['confirmer_rendez_vous', 'annuler_rendez_vous', 'exporter_rendez_vous']
     
     fieldsets = (
-        ('Informations Patient', {'fields': ('patient',)}),
-        ('Informations Rendez-vous', {'fields': ('docteur', 'service', 'date_rdv', 'heure_rdv', 'motif')}),
+        ('Informations Client/Patient', {
+            'fields': ('patient', 'client_nom', 'client_email', 'client_telephone'),
+            'description': 'Remplir soit les informations patient soit les informations client'
+        }),
+        ('Informations Rendez-vous', {
+            'fields': ('service', 'message', 'date_souhaitee', 'date_confirmee', 'docteur')
+        }),
         ('Statut', {'fields': ('statut', 'notes', 'prix_consultation')}),
     )
+    
+    def get_client_info(self, obj):
+        if obj.patient:
+            return f"Patient: {obj.patient.user.first_name} {obj.patient.user.last_name}"
+        else:
+            return f"Client: {obj.client_nom}"
+    get_client_info.short_description = 'Client/Patient'
+    
+    def get_date_info(self, obj):
+        if obj.date_confirmee:
+            return f"Confirmé: {obj.date_confirmee.strftime('%d/%m/%Y %H:%M')}"
+        elif obj.date_souhaitee:
+            return f"Souhaité: {obj.date_souhaitee.strftime('%d/%m/%Y %H:%M')}"
+        else:
+            return "Aucune date"
+    get_date_info.short_description = 'Date'
 
     def confirmer_rendez_vous(self, request, queryset):
         updated = queryset.update(statut='confirme')
@@ -128,3 +149,40 @@ class DossierMedicalAdmin(admin.ModelAdmin):
     list_filter = ('groupe_sanguin', 'created_at')
     search_fields = ('numero_dossier', 'patient__user__first_name', 'patient__user__last_name')
     readonly_fields = ('patient', 'numero_dossier')
+
+@admin.register(Contact)
+class ContactAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'email', 'sujet', 'statut', 'date_heure_souhaitee', 'created_at')
+    list_filter = ('statut', 'created_at', 'date_heure_souhaitee')
+    search_fields = ('nom', 'email', 'sujet', 'message')
+    date_hierarchy = 'created_at'
+    readonly_fields = ('created_at', 'updated_at')
+    actions = ['marquer_comme_lu', 'marquer_comme_repondu', 'marquer_comme_traite']
+    
+    fieldsets = (
+        ('Informations Contact', {
+            'fields': ('nom', 'email', 'sujet', 'message', 'date_heure_souhaitee')
+        }),
+        ('Gestion', {
+            'fields': ('statut', 'notes_admin')
+        }),
+        ('Dates', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def marquer_comme_lu(self, request, queryset):
+        updated = queryset.update(statut='lu')
+        self.message_user(request, f'{updated} messages marqués comme lus.')
+    marquer_comme_lu.short_description = "Marquer comme lu"
+    
+    def marquer_comme_repondu(self, request, queryset):
+        updated = queryset.update(statut='repondu')
+        self.message_user(request, f'{updated} messages marqués comme répondus.')
+    marquer_comme_repondu.short_description = "Marquer comme répondu"
+    
+    def marquer_comme_traite(self, request, queryset):
+        updated = queryset.update(statut='traite')
+        self.message_user(request, f'{updated} messages marqués comme traités.')
+    marquer_comme_traite.short_description = "Marquer comme traité"
