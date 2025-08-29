@@ -10,7 +10,9 @@ import AppointmentForm from '@/components/forms/AppointmentForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from '@/hooks/use-toast';
 import { rdvResponsableApi, apiService } from '@/services/api';
-import { Calendar, Clock, User, Mail, Phone, MessageSquare, Edit, Check, Trash2, UserPlus, Search, Eye, CalendarDays, Plus } from 'lucide-react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { Calendar, Clock, User, Mail, Phone, MessageSquare, Edit, Check, Trash2, UserPlus, Search, Eye, CalendarDays, Plus, List, Download } from 'lucide-react';
 
 interface DemandeRDV {
   id: number;
@@ -72,6 +74,11 @@ const RendezVousManagement: React.FC = () => {
     raison_modification: '',
   });
 
+  // États pour la liste complète des rendez-vous
+  const [allAppointments, setAllAppointments] = useState<any[]>([]);
+  const [isListModalOpen, setIsListModalOpen] = useState(false);
+  const [listLoading, setListLoading] = useState(false);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -89,15 +96,24 @@ const RendezVousManagement: React.FC = () => {
       // Charger les docteurs
       try {
         const docteursData = await apiService.getDoctors();
+        console.log('🔍 Docteurs récupérés depuis API:', docteursData);
+        
         const docteursConvertis = docteursData.map(user => ({
           id: parseInt(user.id),
           first_name: user.firstName,
           last_name: user.lastName,
           speciality: user.speciality || 'Généraliste'
         }));
+        
+        console.log('👨‍⚕️ Docteurs convertis:', docteursConvertis);
         setDocteurs(docteursConvertis);
       } catch (error) {
-        console.error('Erreur lors du chargement des docteurs:', error);
+        console.error('❌ Erreur lors du chargement des docteurs:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger la liste des docteurs",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
@@ -195,7 +211,146 @@ const RendezVousManagement: React.FC = () => {
     setDetailsModal(true);
   };
 
-  // 5. Créer un nouveau rendez-vous
+  // 5. Charger tous les rendez-vous
+  const loadAllAppointments = async () => {
+    try {
+      setListLoading(true);
+      const response = await fetch('http://127.0.0.1:8000/api/rendez-vous/', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement des rendez-vous');
+      }
+      
+      const data = await response.json();
+      console.log('Données reçues:', data);
+      
+      if (Array.isArray(data)) {
+        setAllAppointments(data);
+      } else if (data.results && Array.isArray(data.results)) {
+        setAllAppointments(data.results);
+      } else if (data.data && Array.isArray(data.data)) {
+        setAllAppointments(data.data);
+      } else {
+        console.error('Format de données inattendu:', data);
+        setAllAppointments([]);
+        toast({
+          title: "Erreur",
+          description: "Format de données inattendu",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      setAllAppointments([]);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger tous les rendez-vous",
+        variant: "destructive",
+      });
+    } finally {
+      setListLoading(false);
+    }
+  };
+
+  // 6. Générer et télécharger le PDF
+  const generatePDF = () => {
+    if (!Array.isArray(allAppointments) || allAppointments.length === 0) {
+      toast({
+        title: "Erreur",
+        description: "Aucun rendez-vous à exporter",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const doc = new jsPDF('landscape');
+    
+    doc.setFontSize(20);
+    doc.text('Liste des Rendez-vous - Cabinet Yaye Aminata', 20, 20);
+    
+    doc.setFontSize(12);
+    doc.text(`Généré le: ${new Date().toLocaleString('fr-FR')}`, 20, 30);
+    
+    const tableData = allAppointments.map((appointment) => {
+      const clientName = appointment.patient?.user?.first_name 
+        ? `${appointment.patient.user.first_name} ${appointment.patient.user.last_name}`
+        : appointment.client_nom || 'N/A';
+      const clientType = appointment.patient ? 'Patient' : 'Client';
+      
+      return [
+        appointment.id.toString(),
+        `${clientName} (${clientType})`,
+        appointment.service?.nom || 'N/A',
+        appointment.date_souhaitee 
+          ? new Date(appointment.date_souhaitee).toLocaleString('fr-FR')
+          : 'Non spécifiée',
+        appointment.date_confirmee 
+          ? new Date(appointment.date_confirmee).toLocaleString('fr-FR')
+          : 'Non confirmée',
+        appointment.docteur 
+          ? `Dr. ${appointment.docteur.first_name} ${appointment.docteur.last_name}`
+          : 'Non assigné',
+        appointment.statut,
+        appointment.prix_consultation 
+          ? `${appointment.prix_consultation} FCFA`
+          : 'Non défini'
+      ];
+    });
+    
+    autoTable(doc, {
+      head: [['ID', 'Client/Patient', 'Service', 'Date souhaitée', 'Date confirmée', 'Médecin', 'Statut', 'Prix']],
+      body: tableData,
+      startY: 40,
+      styles: {
+        fontSize: 12,
+        cellPadding: 5,
+      },
+      headStyles: {
+        fillColor: [108, 36, 118],
+        textColor: 255,
+        fontStyle: 'bold',
+        fontSize: 13,
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252],
+      },
+      columnStyles: {
+        0: { cellWidth: 15 },
+        1: { cellWidth: 45 },
+        2: { cellWidth: 35 },
+        3: { cellWidth: 30 },
+        4: { cellWidth: 30 },
+        5: { cellWidth: 40 },
+        6: { cellWidth: 20 },
+        7: { cellWidth: 25 },
+      },
+      margin: { top: 40, right: 20, bottom: 60, left: 20 },
+    });
+    
+    const finalY = (doc as any).lastAutoTable.finalY || 200;
+    doc.setFontSize(14);
+    doc.text('Statistiques:', 20, finalY + 20);
+    doc.setFontSize(12);
+    doc.text(`Total: ${allAppointments.length}`, 30, finalY + 30);
+    doc.text(`En attente: ${allAppointments.filter(a => a.statut === 'en_attente').length}`, 30, finalY + 40);
+    doc.text(`Confirmés: ${allAppointments.filter(a => a.statut === 'confirme').length}`, 30, finalY + 50);
+    doc.text(`Réalisés: ${allAppointments.filter(a => a.statut === 'realise').length}`, 30, finalY + 60);
+    
+    const fileName = `rendez-vous-${new Date().toISOString().split('T')[0]}.pdf`;
+    doc.save(fileName);
+    
+    toast({
+      title: "Succès",
+      description: "PDF généré et téléchargé avec succès",
+    });
+  };
+
+  // 7. Créer un nouveau rendez-vous
   const handleCreateAppointment = async (data: any) => {
     try {
       console.log('Nouveau rendez-vous créé par le responsable:', data);
@@ -259,22 +414,134 @@ const RendezVousManagement: React.FC = () => {
           <p className="text-gray-600 mt-2">Gérez les demandes de rendez-vous des clients/visiteurs</p>
         </div>
         
-        {/* Bouton Nouveau RDV */}
-        <Dialog open={isAppointmentFormOpen} onOpenChange={setIsAppointmentFormOpen}>
-          <DialogTrigger asChild>
-            <Button 
-              className="hover:opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl" 
-              style={{ background: 'linear-gradient(135deg, #6C2476 0%, #B0368B 100%)' }}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Nouveau RDV
-            </Button>
-          </DialogTrigger>
-          <AppointmentForm 
-            onSubmit={handleCreateAppointment}
-            onCancel={() => setIsAppointmentFormOpen(false)}
-          />
-        </Dialog>
+        {/* Boutons d'action */}
+        <div className="flex space-x-2">
+          {/* Bouton Liste des Rendez-vous */}
+          <Dialog open={isListModalOpen} onOpenChange={setIsListModalOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  setIsListModalOpen(true);
+                  loadAllAppointments();
+                }}
+                className="hover:opacity-90 transition-all duration-300"
+              >
+                <List className="mr-2 h-4 w-4" />
+                Liste des Rendez-vous
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex justify-between items-center">
+                  <span>Liste Complète des Rendez-vous</span>
+                  <Button 
+                    onClick={generatePDF}
+                    variant="outline"
+                    size="sm"
+                    className="ml-4"
+                    disabled={!Array.isArray(allAppointments) || allAppointments.length === 0}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Télécharger PDF
+                  </Button>
+                </DialogTitle>
+              </DialogHeader>
+              {listLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="text-lg">Chargement des rendez-vous...</div>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-300">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-300 px-3 py-2 text-left">ID</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Client/Patient</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Service</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Date souhaitée</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Date confirmée</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Médecin</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Statut</th>
+                        <th className="border border-gray-300 px-3 py-2 text-left">Prix</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.isArray(allAppointments) && allAppointments.map((appointment) => {
+                        const clientName = appointment.patient?.user?.first_name 
+                          ? `${appointment.patient.user.first_name} ${appointment.patient.user.last_name}`
+                          : appointment.client_nom || 'N/A';
+                        const clientType = appointment.patient ? 'Patient' : 'Client';
+                        
+                        return (
+                          <tr key={appointment.id} className="hover:bg-gray-50">
+                            <td className="border border-gray-300 px-3 py-2">{appointment.id}</td>
+                            <td className="border border-gray-300 px-3 py-2">
+                              <div>
+                                <div className="font-medium">{clientName}</div>
+                                <div className="text-sm text-gray-500">{clientType}</div>
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2">
+                              <div>
+                                <div className="font-medium">{appointment.service?.nom || 'N/A'}</div>
+                                <div className="text-sm text-gray-500">{appointment.service?.prix || 'N/A'} FCFA</div>
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2">
+                              {appointment.date_souhaitee 
+                                ? new Date(appointment.date_souhaitee).toLocaleString('fr-FR')
+                                : 'Non spécifiée'
+                              }
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2">
+                              {appointment.date_confirmee 
+                                ? new Date(appointment.date_confirmee).toLocaleString('fr-FR')
+                                : 'Non confirmée'
+                              }
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2">
+                              {appointment.docteur 
+                                ? `Dr. ${appointment.docteur.first_name} ${appointment.docteur.last_name}`
+                                : 'Non assigné'
+                              }
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2">
+                              {getStatutBadge(appointment.statut)}
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2">
+                              {appointment.prix_consultation 
+                                ? `${appointment.prix_consultation} FCFA`
+                                : 'Non défini'
+                              }
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+
+          {/* Bouton Nouveau RDV */}
+          <Dialog open={isAppointmentFormOpen} onOpenChange={setIsAppointmentFormOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                className="hover:opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl" 
+                style={{ background: 'linear-gradient(135deg, #6C2476 0%, #B0368B 100%)' }}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Nouveau RDV
+              </Button>
+            </DialogTrigger>
+            <AppointmentForm 
+              onSubmit={handleCreateAppointment}
+              onCancel={() => setIsAppointmentFormOpen(false)}
+            />
+          </Dialog>
+        </div>
       </div>
 
       {/* Statistiques */}
