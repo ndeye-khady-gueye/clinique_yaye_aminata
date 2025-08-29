@@ -11,7 +11,6 @@ import PatientRegistrationForm from '@/components/forms/PatientRegistrationForm'
 import PaymentForm from '@/components/forms/PaymentForm';
 import ConsultationReceiptForm from '@/components/forms/ConsultationReceiptForm';
 import PatientStatusTracker from '@/components/PatientStatusTracker';
-import ReportsGenerator from '@/components/ReportsGenerator';
 import ClientRegistrationTable from '@/components/ClientRegistrationTable';
 import FinancialReportsModal from '@/components/FinancialReportsModal';
 

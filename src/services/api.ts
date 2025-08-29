@@ -240,7 +240,8 @@ class ApiService {
   }
 
   async getDoctors(): Promise<User[]> {
-    return await this.request<User[]>('/users/docteurs/');
+    const response = await this.request<any>('/users/?role=doctor');
+    return response.results || response;
   }
 
   async createUser(userData: any): Promise<User> {
@@ -265,7 +266,8 @@ class ApiService {
 
   // Patients
   async getPatients(): Promise<any[]> {
-    return await this.request<any[]>('/patients/');
+    const response = await this.request<any>('/patients/');
+    return response.results || response;
   }
 
   async getPatient(id: string): Promise<any> {

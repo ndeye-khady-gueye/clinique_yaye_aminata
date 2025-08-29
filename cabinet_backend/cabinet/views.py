@@ -25,7 +25,8 @@ from .serializers import (
 from .permissions import (
     IsAdminUser, IsResponsableCabinet, IsDoctor, IsReceptionist, IsPatient,
     IsAdminOrResponsable, IsResponsableOrReceptionist, IsDoctorOrReceptionist, IsDoctorOrPatient,
-    IsOwnerOrStaff, CanManageUsers, CanViewReports, CanManageAppointments, CanViewPatients
+    IsOwnerOrStaff, CanManageUsers, CanViewReports, CanManageAppointments, CanViewPatients,
+    CanViewUsersForAppointments
 )
 
 class AuthViewSet(viewsets.ViewSet):
@@ -271,6 +272,18 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [CanManageUsers]
     
+    def get_permissions(self):
+        """
+        Permissions personnalisées selon l'action
+        """
+        if self.action in ['list', 'retrieve']:
+            # Pour la lecture, permettre aux médecins et réceptionnistes de voir les utilisateurs
+            permission_classes = [CanViewUsersForAppointments]
+        else:
+            # Pour la création/modification/suppression, admin et responsable uniquement
+            permission_classes = [CanManageUsers]
+        return [permission() for permission in permission_classes]
+    
     def get_serializer_class(self):
         if self.action == 'create':
             return UserCreateSerializer
@@ -280,12 +293,24 @@ class UserViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         user = self.request.user
+        queryset = User.objects.all()
+        
+        # Appliquer les filtres de l'URL
+        role_filter = self.request.query_params.get('role')
+        if role_filter:
+            queryset = queryset.filter(role=role_filter)
+        
+        # Appliquer les restrictions selon le rôle de l'utilisateur connecté
         if user.role == 'admin':
-            return User.objects.all()
+            return queryset
         elif user.role == 'responsable_cabinet':
-            return User.objects.exclude(role='admin')
+            return queryset.exclude(role='admin')
+        elif user.role in ['doctor', 'receptionist']:
+            # Les médecins et réceptionnistes peuvent voir les utilisateurs selon les filtres
+            return queryset
         else:
-            return User.objects.filter(id=user.id)
+            # Pour les autres rôles, ne voir que leur propre utilisateur
+            return queryset.filter(id=user.id)
     
     @action(detail=False, methods=['get'])
     def docteurs(self, request):
@@ -341,8 +366,8 @@ class PatientViewSet(viewsets.ModelViewSet):
         if user.role == 'patient':
             return Patient.objects.filter(user=user)
         elif user.role == 'doctor':
-            # Docteurs voient leurs patients
-            return Patient.objects.filter(rendez_vous__docteur=user).distinct()
+            # Docteurs voient tous les patients (pour créer des rendez-vous)
+            return Patient.objects.all()
         else:
             return Patient.objects.all()
     
@@ -640,7 +665,7 @@ class StatistiquesViewSet(viewsets.ViewSet):
         # Statistiques selon le rôle
         if user.role == 'admin':
             total_patients = Patient.objects.count()
-            total_rdv_aujourd_hui = RendezVous.objects.filter(date_rdv=aujourd_hui).count()
+            total_rdv_aujourd_hui = RendezVous.objects.filter(date_confirmee__date=aujourd_hui).count()
             total_docteurs = User.objects.filter(role='doctor', is_active=True).count()
             total_consultations_mois = Consultation.objects.filter(created_at__gte=debut_mois).count()
             revenus_mois = Paiement.objects.filter(
@@ -650,7 +675,7 @@ class StatistiquesViewSet(viewsets.ViewSet):
             
         elif user.role == 'responsable_cabinet':
             total_patients = Patient.objects.count()
-            total_rdv_aujourd_hui = RendezVous.objects.filter(date_rdv=aujourd_hui).count()
+            total_rdv_aujourd_hui = RendezVous.objects.filter(date_confirmee__date=aujourd_hui).count()
             total_docteurs = User.objects.filter(role='doctor', is_active=True).count()
             total_consultations_mois = Consultation.objects.filter(created_at__gte=debut_mois).count()
             revenus_mois = Paiement.objects.filter(
@@ -660,7 +685,7 @@ class StatistiquesViewSet(viewsets.ViewSet):
             
         elif user.role == 'doctor':
             total_patients = Patient.objects.filter(rendez_vous__docteur=user).distinct().count()
-            total_rdv_aujourd_hui = RendezVous.objects.filter(docteur=user, date_rdv=aujourd_hui).count()
+            total_rdv_aujourd_hui = RendezVous.objects.filter(docteur=user, date_confirmee__date=aujourd_hui).count()
             total_docteurs = 1  # Le docteur lui-même
             total_consultations_mois = Consultation.objects.filter(
                 rendez_vous__docteur=user,
@@ -676,7 +701,7 @@ class StatistiquesViewSet(viewsets.ViewSet):
             total_patients = 1  # Le patient lui-même
             total_rdv_aujourd_hui = RendezVous.objects.filter(
                 patient__user=user,
-                date_rdv=aujourd_hui
+                date_confirmee__date=aujourd_hui
             ).count()
             total_docteurs = User.objects.filter(role='doctor', is_active=True).count()
             total_consultations_mois = Consultation.objects.filter(

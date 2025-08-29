@@ -274,30 +274,38 @@ class RendezVousSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 class RendezVousCreateSerializer(serializers.ModelSerializer):
-    """Sérialiseur pour la création de rendez-vous (clients/visiteurs)"""
+    """Sérialiseur pour la création de rendez-vous (patients existants et clients/visiteurs)"""
     
     class Meta:
         model = RendezVous
         fields = [
-            'client_nom', 'client_email', 'client_telephone',
-            'service', 'message', 'date_souhaitee'
+            'patient', 'client_nom', 'client_email', 'client_telephone',
+            'service', 'message', 'date_souhaitee', 'date_confirmee', 'docteur', 'notes', 'statut'
         ]
     
     def validate(self, attrs):
         """Validation personnalisée"""
-        # Vérifier qu'on a au moins un moyen de contact
-        if not attrs.get('client_email') and not attrs.get('client_telephone'):
-            raise serializers.ValidationError("Vous devez fournir au moins un email ou un numéro de téléphone")
-        
-        # Vérifier qu'on a un nom
-        if not attrs.get('client_nom'):
-            raise serializers.ValidationError("Le nom est obligatoire")
+        # Si on a un patient, on n'a pas besoin des champs client
+        if attrs.get('patient'):
+            # Vérifier que les champs client sont vides
+            if attrs.get('client_nom') or attrs.get('client_email') or attrs.get('client_telephone'):
+                raise serializers.ValidationError("Un rendez-vous ne peut pas avoir à la fois un patient et des informations client")
+        else:
+            # Si pas de patient, on doit avoir les informations client
+            if not attrs.get('client_nom'):
+                raise serializers.ValidationError("Le nom est obligatoire pour les clients sans compte")
+            
+            if not attrs.get('client_email') and not attrs.get('client_telephone'):
+                raise serializers.ValidationError("Vous devez fournir au moins un email ou un numéro de téléphone")
         
         return attrs
     
     def create(self, validated_data):
-        """Créer un rendez-vous avec statut en_attente"""
-        validated_data['statut'] = 'en_attente'
+        """Créer un rendez-vous"""
+        # Si pas de statut spécifié, mettre en_attente par défaut
+        if not validated_data.get('statut'):
+            validated_data['statut'] = 'en_attente'
+        
         return super().create(validated_data)
 
 class RendezVousResponsableSerializer(serializers.ModelSerializer):

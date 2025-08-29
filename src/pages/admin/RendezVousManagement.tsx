@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import AppointmentForm from '@/components/forms/AppointmentForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from '@/hooks/use-toast';
 import { rdvResponsableApi, apiService } from '@/services/api';
-import { Calendar, Clock, User, Mail, Phone, MessageSquare, Edit, Check, Trash2, UserPlus, Search, Eye, CalendarDays } from 'lucide-react';
+import { Calendar, Clock, User, Mail, Phone, MessageSquare, Edit, Check, Trash2, UserPlus, Search, Eye, CalendarDays, Plus } from 'lucide-react';
 
 interface DemandeRDV {
   id: number;
@@ -58,6 +59,7 @@ const RendezVousManagement: React.FC = () => {
   const [confirmationModal, setConfirmationModal] = useState(false);
   const [modificationModal, setModificationModal] = useState(false);
   const [detailsModal, setDetailsModal] = useState(false);
+  const [isAppointmentFormOpen, setIsAppointmentFormOpen] = useState(false);
   const [confirmationData, setConfirmationData] = useState({
     docteur_id: '',
     date_confirmee: '',
@@ -193,6 +195,29 @@ const RendezVousManagement: React.FC = () => {
     setDetailsModal(true);
   };
 
+  // 5. Créer un nouveau rendez-vous
+  const handleCreateAppointment = async (data: any) => {
+    try {
+      console.log('Nouveau rendez-vous créé par le responsable:', data);
+      toast({
+        title: "✅ Succès",
+        description: "Rendez-vous créé avec succès !",
+      });
+      setIsAppointmentFormOpen(false);
+      
+      // Recharger les données
+      await loadData();
+      
+    } catch (error: any) {
+      console.error('Erreur lors de la création du rendez-vous:', error);
+      toast({
+        title: "❌ Erreur",
+        description: error.message || "Erreur lors de la création du rendez-vous.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getStatutBadge = (statut: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       'en_attente': 'outline',
@@ -233,6 +258,23 @@ const RendezVousManagement: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Gestion des Demandes de Rendez-vous</h1>
           <p className="text-gray-600 mt-2">Gérez les demandes de rendez-vous des clients/visiteurs</p>
         </div>
+        
+        {/* Bouton Nouveau RDV */}
+        <Dialog open={isAppointmentFormOpen} onOpenChange={setIsAppointmentFormOpen}>
+          <DialogTrigger asChild>
+            <Button 
+              className="hover:opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl" 
+              style={{ background: 'linear-gradient(135deg, #6C2476 0%, #B0368B 100%)' }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Nouveau RDV
+            </Button>
+          </DialogTrigger>
+          <AppointmentForm 
+            onSubmit={handleCreateAppointment}
+            onCancel={() => setIsAppointmentFormOpen(false)}
+          />
+        </Dialog>
       </div>
 
       {/* Statistiques */}

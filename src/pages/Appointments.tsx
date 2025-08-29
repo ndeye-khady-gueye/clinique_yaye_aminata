@@ -10,7 +10,7 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import AppointmentForm from '@/components/forms/AppointmentForm';
 import DetailsModal from '@/components/modals/DetailsModal';
 import PDFExportForm from '@/components/forms/PDFExportForm';
-import { rdvResponsableApi } from '@/services/api';
+import { apiService } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 
 const Appointments = () => {
@@ -64,8 +64,8 @@ const Appointments = () => {
     return matchesSearch && matchesStatus && matchesDate;
   });
 
-  const canModifyAppointments = user?.role === 'admin' || user?.role === 'receptionist';
-  const canSeeAllAppointments = user?.role === 'admin' || user?.role === 'receptionist';
+  const canModifyAppointments = user?.role === 'admin' || user?.role === 'receptionist' || user?.role === 'responsable_cabinet';
+  const canSeeAllAppointments = user?.role === 'admin' || user?.role === 'receptionist' || user?.role === 'responsable_cabinet';
 
   // Charger les vraies données depuis l'API
   useEffect(() => {
@@ -75,7 +75,7 @@ const Appointments = () => {
   const loadAppointments = async () => {
     try {
       setLoading(true);
-      const data = await rdvResponsableApi.getAllRendezVous();
+      const data = await apiService.getRendezVous();
       setAppointments(data);
     } catch (error) {
       console.error('Erreur lors du chargement des rendez-vous:', error);
@@ -91,13 +91,7 @@ const Appointments = () => {
 
   const handleCreateAppointment = async (data: any) => {
     try {
-      // Utiliser l'API pour créer un rendez-vous
-      await rdvResponsableApi.confirmerRendezVous({
-        rendez_vous_id: data.id,
-        date_confirmee: data.date_confirmee,
-        notes: data.notes,
-      });
-      
+      // Le formulaire a déjà créé le rendez-vous via l'API
       toast({
         title: "Succès",
         description: "Rendez-vous créé avec succès",

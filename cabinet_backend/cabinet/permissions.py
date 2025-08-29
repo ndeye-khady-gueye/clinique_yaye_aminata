@@ -144,22 +144,34 @@ class CanViewReports(permissions.BasePermission):
 
 class CanManageAppointments(permissions.BasePermission):
     """
-    Permission pour gérer les rendez-vous (responsable et réceptionniste)
+    Permission pour gérer les rendez-vous (responsable, réceptionniste et docteur)
     """
     def has_permission(self, request, view):
         return bool(
             request.user and 
             request.user.is_authenticated and 
-            request.user.role in ['responsable_cabinet', 'receptionist']
+            request.user.role in ['responsable_cabinet', 'receptionist', 'doctor']
         )
 
 class CanViewPatients(permissions.BasePermission):
     """
-    Permission pour voir les patients (docteur et réceptionniste)
+    Permission pour voir les patients (docteur, réceptionniste et responsable)
     """
     def has_permission(self, request, view):
         return bool(
             request.user and 
             request.user.is_authenticated and 
-            request.user.role in ['doctor', 'receptionist']
+            request.user.role in ['doctor', 'receptionist', 'responsable_cabinet', 'admin']
+        )
+
+class CanViewUsersForAppointments(permissions.BasePermission):
+    """
+    Permission pour voir les utilisateurs dans le contexte des rendez-vous
+    (docteur, réceptionniste et responsable)
+    """
+    def has_permission(self, request, view):
+        return bool(
+            request.user and 
+            request.user.is_authenticated and 
+            request.user.role in ['doctor', 'receptionist', 'responsable_cabinet', 'admin']
         )
