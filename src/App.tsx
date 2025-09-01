@@ -81,14 +81,12 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 
-                {/* Routes responsable cabinet et réceptionniste */}
+                {/* Routes responsable cabinet uniquement */}
                 <Route path="appointments" element={
-                  <ProtectedRoute allowedRoles={['responsable_cabinet', 'receptionist', 'admin']}>
+                  <ProtectedRoute allowedRoles={['responsable_cabinet', 'admin']}>
                     <RendezVousManagement />
                   </ProtectedRoute>
                 } />
-                
-                {/* Routes responsable cabinet uniquement */}
                 <Route path="users" element={
                   <ProtectedRoute allowedRoles={['responsable_cabinet']}>
                     <TeamManagement />

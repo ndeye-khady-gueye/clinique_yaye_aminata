@@ -60,7 +60,6 @@ const Layout = () => {
       case 'receptionist':
         return [
           ...baseItems,
-          { path: '/appointments', icon: Calendar, label: 'Rendez-vous' },
           { path: '/patients', icon: Users, label: 'Patients' }
         ];
       case 'patient':

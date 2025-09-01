@@ -238,20 +238,7 @@ const Login = () => {
                 </form>
               )}
 
-              {/* Lien inscription */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-3">
-                    Vous n'avez pas encore de compte ?
-                  </p>
-                  <Link 
-                    to="/register" 
-                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-md hover:bg-primary/20 transition-colors"
-                  >
-                    Créer un compte patient
-                  </Link>
-                </div>
-              </div>
+
             </CardContent>
           </Card>
         </div>

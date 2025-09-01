@@ -9,10 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import AppointmentForm from '@/components/forms/AppointmentForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from '@/hooks/use-toast';
-import { rdvResponsableApi, apiService } from '@/services/api';
+import { rdvResponsableApi, apiService, User as ApiUser } from '@/services/api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Calendar, Clock, User, Mail, Phone, MessageSquare, Edit, Check, Trash2, UserPlus, Search, Eye, CalendarDays, Plus, List, Download } from 'lucide-react';
+import { Calendar, Clock, User, Mail, Phone, MessageSquare, Edit, Check, Trash2, UserPlus, Search, Eye, CalendarDays, Plus, List, Download, RefreshCw } from 'lucide-react';
 
 interface DemandeRDV {
   id: number;
@@ -26,26 +26,17 @@ interface DemandeRDV {
   message: string;
   date_souhaitee: string;
   date_confirmee: string | null;
-  docteur: {
-    id: number;
-    first_name: string;
-    last_name: string;
-  } | null;
+  docteur: ApiUser | null;
   statut: string;
   notes: string;
   created_at: string;
 }
 
-interface Docteur {
-  id: number;
-  first_name: string;
-  last_name: string;
-  speciality: string;
-}
+
 
 const RendezVousManagement: React.FC = () => {
   const [demandesRDV, setDemandesRDV] = useState<DemandeRDV[]>([]);
-  const [docteurs, setDocteurs] = useState<Docteur[]>([]);
+  const [docteurs, setDocteurs] = useState<ApiUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDemande, setSelectedDemande] = useState<DemandeRDV | null>(null);
@@ -81,7 +72,49 @@ const RendezVousManagement: React.FC = () => {
 
   useEffect(() => {
     loadData();
+    
+    // Rechargement automatique de la liste des médecins toutes les 30 secondes
+    const intervalId = setInterval(() => {
+      console.log('🔄 Rechargement automatique de la liste des médecins...');
+      loadDoctors();
+    }, 30000); // 30 secondes
+    
+    // Nettoyer l'intervalle quand le composant est démonté
+    return () => clearInterval(intervalId);
   }, []);
+
+  // Fonction pour charger spécifiquement les médecins (même logique que AppointmentForm)
+  const loadDoctors = async () => {
+    try {
+      const doctorsData = await apiService.getDoctors();
+      console.log('🔍 Docteurs récupérés depuis API:', doctorsData);
+      console.log('🔍 Nombre de docteurs récupérés:', doctorsData ? doctorsData.length : 0);
+      
+      // Utiliser exactement la même logique que AppointmentForm
+      const doctorsArray = Array.isArray(doctorsData) ? doctorsData : [];
+      setDocteurs(doctorsArray);
+      
+      console.log('👨‍⚕️ Docteurs chargés dans le state:', doctorsArray);
+      console.log('👨‍⚕️ Nombre de docteurs dans le state:', doctorsArray.length);
+      
+      // Log détaillé de chaque docteur
+      doctorsArray.forEach((doctor, index) => {
+        console.log(`👨‍⚕️ Docteur ${index + 1}:`, {
+          id: doctor.id,
+          firstName: doctor.firstName,
+          lastName: doctor.lastName,
+          speciality: doctor.speciality
+        });
+      });
+    } catch (error) {
+      console.error('❌ Erreur lors du chargement des docteurs:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger la liste des docteurs",
+        variant: "destructive",
+      });
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -94,27 +127,7 @@ const RendezVousManagement: React.FC = () => {
       setStatistiques(statsData);
       
       // Charger les docteurs
-      try {
-        const docteursData = await apiService.getDoctors();
-        console.log('🔍 Docteurs récupérés depuis API:', docteursData);
-        
-        const docteursConvertis = docteursData.map(user => ({
-          id: parseInt(user.id),
-          first_name: user.firstName,
-          last_name: user.lastName,
-          speciality: user.speciality || 'Généraliste'
-        }));
-        
-        console.log('👨‍⚕️ Docteurs convertis:', docteursConvertis);
-        setDocteurs(docteursConvertis);
-      } catch (error) {
-        console.error('❌ Erreur lors du chargement des docteurs:', error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger la liste des docteurs",
-          variant: "destructive",
-        });
-      }
+      await loadDoctors();
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
       toast({
@@ -132,13 +145,26 @@ const RendezVousManagement: React.FC = () => {
     if (!selectedDemande) return;
 
     try {
-      await rdvResponsableApi.confirmerRendezVous({
+      // Logs de debug pour voir les données
+      const token = localStorage.getItem('authToken');
+      console.log('🔐 Token d\'authentification:', token ? 'Présent' : 'Absent');
+      console.log('📋 Données à envoyer:', {
+        rendez_vous_id: selectedDemande.id,
+        docteur_id: confirmationData.docteur_id ? parseInt(confirmationData.docteur_id) : undefined,
+        date_confirmee: confirmationData.date_confirmee || undefined,
+        notes: confirmationData.notes,
+        envoyer_notification: true,
+      });
+
+      const result = await rdvResponsableApi.confirmerRendezVous({
         rendez_vous_id: selectedDemande.id,
         docteur_id: confirmationData.docteur_id ? parseInt(confirmationData.docteur_id) : undefined,
         date_confirmee: confirmationData.date_confirmee || undefined,
         notes: confirmationData.notes,
         envoyer_notification: true, // Envoyer notification automatiquement
       });
+
+      console.log('✅ Réponse API:', result);
 
       toast({
         title: "✅ Rendez-vous confirmé !",
@@ -147,11 +173,13 @@ const RendezVousManagement: React.FC = () => {
 
       setConfirmationModal(false);
       setConfirmationData({ docteur_id: '', date_confirmee: '', notes: '' });
-      loadData(); // Recharger les données
+      await loadData(); // Recharger les données
+      await loadDoctors(); // Recharger spécifiquement les médecins
     } catch (error: any) {
+      console.error('❌ Erreur détaillée:', error);
       toast({
         title: "❌ Erreur",
-        description: error.message,
+        description: error.message || "Erreur lors de la confirmation",
         variant: "destructive",
       });
     }
@@ -177,7 +205,8 @@ const RendezVousManagement: React.FC = () => {
 
       setModificationModal(false);
       setModificationData({ date_confirmee: '', docteur_id: '', notes: '', raison_modification: '' });
-      loadData();
+      await loadData();
+      await loadDoctors(); // Recharger spécifiquement les médecins
     } catch (error: any) {
       toast({
         title: "❌ Erreur",
@@ -195,7 +224,8 @@ const RendezVousManagement: React.FC = () => {
         title: "✅ Demande supprimée",
         description: "La demande de rendez-vous a été supprimée",
       });
-      loadData();
+      await loadData();
+      await loadDoctors(); // Recharger spécifiquement les médecins
     } catch (error: any) {
       toast({
         title: "❌ Erreur",
@@ -293,7 +323,7 @@ const RendezVousManagement: React.FC = () => {
           ? new Date(appointment.date_confirmee).toLocaleString('fr-FR')
           : 'Non confirmée',
         appointment.docteur 
-          ? `Dr. ${appointment.docteur.first_name} ${appointment.docteur.last_name}`
+          ? `Dr. ${appointment.docteur.firstName} ${appointment.docteur.lastName}`
           : 'Non assigné',
         appointment.statut,
         appointment.prix_consultation 
@@ -362,6 +392,7 @@ const RendezVousManagement: React.FC = () => {
       
       // Recharger les données
       await loadData();
+      await loadDoctors(); // Recharger spécifiquement les médecins
       
     } catch (error: any) {
       console.error('Erreur lors de la création du rendez-vous:', error);
@@ -414,10 +445,30 @@ const RendezVousManagement: React.FC = () => {
           <p className="text-gray-600 mt-2">Gérez les demandes de rendez-vous des clients/visiteurs</p>
         </div>
         
-        {/* Boutons d'action */}
-        <div className="flex space-x-2">
-          {/* Bouton Liste des Rendez-vous */}
-          <Dialog open={isListModalOpen} onOpenChange={setIsListModalOpen}>
+                 {/* Boutons d'action */}
+         <div className="flex space-x-2">
+           {/* Bouton Rafraîchir les médecins */}
+           <Button 
+             variant="outline"
+             onClick={async () => {
+               toast({
+                 title: "🔄 Rafraîchissement",
+                 description: "Rechargement de la liste des médecins...",
+               });
+               await loadDoctors();
+               toast({
+                 title: "✅ Succès",
+                 description: `Liste des médecins mise à jour (${docteurs.length} médecins)`,
+               });
+             }}
+             className="hover:opacity-90 transition-all duration-300"
+           >
+             <RefreshCw className="mr-2 h-4 w-4" />
+             Rafraîchir Médecins
+           </Button>
+           
+           {/* Bouton Liste des Rendez-vous */}
+           <Dialog open={isListModalOpen} onOpenChange={setIsListModalOpen}>
             <DialogTrigger asChild>
               <Button 
                 variant="outline"
@@ -468,8 +519,8 @@ const RendezVousManagement: React.FC = () => {
                     </thead>
                     <tbody>
                       {Array.isArray(allAppointments) && allAppointments.map((appointment) => {
-                        const clientName = appointment.patient?.user?.first_name 
-                          ? `${appointment.patient.user.first_name} ${appointment.patient.user.last_name}`
+                        const clientName = appointment.patient?.user?.firstName
+                          ? `${appointment.patient.user.firstName} ${appointment.patient.user.lastName}`
                           : appointment.client_nom || 'N/A';
                         const clientType = appointment.patient ? 'Patient' : 'Client';
                         
@@ -502,7 +553,7 @@ const RendezVousManagement: React.FC = () => {
                             </td>
                             <td className="border border-gray-300 px-3 py-2">
                               {appointment.docteur 
-                                ? `Dr. ${appointment.docteur.first_name} ${appointment.docteur.last_name}`
+                                ? `Dr. ${appointment.docteur.firstName} ${appointment.docteur.lastName}`
                                 : 'Non assigné'
                               }
                             </td>
@@ -524,23 +575,23 @@ const RendezVousManagement: React.FC = () => {
               )}
             </DialogContent>
           </Dialog>
-
-          {/* Bouton Nouveau RDV */}
-          <Dialog open={isAppointmentFormOpen} onOpenChange={setIsAppointmentFormOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                className="hover:opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl" 
-                style={{ background: 'linear-gradient(135deg, #6C2476 0%, #B0368B 100%)' }}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Nouveau RDV
-              </Button>
-            </DialogTrigger>
-            <AppointmentForm 
-              onSubmit={handleCreateAppointment}
-              onCancel={() => setIsAppointmentFormOpen(false)}
-            />
-          </Dialog>
+        
+        {/* Bouton Nouveau RDV */}
+        <Dialog open={isAppointmentFormOpen} onOpenChange={setIsAppointmentFormOpen}>
+          <DialogTrigger asChild>
+            <Button 
+              className="hover:opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl" 
+              style={{ background: 'linear-gradient(135deg, #6C2476 0%, #B0368B 100%)' }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Nouveau RDV
+            </Button>
+          </DialogTrigger>
+          <AppointmentForm 
+            onSubmit={handleCreateAppointment}
+            onCancel={() => setIsAppointmentFormOpen(false)}
+          />
+        </Dialog>
         </div>
       </div>
 
@@ -634,7 +685,7 @@ const RendezVousManagement: React.FC = () => {
                       </div>
                       {demande.docteur && (
                         <div className="text-sm">
-                          <span className="font-medium">Médecin assigné:</span> {demande.docteur.first_name} {demande.docteur.last_name}
+                          <span className="font-medium">Médecin assigné:</span> {demande.docteur.firstName} {demande.docteur.lastName}
                         </div>
                       )}
                       {demande.date_confirmee && (
@@ -684,18 +735,23 @@ const RendezVousManagement: React.FC = () => {
                     Voir détails
                   </Button>
 
-                  {/* Bouton Confirmer */}
-                  <Dialog open={confirmationModal && selectedDemande?.id === demande.id} onOpenChange={setConfirmationModal}>
-                    <DialogTrigger asChild>
-                      <Button
-                        size="sm"
-                        onClick={() => setSelectedDemande(demande)}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        <Check className="w-4 h-4 mr-1" />
-                        Confirmer
-                      </Button>
-                    </DialogTrigger>
+                                     {/* Bouton Confirmer */}
+                   <Dialog open={confirmationModal && selectedDemande?.id === demande.id} onOpenChange={setConfirmationModal}>
+                     <DialogTrigger asChild>
+                       <Button
+                         size="sm"
+                         onClick={async () => {
+                           setSelectedDemande(demande);
+                           // Recharger automatiquement la liste des médecins quand on ouvre le modal
+                           console.log('🔄 Rechargement automatique des médecins pour le modal de confirmation...');
+                           await loadDoctors();
+                         }}
+                         className="bg-green-600 hover:bg-green-700"
+                       >
+                         <Check className="w-4 h-4 mr-1" />
+                         Confirmer
+                       </Button>
+                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Confirmer le rendez-vous</DialogTitle>
@@ -703,18 +759,60 @@ const RendezVousManagement: React.FC = () => {
                       <div className="space-y-4">
                         <div>
                           <label className="text-sm font-medium">Médecin (optionnel)</label>
-                          <Select value={confirmationData.docteur_id} onValueChange={(value) => setConfirmationData(prev => ({ ...prev, docteur_id: value }))}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Sélectionner un médecin" />
-                            </SelectTrigger>
+                                                     <Select value={confirmationData.docteur_id} onValueChange={(value) => setConfirmationData(prev => ({ ...prev, docteur_id: value }))}>
+                             <SelectTrigger onClick={async () => {
+                               // Recharger automatiquement la liste des médecins quand on clique sur le champ
+                               console.log('🔄 Rechargement automatique des médecins au clic sur le champ...');
+                               await loadDoctors();
+                             }}>
+                               <SelectValue placeholder="Sélectionner un médecin" />
+                             </SelectTrigger>
                             <SelectContent>
-                              {docteurs.map((docteur) => (
-                                <SelectItem key={docteur.id} value={docteur.id.toString()}>
-                                  {docteur.first_name} {docteur.last_name} - {docteur.speciality}
-                                </SelectItem>
-                              ))}
+                              {(() => {
+                                console.log('🎯 Rendu du SelectContent (CONFIRMATION) - Nombre de docteurs:', docteurs.length);
+                                console.log('🎯 Docteurs dans le state (CONFIRMATION):', docteurs);
+                                
+                                if (Array.isArray(docteurs) && docteurs.length > 0) {
+                                  return docteurs.map((doctor, index) => {
+                                    console.log(`🎯 Rendu SelectItem CONFIRMATION ${index + 1}:`, {
+                                      id: doctor.id,
+                                      firstName: doctor.firstName,
+                                      lastName: doctor.lastName,
+                                      speciality: doctor.speciality
+                                    });
+                                    return (
+                                      <SelectItem key={doctor.id} value={doctor.id.toString()}>
+                                        Dr. {doctor.firstName} {doctor.lastName} {doctor.speciality ? `- ${doctor.speciality}` : ''}
+                                      </SelectItem>
+                                    );
+                                  });
+                                } else {
+                                  console.log('🎯 Aucun docteur disponible dans le Select (CONFIRMATION)');
+                                  return (
+                                    <SelectItem value="" disabled>
+                                      Aucun médecin disponible
+                                    </SelectItem>
+                                  );
+                                }
+                              })()}
                             </SelectContent>
                           </Select>
+                          {docteurs.length === 0 && (
+                            <div className="mt-2">
+                              <p className="text-sm text-red-500 mb-2">
+                                ⚠️ Aucun médecin chargé.
+                              </p>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={loadDoctors}
+                                className="text-xs"
+                              >
+                                <RefreshCw className="w-3 h-3 mr-1" />
+                                Recharger
+                              </Button>
+                            </div>
+                          )}
                         </div>
                         <div>
                           <label className="text-sm font-medium">Date confirmée (optionnel)</label>
@@ -744,18 +842,23 @@ const RendezVousManagement: React.FC = () => {
                     </DialogContent>
                   </Dialog>
 
-                  {/* Bouton Modifier */}
-                  <Dialog open={modificationModal && selectedDemande?.id === demande.id} onOpenChange={setModificationModal}>
-                    <DialogTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setSelectedDemande(demande)}
-                      >
-                        <Edit className="w-4 h-4 mr-1" />
-                        Modifier
-                      </Button>
-                    </DialogTrigger>
+                                     {/* Bouton Modifier */}
+                   <Dialog open={modificationModal && selectedDemande?.id === demande.id} onOpenChange={setModificationModal}>
+                     <DialogTrigger asChild>
+                       <Button
+                         size="sm"
+                         variant="outline"
+                         onClick={async () => {
+                           setSelectedDemande(demande);
+                           // Recharger automatiquement la liste des médecins quand on ouvre le modal
+                           console.log('🔄 Rechargement automatique des médecins pour le modal de modification...');
+                           await loadDoctors();
+                         }}
+                       >
+                         <Edit className="w-4 h-4 mr-1" />
+                         Modifier
+                       </Button>
+                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Modifier le rendez-vous</DialogTitle>
@@ -772,18 +875,49 @@ const RendezVousManagement: React.FC = () => {
                         </div>
                         <div>
                           <label className="text-sm font-medium">Médecin (optionnel)</label>
-                          <Select value={modificationData.docteur_id} onValueChange={(value) => setModificationData(prev => ({ ...prev, docteur_id: value }))}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Sélectionner un médecin" />
-                            </SelectTrigger>
+                                                     <Select value={modificationData.docteur_id} onValueChange={(value) => setModificationData(prev => ({ ...prev, docteur_id: value }))}>
+                             <SelectTrigger onClick={async () => {
+                               // Recharger automatiquement la liste des médecins quand on clique sur le champ
+                               console.log('🔄 Rechargement automatique des médecins au clic sur le champ (modification)...');
+                               await loadDoctors();
+                             }}>
+                               <SelectValue placeholder="Sélectionner un médecin" />
+                             </SelectTrigger>
                             <SelectContent>
-                              {docteurs.map((docteur) => (
-                                <SelectItem key={docteur.id} value={docteur.id.toString()}>
-                                  {docteur.first_name} {docteur.last_name} - {docteur.speciality}
-                                </SelectItem>
-                              ))}
+                              {(() => {
+                                console.log('🎯 Rendu du SelectContent (MODIFICATION) - Nombre de docteurs:', docteurs.length);
+                                console.log('🎯 Docteurs dans le state (MODIFICATION):', docteurs);
+                                
+                                if (Array.isArray(docteurs) && docteurs.length > 0) {
+                                  return docteurs.map((doctor, index) => {
+                                    console.log(`🎯 Rendu SelectItem MODIFICATION ${index + 1}:`, {
+                                      id: doctor.id,
+                                      firstName: doctor.firstName,
+                                      lastName: doctor.lastName,
+                                      speciality: doctor.speciality
+                                    });
+                                    return (
+                                      <SelectItem key={doctor.id} value={doctor.id.toString()}>
+                                        Dr. {doctor.firstName} {doctor.lastName} {doctor.speciality ? `- ${doctor.speciality}` : ''}
+                                      </SelectItem>
+                                    );
+                                  });
+                                } else {
+                                  console.log('🎯 Aucun docteur disponible dans le Select (MODIFICATION)');
+                                  return (
+                                    <SelectItem value="" disabled>
+                                      Aucun médecin disponible
+                                    </SelectItem>
+                                  );
+                                }
+                              })()}
                             </SelectContent>
                           </Select>
+                          {docteurs.length === 0 && (
+                            <p className="text-sm text-red-500 mt-1">
+                              ⚠️ Aucun médecin chargé. Vérifiez la console pour les erreurs.
+                            </p>
+                          )}
                         </div>
                         <div>
                           <label className="text-sm font-medium">Raison de la modification</label>
@@ -923,3 +1057,5 @@ const RendezVousManagement: React.FC = () => {
 };
 
 export default RendezVousManagement;
+
+

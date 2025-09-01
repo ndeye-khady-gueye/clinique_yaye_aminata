@@ -7,7 +7,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Users, Calendar, Search, Plus, Clock, AlertTriangle, Eye } from 'lucide-react';
-import PatientRegistrationForm from './forms/PatientRegistrationForm'
+import PatientEnregistreForm from './forms/PatientEnregistreForm';
+import { patientEnregistreService } from '@/services/patientEnregistreService';
+import { toast } from '@/components/ui/use-toast';
+
+
+
+
 
 const ClientRegistrationTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -124,25 +130,45 @@ const ClientRegistrationTable = () => {
     client.motifVisite.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddClient = (data: any) => {
-    const newClient = {
-      id: clientsData.length + 1,
-      date: new Date(data.date).toLocaleDateString('fr-FR').slice(0, 8) + '25',
-      nom: data.nom.toUpperCase(),
-      prenom: data.prenom.toUpperCase(),
-      age: parseInt(data.age) || null,
-      motifVisite: data.typeConsultation,
-      observationsNotes: data.observationsNotes,
-      telephone: data.telephone,
-      typeConsultation: data.typeConsultation,
-      prix: data.consultationPrice,
-      status: 'enregistré',
-      heure: data.registrationTime
-    };
-    
-    setClientsData([...clientsData, newClient]);
-    setIsFormOpen(false);
-    console.log('Nouveau client enregistré:', newClient);
+  const handleAddClient = async (data: any) => {
+    try {
+      // Créer le patient enregistré directement
+      const newPatient = await patientEnregistreService.createPatientEnregistre(data);
+      
+      // Ajouter le nouveau client à la liste locale
+      const newClient = {
+        id: newPatient.id,
+        date: new Date().toLocaleDateString('fr-FR'),
+        nom: data.nom.toUpperCase(),
+        prenom: data.prenom.toUpperCase(),
+        age: data.age || null,
+        motifVisite: data.motif_visite,
+        observationsNotes: data.observations_notes || '',
+        telephone: data.telephone || '',
+        typeConsultation: data.type_consultation,
+        prix: data.prix_consultation,
+        status: 'enregistré',
+        heure: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+      };
+
+      setClientsData([...clientsData, newClient]);
+      setIsFormOpen(false);
+      
+      toast({
+        title: "Succès",
+        description: "Nouveau patient enregistré avec succès !",
+        variant: "success",
+      });
+      
+      console.log('Nouveau patient enregistré:', newClient);
+    } catch (error) {
+      console.error('Erreur lors de la création du patient:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de l'enregistrement du patient",
+        variant: "destructive",
+      });
+    }
   };
 
   const todayClients = filteredClients.filter(client => 
@@ -164,10 +190,10 @@ const ClientRegistrationTable = () => {
                 Nouveau Client
               </Button>
             </DialogTrigger>
-            <PatientRegistrationForm 
-              onSubmit={handleAddClient}
-              onCancel={() => setIsFormOpen(false)}
-            />
+                         <PatientEnregistreForm 
+               onSubmit={handleAddClient}
+               onCancel={() => setIsFormOpen(false)}
+             />
           </Dialog>
         </CardTitle>
         <CardDescription>

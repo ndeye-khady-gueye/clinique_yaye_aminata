@@ -70,6 +70,73 @@ class Patient(models.Model):
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
 
+class PatientEnregistre(models.Model):
+    """Modèle pour les patients enregistrés temporairement (sans compte utilisateur)"""
+    
+    TYPE_CONSULTATION_CHOICES = [
+        ('MEDECIN', 'Médecin'),
+        ('GYNECO', 'Gynécologie'),
+        ('PEDIATRIE', 'Pédiatrie'),
+        ('SAGE_FEMME', 'Sage-femme'),
+        ('ENFANT', 'Enfant'),
+        ('AUTRE', 'Autre'),
+    ]
+    
+    STATUT_CHOICES = [
+        ('enregistre', 'Enregistré'),
+        ('en_attente', 'En attente'),
+        ('en_consultation', 'En consultation'),
+        ('termine', 'Terminé'),
+    ]
+    
+    # Informations de base
+    nom = models.CharField(max_length=100, verbose_name="Nom")
+    prenom = models.CharField(max_length=100, verbose_name="Prénom")
+    telephone = models.CharField(max_length=15, blank=True, null=True, verbose_name="Téléphone")
+    email = models.EmailField(blank=True, null=True, verbose_name="Email")
+    
+    # Informations médicales
+    age = models.PositiveIntegerField(blank=True, null=True, verbose_name="Âge")
+    motif_visite = models.CharField(max_length=200, verbose_name="Motif de la visite")
+    observations_notes = models.TextField(blank=True, null=True, verbose_name="Observations/Notes")
+    
+    # Informations de consultation
+    type_consultation = models.CharField(max_length=20, choices=TYPE_CONSULTATION_CHOICES, default='MEDECIN')
+    prix_consultation = models.DecimalField(max_digits=10, decimal_places=2, default=5000, verbose_name="Prix consultation")
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='enregistre')
+    
+    # Horodatage
+    date_enregistrement = models.DateField(auto_now_add=True, verbose_name="Date d'enregistrement")
+    heure_enregistrement = models.TimeField(auto_now_add=True, verbose_name="Heure d'enregistrement")
+    
+    # Informations supplémentaires (optionnelles)
+    profession = models.CharField(max_length=100, blank=True, null=True)
+    adresse = models.TextField(blank=True, null=True)
+    antecedents_medicaux = models.TextField(blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Patient Enregistré"
+        verbose_name_plural = "Patients Enregistrés"
+        ordering = ['-date_enregistrement', '-heure_enregistrement']
+    
+    def __str__(self):
+        return f"{self.nom} {self.prenom} - {self.date_enregistrement}"
+    
+    @property
+    def nom_complet(self):
+        return f"{self.nom} {self.prenom}"
+    
+    @property
+    def statut_display(self):
+        return dict(self.STATUT_CHOICES)[self.statut]
+    
+    @property
+    def type_consultation_display(self):
+        return dict(self.TYPE_CONSULTATION_CHOICES)[self.type_consultation]
+
 class Service(models.Model):
     """Modèle pour les services médicaux"""
     

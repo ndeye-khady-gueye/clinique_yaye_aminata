@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import User, Patient, Service, RendezVous, Consultation, Prescription, Paiement, DossierMedical, Contact
+from .models import User, Patient, Service, RendezVous, Consultation, Prescription, Paiement, DossierMedical, Contact, PatientEnregistre
 import re
 
 class UserSerializer(serializers.ModelSerializer):
@@ -219,6 +219,45 @@ class LoginSerializer(serializers.Serializer):
         
         data['user'] = authenticated_user
         return data
+
+class PatientEnregistreSerializer(serializers.ModelSerializer):
+    """Sérialiseur pour les patients enregistrés temporairement"""
+    
+    class Meta:
+        model = PatientEnregistre
+        fields = [
+            'id', 'nom', 'prenom', 'telephone', 'email', 'age', 'motif_visite', 
+            'observations_notes', 'type_consultation', 'prix_consultation', 'statut',
+            'date_enregistrement', 'heure_enregistrement', 'profession', 'adresse', 
+            'antecedents_medicaux', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'date_enregistrement', 'heure_enregistrement', 'created_at', 'updated_at']
+    
+    def validate(self, attrs):
+        # Validation basique
+        if not attrs.get('nom') or not attrs.get('prenom'):
+            raise serializers.ValidationError("Le nom et le prénom sont obligatoires")
+        
+        if not attrs.get('motif_visite'):
+            raise serializers.ValidationError("Le motif de la visite est obligatoire")
+        
+        # Validation de l'âge si fourni
+        if attrs.get('age') is not None and attrs['age'] < 0:
+            raise serializers.ValidationError("L'âge ne peut pas être négatif")
+        
+        # Validation du prix si fourni
+        if attrs.get('prix_consultation') is not None and attrs['prix_consultation'] < 0:
+            raise serializers.ValidationError("Le prix ne peut pas être négatif")
+        
+        return attrs
+    
+    def create(self, validated_data):
+        # Définir le statut par défaut
+        validated_data.setdefault('statut', 'enregistre')
+        
+        # Créer le patient enregistré
+        patient = PatientEnregistre.objects.create(**validated_data)
+        return patient
 
 class PatientSerializer(serializers.ModelSerializer):
     """Sérialiseur pour les patients"""

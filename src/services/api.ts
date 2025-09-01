@@ -241,7 +241,69 @@ class ApiService {
 
   async getDoctors(): Promise<User[]> {
     const response = await this.request<any>('/users/?role=doctor');
-    return response.results || response;
+    const doctors = response.results || response;
+    
+    console.log('🔍 Données brutes des médecins depuis API:', doctors);
+    
+    // Nettoyer et formater les données des médecins
+    const formattedDoctors = doctors.map((doctor: any) => {
+      // L'API retourne first_name et last_name séparés
+      let firstName = doctor.first_name || 'Nom non défini';
+      let lastName = doctor.last_name || 'Prénom non défini';
+      
+      console.log(`🔍 Médecin ID ${doctor.id}:`, {
+        first_name: doctor.first_name,
+        last_name: doctor.last_name,
+        speciality: doctor.speciality
+      });
+      
+      // Nettoyer le first_name s'il contient "Dr."
+      if (firstName && firstName.includes('Dr.')) {
+        firstName = firstName.replace(/^Dr\.?\s*/i, '').trim();
+      }
+      
+      // Nettoyer le last_name s'il contient "Dr."
+      if (lastName && lastName.includes('Dr.')) {
+        lastName = lastName.replace(/^Dr\.?\s*/i, '').trim();
+      }
+      
+      const formattedDoctor = {
+        ...doctor,
+        firstName: firstName,
+        lastName: lastName,
+        speciality: doctor.speciality || 'Spécialité non définie'
+      };
+      
+      console.log(`✅ Médecin formaté ID ${doctor.id}:`, formattedDoctor);
+      
+      return formattedDoctor;
+    });
+    
+    // Filtrer les doublons basés sur firstName + lastName
+    const uniqueDoctors = formattedDoctors.filter((doctor, index, self) => {
+      const nameKey = `${doctor.firstName} ${doctor.lastName}`.toLowerCase();
+      const firstIndex = self.findIndex(d => 
+        `${d.firstName} ${d.lastName}`.toLowerCase() === nameKey
+      );
+      return index === firstIndex;
+    });
+    
+    console.log(`🔍 Docteurs après filtrage des doublons: ${uniqueDoctors.length} (sur ${formattedDoctors.length})`);
+    
+    // Log des doublons supprimés
+    const duplicates = formattedDoctors.filter((doctor, index, self) => {
+      const nameKey = `${doctor.firstName} ${doctor.lastName}`.toLowerCase();
+      const firstIndex = self.findIndex(d => 
+        `${d.firstName} ${d.lastName}`.toLowerCase() === nameKey
+      );
+      return index !== firstIndex;
+    });
+    
+    if (duplicates.length > 0) {
+      console.log('⚠️ Doublons supprimés:', duplicates.map(d => `${d.firstName} ${d.lastName} (ID: ${d.id})`));
+    }
+    
+    return uniqueDoctors;
   }
 
   async createUser(userData: any): Promise<User> {

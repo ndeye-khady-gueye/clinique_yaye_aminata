@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.contrib.admin.models import LogEntry, CHANGE, ADDITION
 from django.contrib.contenttypes.models import ContentType
-from .models import User, Patient, Service, RendezVous, Consultation, Prescription, Paiement, DossierMedical, Contact
+from .models import User, Patient, Service, RendezVous, Consultation, Prescription, Paiement, DossierMedical, Contact, PatientEnregistre
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
@@ -64,6 +64,47 @@ class PatientAdmin(admin.ModelAdmin):
             object_repr=str(obj),
             action_flag=CHANGE if change else ADDITION,
             change_message="Modification du patient" if change else "Création du patient"
+        )
+
+@admin.register(PatientEnregistre)
+class PatientEnregistreAdmin(admin.ModelAdmin):
+    """Admin pour les patients enregistrés temporairement"""
+    list_display = ('nom', 'prenom', 'telephone', 'age', 'motif_visite', 'type_consultation', 'statut', 'date_enregistrement', 'heure_enregistrement')
+    list_filter = ('statut', 'type_consultation', 'date_enregistrement')
+    search_fields = ('nom', 'prenom', 'telephone', 'email')
+    readonly_fields = ('date_enregistrement', 'heure_enregistrement', 'created_at', 'updated_at')
+    date_hierarchy = 'date_enregistrement'
+    
+    fieldsets = (
+        ('Informations de base', {
+            'fields': ('nom', 'prenom', 'telephone', 'email', 'age')
+        }),
+        ('Informations médicales', {
+            'fields': ('motif_visite', 'observations_notes', 'antecedents_medicaux')
+        }),
+        ('Consultation', {
+            'fields': ('type_consultation', 'prix_consultation', 'statut')
+        }),
+        ('Informations supplémentaires', {
+            'fields': ('profession', 'adresse')
+        }),
+        ('Horodatage', {
+            'fields': ('date_enregistrement', 'heure_enregistrement', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        
+        # Log de l'action
+        LogEntry.objects.log_action(
+            user_id=request.user.id,
+            content_type_id=ContentType.objects.get_for_model(obj).pk,
+            object_id=obj.pk,
+            object_repr=str(obj),
+            action_flag=CHANGE if change else ADDITION,
+            change_message="Modification du patient enregistré" if change else "Enregistrement d'un nouveau patient"
         )
 
 @admin.register(Service)

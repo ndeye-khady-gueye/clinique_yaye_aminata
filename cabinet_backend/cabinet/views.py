@@ -15,12 +15,12 @@ import psutil
 from django.core.mail import send_mail
 import json
 
-from .models import User, Patient, Service, RendezVous, Consultation, Prescription, Paiement, DossierMedical, Contact
+from .models import User, Patient, Service, RendezVous, Consultation, Prescription, Paiement, DossierMedical, Contact, PatientEnregistre
 from .serializers import (
     UserSerializer, UserCreateSerializer, UserUpdateSerializer, RegisterSerializer, LoginSerializer, PatientSerializer, PatientCreateSerializer,
     ServiceSerializer, RendezVousSerializer, RendezVousCreateSerializer, ConsultationSerializer,
     PrescriptionSerializer, PaiementSerializer, DossierMedicalSerializer, StatistiquesSerializer,
-    ContactSerializer, ContactCreateSerializer, RendezVousResponsableSerializer, RendezVousConfirmationSerializer, RendezVousModificationSerializer, PatientCreationFromRendezVousSerializer
+    ContactSerializer, ContactCreateSerializer, RendezVousResponsableSerializer, RendezVousConfirmationSerializer, RendezVousModificationSerializer, PatientCreationFromRendezVousSerializer, PatientEnregistreSerializer
 )
 from .permissions import (
     IsAdminUser, IsResponsableCabinet, IsDoctor, IsReceptionist, IsPatient,
@@ -1113,3 +1113,44 @@ class RendezVousResponsableViewSet(viewsets.ModelViewSet):
                 )
         except Exception as e:
             print(f"Erreur lors de l'envoi de l'email: {e}")
+
+class PatientEnregistreViewSet(viewsets.ModelViewSet):
+    """Vues pour la gestion des enregistrements de patients temporaires"""
+    queryset = PatientEnregistre.objects.all()
+    serializer_class = PatientEnregistreSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        # Les réceptionnistes peuvent voir et créer des enregistrements
+        if user.role in ['admin', 'responsable_cabinet', 'receptionist']:
+            return PatientEnregistre.objects.all().order_by('-date_enregistrement')
+        return PatientEnregistre.objects.none()
+    
+    def create(self, request, *args, **kwargs):
+        """Créer un nouvel enregistrement de patient"""
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                patient = serializer.save()
+                return Response({
+                    'success': True,
+                    'message': 'Patient enregistré avec succès',
+                    'patient': PatientEnregistreSerializer(patient).data
+                }, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({
+                    'error': f'Erreur lors de l\'enregistrement: {str(e)}'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['get'])
+    def aujourd_hui(self, request):
+        """Récupérer les enregistrements d'aujourd'hui"""
+        from django.utils import timezone
+        aujourd_hui = timezone.now().date()
+        enregistrements = PatientEnregistre.objects.filter(
+            date_enregistrement=aujourd_hui
+        ).order_by('-heure_enregistrement')
+        serializer = PatientEnregistreSerializer(enregistrements, many=True)
+        return Response(serializer.data)
