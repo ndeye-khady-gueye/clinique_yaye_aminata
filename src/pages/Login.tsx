@@ -98,43 +98,43 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
-      {/* Flèche de retour vers l'accueil */}
-      <div className="absolute top-6 right-6">
-        <Link to="/" className="flex items-center space-x-2 text-gray-600 hover:text-primary transition-colors">
-          <ArrowLeft className="h-4 w-4" />
-          <span className="text-sm">Retour à l'accueil</span>
+      {/* Flèche de retour vers l'accueil - Responsive */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
+        <Link to="/" className="flex items-center space-x-1 sm:space-x-2 text-gray-600 hover:text-primary transition-colors">
+          <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+          <span className="text-xs sm:text-sm">Retour à l'accueil</span>
         </Link>
       </div>
 
-      <div className="flex items-center justify-center p-4 min-h-screen">
-        <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+      <div className="flex items-center justify-center p-4 sm:p-6 lg:p-8 min-h-screen">
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 xl:gap-12 items-center">
           
-          {/* Logo et titre */}
-          <div className="text-center lg:text-left">
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-primary">CABINET</h1>
-              <p className="text-lg text-gray-600">YAYE AMINATA</p>
+          {/* Logo et titre - Responsive */}
+          <div className="text-center lg:text-left order-2 lg:order-1">
+            <div className="mb-4 sm:mb-6">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary">CABINET</h1>
+              <p className="text-base sm:text-lg lg:text-xl text-gray-600">YAYE AMINATA</p>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-800 mb-3 sm:mb-4">
               <span className="inline-block">
                 {displayText}
                 <span 
-                  className={`inline-block w-1 h-8 bg-primary ml-1 transition-opacity duration-200 ${
+                  className={`inline-block w-0.5 sm:w-1 h-6 sm:h-8 bg-primary ml-1 transition-opacity duration-200 ${
                     showCursor ? 'opacity-100' : 'opacity-0'
                   }`}
                 />
               </span>
             </h2>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
               Connectez-vous pour accéder à votre tableau de bord personnalisé
             </p>
           </div>
 
-          {/* Formulaire de connexion */}
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle className="text-2xl text-center">Se connecter</CardTitle>
-              <CardDescription className="text-center">
+          {/* Formulaire de connexion - Responsive */}
+          <Card className="w-full order-1 lg:order-2">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-xl sm:text-2xl text-center">Se connecter</CardTitle>
+              <CardDescription className="text-center text-sm sm:text-base">
                 Entrez vos identifiants pour accéder à votre compte
               </CardDescription>
               
@@ -169,12 +169,12 @@ const Login = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6">
               {currentStep === 1 ? (
-                // Étape 1 : Identification
-                <form onSubmit={handleIdentifierSubmit} className="space-y-4">
+                // Étape 1 : Identification - Responsive
+                <form onSubmit={handleIdentifierSubmit} className="form-responsive">
                   <div className="space-y-2">
-                    <label htmlFor="identifier" className="text-sm font-medium">
+                    <label htmlFor="identifier" className="text-sm font-medium text-gray-700">
                       Email ou numéro de téléphone
                     </label>
                     <div className="relative">
@@ -185,7 +185,7 @@ const Login = () => {
                         placeholder="votre@email.com ou 771234567"
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
-                        className="pl-10"
+                        className="input-responsive pl-10"
                         disabled={isLoading}
                       />
                     </div>
@@ -196,17 +196,17 @@ const Login = () => {
 
                   <Button 
                     type="submit" 
-                    className="w-full hover:opacity-90"
+                    className="w-full hover:opacity-90 btn-responsive"
                     disabled={isLoading}
                   >
                     Continuer
                   </Button>
                 </form>
               ) : (
-                // Étape 2 : Mot de passe
-                <form onSubmit={handleSubmit} className="space-y-4">
+                // Étape 2 : Mot de passe - Responsive
+                <form onSubmit={handleSubmit} className="form-responsive">
                   <div className="space-y-2">
-                    <label htmlFor="password" className="text-sm font-medium">Mot de passe</label>
+                    <label htmlFor="password" className="text-sm font-medium text-gray-700">Mot de passe</label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
@@ -215,7 +215,7 @@ const Login = () => {
                         placeholder="••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10"
+                        className="input-responsive pl-10"
                         disabled={isLoading}
                       />
                     </div>
@@ -223,22 +223,20 @@ const Login = () => {
 
                   {error && (
                     <div className="flex items-center space-x-2 text-red-600 text-sm">
-                      <AlertCircle className="h-4 w-4" />
-                      <span>{error}</span>
+                      <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                      <span className="break-words">{error}</span>
                     </div>
                   )}
 
                   <Button 
                     type="submit" 
-                    className="w-full hover:opacity-90"
+                    className="w-full hover:opacity-90 btn-responsive"
                     disabled={isLoading}
                   >
                     {isLoading ? 'Connexion...' : 'Se connecter'}
                   </Button>
                 </form>
               )}
-
-
             </CardContent>
           </Card>
         </div>
