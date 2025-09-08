@@ -1,0 +1,42 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Test CSS - Cabinet Yaye Aminata{% endblock %}
+
+{% block extrastyle %}
+<link href="{% static 'admin/css/custom_admin.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div style="padding: 20px; text-align: center;">
+    <h1 style="color: #B0368B; margin-bottom: 20px;"> Test du CSS Personnalisé</h1>
+    
+    <div class="module" style="max-width: 600px; margin: 0 auto;">
+        <h2> Module de Test</h2>
+        <div style="padding: 20px;">
+            <p>Si vous voyez ce module avec des coins arrondis et un dégradé violet, le CSS fonctionne !</p>
+            
+            <div style="margin: 20px 0;">
+                <a href="#" class="button">Bouton de Test</a>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <span class="field-statut confirme">Statut Confirmé</span>
+                <span class="field-statut en_attente">En Attente</span>
+                <span class="field-statut annule">Annulé</span>
+            </div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <p><strong>Instructions :</strong></p>
+        <ol style="text-align: left; max-width: 500px; margin: 0 auto;">
+            <li>Vérifiez que le module a des coins arrondis</li>
+            <li>Vérifiez que le header a un dégradé violet</li>
+            <li>Vérifiez que les boutons ont un style moderne</li>
+            <li>Vérifiez que les badges de statut sont colorés</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}
+

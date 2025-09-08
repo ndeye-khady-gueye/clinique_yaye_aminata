@@ -1,0 +1,561 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="?export=pdf" class="service-btn pdf" title="Télécharger la liste des services en PDF">
+             Télécharger PDF
+        </a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    <!-- Section des graphiques -->
+    <div class="charts-dashboard" style="margin-bottom: 30px;">
+        <h2 style="color: #B0368B; margin-bottom: 20px; font-size: 24px;"> Tableau de Bord des Services</h2>
+        
+        <!-- Informations sur les filtres actifs -->
+        <div id="filter-info" style="background: #e0f2fe; padding: 12px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #B0368B; font-size: 14px;">
+            <strong>Données affichées:</strong> 
+            <span id="filter-count">{{ total_filtered_count|default:"Tous les services" }}</span> services
+            {% if active_filters %}
+                <div style="margin-top: 8px; font-size: 13px; color: #6b7280;">
+                    <strong>Filtres actifs:</strong>
+                    {% for key, value in active_filters.items %}
+                        <span class="filter-badge">{{ key }}: {{ value }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Debug info -->
+        <div id="debug-info" style="background: #f0f0f0; padding: 10px; margin-bottom: 20px; border-radius: 5px; font-family: monospace; font-size: 12px;">
+            Debug: Chargement des données...
+        </div>
+        
+        <div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            <!-- Graphique services par statut -->
+            <div class="chart-container">
+                <div class="chart-card">
+                    <h3>Services par Statut</h3>
+                    <canvas id="statusChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+            
+            <!-- Graphique services par prix -->
+            <div class="chart-container">
+                <div class="chart-card">
+                    <h3>Répartition par Prix</h3>
+                    <canvas id="priceChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+            
+            <!-- Graphique services les plus demandés -->
+            <div class="chart-container">
+                <div class="chart-card">
+                    <h3>Tous les Services</h3>
+                    <div style="margin-bottom: 10px;">
+                        <input type="text" id="serviceFilter" placeholder="Filtrer par nom de service..." 
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+                    <canvas id="popularChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+            
+            <!-- Graphique durée consultation -->
+            <div class="chart-container">
+                <div class="chart-card">
+                    <h3>Durée de Consultation</h3>
+                    <canvas id="durationChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Espacement entre les graphiques et les boutons -->
+    <div style="margin: 30px 0;"></div>
+    
+    {{ block.super }}
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Styles pour les graphiques */
+        .charts-dashboard {
+            background: #e8afde;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .chart-card {
+            background:#6C2476;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            height: 300px;
+        }
+        
+        .chart-card canvas {
+            max-height: 220px !important;
+        }
+        
+        .chart-card h3 {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid #B0368B;
+            padding-bottom: 8px;
+        }
+        
+        /* Styles pour les badges de filtres */
+        .filter-badge {
+            background: #B0368B;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 8px;
+            display: inline-block;
+        }
+        
+        /* Styles pour le bouton Télécharger PDF */
+        .service-btn.pdf {
+            background: #6C2476 !important;
+            color: #ffffff !important;
+            border: none !important;
+            padding: 10px 18px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 8px !important;
+            box-shadow: 0 3px 12px rgba(108, 36, 118, 0.3) !important;
+            transition: all 0.3s ease !important;
+            position: relative !important;
+            overflow: hidden !important;
+            margin-top: 50px;
+            margin-right: 300px !important;
+        }
+
+        .service-btn.pdf:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .service-btn.pdf:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 5px 15px rgba(108, 36, 118, 0.4) !important;
+            background: linear-gradient(135deg, #6C2476, #B0368B) !important;
+        }
+
+        .service-btn.pdf:hover:before {
+            left: 100%;
+        }
+
+        .service-btn.pdf:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 8px rgba(108, 36, 118, 0.3) !important;
+        }
+
+        /* Amélioration du bouton Ajouter existant */
+        .object-tools li a.addlink {
+            background: #ffffff !important;
+            color: #B0368B !important;
+            border: none !important;
+            padding: 10px 18px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+            text-decoration: none !important;
+            border: 1px solid #B0368B !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            box-shadow: 0 4px 15px rgba(176, 54, 139, 0.3) !important;
+            transition: all 0.3s ease !important;
+            position: relative !important;
+            overflow: hidden !important; 
+            margin-right: 20px !important;
+            margin-top: 50px;
+        }
+
+        .object-tools li a.addlink:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .object-tools li a.addlink:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(176, 54, 139, 0.4) !important;
+            background: linear-gradient(135deg, #6C2476, #B0368B) !important;
+            color: white !important;
+        }
+
+        .object-tools li a.addlink:hover:before {
+            left: 100%;
+        }
+
+        .object-tools li a.addlink:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 10px rgba(176, 54, 139, 0.3) !important;
+        }
+
+        /* Responsive design pour les graphiques */
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .chart-card {
+                padding: 15px;
+                height: auto;
+                min-height: 250px;
+            }
+            
+            .charts-dashboard {
+                padding: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .chart-card {
+                padding: 10px;
+            }
+            
+            .chart-card h3 {
+                font-size: 14px;
+            }
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const debugDiv = document.getElementById('debug-info');
+            
+            // Vérifier si Chart.js est chargé
+            if (typeof Chart === 'undefined') {
+                debugDiv.innerHTML = 'Erreur: Chart.js non chargé. Vérifiez votre connexion internet.';
+                debugDiv.style.background = '#fef2f2';
+                debugDiv.style.color = '#B0368B';
+                debugDiv.style.border = '1px solid #B0368B';
+                return;
+            }
+            
+            try {
+                // Configuration globale Chart.js
+                Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+                Chart.defaults.color = '#374151';
+                
+                debugDiv.innerHTML = 'Debug: Chart.js chargé, récupération des données...';
+                
+                // Données des graphiques depuis Django
+                let chartData;
+                try {
+                    {% if chart_data_json %}
+                        chartData = {{ chart_data_json|safe }};
+                        debugDiv.innerHTML = 'Debug: Données filtrées reçues - Total: {{ total_filtered_count|default:0 }} services';
+                        
+                        // Mettre à jour l'affichage du nombre de données
+                        const filterCountSpan = document.getElementById('filter-count');
+                        if (filterCountSpan) {
+                            filterCountSpan.textContent = '{{ total_filtered_count|default:0 }}';
+                        }
+                    {% else %}
+                        // Données de test si pas de données du backend
+                        chartData = {
+                            status: {
+                                labels: ['Actifs', 'Inactifs'],
+                                data: [15, 3],
+                                colors: ['#10b981', '#ef4444']
+                            },
+                            prices: {
+                                labels: ['0-25k', '25k-50k', '50k-75k', '75k+'],
+                                data: [8, 6, 3, 1],
+                                colors: ['#B0368B', '#6C2476', '#10b981', '#f59e0b']
+                            },
+                            popular: {
+                                labels: ['Consultation Générale', 'Échographie', 'Vaccination'],
+                                data: [25, 15, 10]
+                            },
+                            duration: {
+                                labels: ['15-30 min', '30-45 min', '45-60 min', '60+ min'],
+                                data: [5, 8, 4, 1]
+                            }
+                        };
+                        debugDiv.innerHTML = 'Debug: Utilisation de données de test (aucune donnée backend)';
+                    {% endif %}
+                } catch (parseError) {
+                    debugDiv.innerHTML = 'Debug: Erreur parsing données - ' + parseError.message;
+                    debugDiv.style.background = '#fef2f2';
+                    debugDiv.style.color = '#B0368B';
+                    debugDiv.style.border = '1px solid #B0368B';
+                    return;
+                }
+                
+                // Fonction helper pour créer les graphiques
+                function createChart(canvasId, config) {
+                    const canvas = document.getElementById(canvasId);
+                    if (!canvas) {
+                        console.warn('Canvas ' + canvasId + ' non trouvé');
+                        return null;
+                    }
+                    return new Chart(canvas.getContext('2d'), config);
+                }
+                
+                // Vérifier si nous avons des données à afficher
+                const hasData = chartData && (
+                    (chartData.status && chartData.status.data && chartData.status.data.length > 0) ||
+                    (chartData.prices && chartData.prices.data && chartData.prices.data.length > 0) ||
+                    (chartData.popular && chartData.popular.data && chartData.popular.data.length > 0)
+                );
+                
+                if (!hasData) {
+                    debugDiv.innerHTML = 'Debug: Aucune donnée à afficher avec les filtres actuels';
+                    debugDiv.style.background = '#fef3c7';
+                    debugDiv.style.color = '#92400e';
+                    
+                    // Afficher un message dans chaque graphique
+                    ['statusChart', 'priceChart', 'popularChart', 'durationChart'].forEach(canvasId => {
+                        const canvas = document.getElementById(canvasId);
+                        if (canvas) {
+                            const ctx = canvas.getContext('2d');
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.fillStyle = '#6b7280';
+                            ctx.font = '16px Inter, sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.fillText('Aucune donnée avec les filtres actuels', canvas.width/2, canvas.height/2);
+                        }
+                    });
+                    return;
+                }
+                
+                // Graphique par statut (Doughnut)
+                if (chartData.status && chartData.status.labels && chartData.status.labels.length > 0) {
+                    createChart('statusChart', {
+                        type: 'doughnut',
+                        data: {
+                            labels: chartData.status.labels,
+                            datasets: [{
+                                data: chartData.status.data,
+                                backgroundColor: chartData.status.colors || ['#10b981', '#ef4444'],
+                                borderWidth: 2,
+                                borderColor: '#ffffff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 15,
+                                        usePointStyle: true
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = ((context.parsed * 100) / total).toFixed(1);
+                                            return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Graphique par prix (Bar)
+                if (chartData.prices && chartData.prices.labels && chartData.prices.labels.length > 0) {
+                    createChart('priceChart', {
+                        type: 'bar',
+                        data: {
+                            labels: chartData.prices.labels,
+                            datasets: [{
+                                label: 'Nombre de services',
+                                data: chartData.prices.data,
+                                backgroundColor: chartData.prices.colors || ['#B0368B', '#6C2476', '#10b981', '#f59e0b'],
+                                borderWidth: 0,
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: '#f3f4f6'
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Nombre de services'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Tranches de prix (FCFA)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Graphique services populaires (Bar horizontal)
+                let popularChart;
+                let originalPopularData = chartData.popular;
+                
+                function createPopularChart(data) {
+                    if (popularChart) {
+                        popularChart.destroy();
+                    }
+                    
+                    if (document.getElementById('popularChart')) {
+                        popularChart = new Chart(document.getElementById('popularChart'), {
+                            type: 'bar',
+                            data: {
+                                labels: data.labels,
+                                datasets: [{
+                                    label: 'Nombre de RDV',
+                                    data: data.data,
+                                    backgroundColor: data.colors,
+                                    borderColor: '#6C2476',
+                                    borderWidth: 1,
+                                    borderRadius: 4
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        beginAtZero: true,
+                                        grid: {
+                                            color: '#f3f4f6'
+                                        }
+                                    },
+                                    y: {
+                                        grid: {
+                                            display: false
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+                
+                // Créer le graphique initial
+                createPopularChart(originalPopularData);
+                
+                // Filtrage interactif par nom
+                document.getElementById('serviceFilter').addEventListener('input', function(e) {
+                    const filterText = e.target.value.toLowerCase();
+                    
+                    if (!filterText) {
+                        createPopularChart(originalPopularData);
+                        return;
+                    }
+                    
+                    const filteredData = {
+                        labels: [],
+                        data: [],
+                        colors: []
+                    };
+                    
+                    originalPopularData.labels.forEach((label, index) => {
+                        if (label.toLowerCase().includes(filterText)) {
+                            filteredData.labels.push(label);
+                            filteredData.data.push(originalPopularData.data[index]);
+                            filteredData.colors.push(originalPopularData.colors[index]);
+                        }
+                    });
+                    
+                    createPopularChart(filteredData);
+                });
+
+                // Graphique durée consultation (Pie)
+                if (chartData.duration && chartData.duration.labels && chartData.duration.labels.length > 0) {
+                    createChart('durationChart', {
+                        type: 'pie',
+                        data: {
+                            labels: chartData.duration.labels,
+                            datasets: [{
+                                data: chartData.duration.data,
+                                backgroundColor: chartData.duration.colors,
+                                borderWidth: 2,
+                                borderColor: '#ffffff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 15,
+                                        usePointStyle: true
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                debugDiv.innerHTML = 'Graphiques des services créés avec succès! Données filtrées affichées.';
+                debugDiv.style.background = '#f0fdf4';
+                debugDiv.style.color = '#166534';
+                debugDiv.style.border = '1px solid #22c55e';
+                
+            } catch (error) {
+                debugDiv.innerHTML = 'Debug: Erreur - ' + error.message;
+                debugDiv.style.background = '#fef2f2';
+                debugDiv.style.color = '#B0368B';
+                debugDiv.style.border = '1px solid #B0368B';
+                console.error('Erreur graphiques services:', error);
+            }
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,489 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .form-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .form-header {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .form-title {
+        color: #B0368B;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-subtitle {
+        color: #6b7280;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .module {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+
+    .module h2 {
+        background: linear-gradient(135deg, #B0368B, #6C2476);
+        color: white;
+        padding: 1.5rem 2rem;
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .form-row {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #f3f4f6;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .form-row:hover {
+        background-color: rgba(176, 54, 139, 0.02);
+    }
+
+    .form-row:last-child {
+        border-bottom: none;
+    }
+
+    .form-row label {
+        font-weight: 600;
+        color: #374151;
+        min-width: 150px;
+        margin-bottom: 0;
+        font-size: 0.95rem;
+    }
+
+    .form-row .field-box {
+        flex: 1;
+        position: relative;
+    }
+
+    input[type="text"], 
+    input[type="email"], 
+    input[type="password"], 
+    input[type="tel"], 
+    select, 
+    textarea {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: #fafafa;
+    }
+
+    input[type="text"]:focus, 
+    input[type="email"]:focus, 
+    input[type="password"]:focus, 
+    input[type="tel"]:focus, 
+    select:focus, 
+    textarea:focus {
+        outline: none;
+        border-color: #B0368B;
+        box-shadow: 0 0 0 3px rgba(176, 54, 139, 0.1);
+        background: white;
+        transform: translateY(-1px);
+    }
+
+    .field-avatar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .current-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #B0368B;
+        box-shadow: 0 4px 12px rgba(176, 54, 139, 0.3);
+    }
+
+    .avatar-placeholder {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #B0368B, #6C2476);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-left: 0.5rem;
+    }
+
+    .role-badge.admin { background: #fef3c7; color: #d97706; }
+    .role-badge.doctor { background: #dbeafe; color: #1e40af; }
+    .role-badge.patient { background: #dcfce7; color: #166534; }
+    .role-badge.receptionist { background: #e9d5ff; color: #7c3aed; }
+    .role-badge.responsable_cabinet { background: #fecaca; color: #dc2626; }
+
+    .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #B0368B;
+        cursor: pointer;
+    }
+
+    .help {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
+
+    .submit-row {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .default, .deletelink {
+        background: linear-gradient(135deg, #B0368B, #6C2476);
+        color: white;
+        border: none;
+        padding: 1rem 2.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 1rem;
+        margin: 0 0.5rem;
+        box-shadow: 0 4px 12px rgba(176, 54, 139, 0.3);
+    }
+
+    .default:hover, .deletelink:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(176, 54, 139, 0.4);
+        background: #9d2f7a;
+        color: white;
+        text-decoration: none;
+    }
+
+    .deletelink {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .deletelink:hover {
+        background: #dc2626;
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .breadcrumbs {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .breadcrumbs a {
+        color: #B0368B;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .breadcrumbs a:hover {
+        text-decoration: underline;
+    }
+
+    .errorlist {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 0.8rem;
+        margin-top: 0.5rem;
+        color: #dc2626;
+        font-size: 0.9rem;
+    }
+
+    .errorlist li {
+        list-style: none;
+        margin: 0;
+    }
+
+    .required {
+        color: #ef4444;
+        font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+        
+        .form-row label {
+            min-width: auto;
+        }
+        
+        .form-title {
+            font-size: 1.8rem;
+        }
+        
+        .default, .deletelink {
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content_title %}
+<div class="form-header">
+    <h1 class="form-title">
+        {% if original %}
+            Modifier l'Utilisateur
+        {% else %}
+            Nouvel Utilisateur
+        {% endif %}
+    </h1>
+    <p class="form-subtitle">Cabinet Yaye Aminata - Gestion des Utilisateurs</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    
+    <div class="module">
+        <h2>🔐 Informations de Connexion</h2>
+        
+        <div class="form-row">
+            <label for="id_username" class="required">Nom d'utilisateur :</label>
+            <div class="field-box">
+                {{ form.username }}
+                {% if form.username.help_text %}
+                    <div class="help">{{ form.username.help_text }}</div>
+                {% endif %}
+                {{ form.username.errors }}
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <label for="id_email" class="required">Email :</label>
+            <div class="field-box">
+                {{ form.email }}
+                {% if form.email.help_text %}
+                    <div class="help">{{ form.email.help_text }}</div>
+                {% endif %}
+                {{ form.email.errors }}
+            </div>
+        </div>
+        
+        {% if not original %}
+        <div class="form-row">
+            <label for="id_password1" class="required">Mot de passe :</label>
+            <div class="field-box">
+                {{ form.password1 }}
+                {% if form.password1.help_text %}
+                    <div class="help">{{ form.password1.help_text }}</div>
+                {% endif %}
+                {{ form.password1.errors }}
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <label for="id_password2" class="required">Confirmer le mot de passe :</label>
+            <div class="field-box">
+                {{ form.password2 }}
+                {% if form.password2.help_text %}
+                    <div class="help">{{ form.password2.help_text }}</div>
+                {% endif %}
+                {{ form.password2.errors }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="module">
+        <h2>👤 Informations Personnelles</h2>
+        
+        <div class="form-row">
+            <label for="id_first_name" class="required">Prénom :</label>
+            <div class="field-box">
+                {{ form.first_name }}
+                {{ form.first_name.errors }}
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <label for="id_last_name" class="required">Nom :</label>
+            <div class="field-box">
+                {{ form.last_name }}
+                {{ form.last_name.errors }}
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <label for="id_phone">Téléphone :</label>
+            <div class="field-box">
+                {{ form.phone }}
+                {{ form.phone.errors }}
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <label for="id_avatar">Photo de profil :</label>
+            <div class="field-box field-avatar">
+                {% if original.avatar %}
+                    <img src="{{ original.avatar.url }}" alt="Avatar actuel" class="current-avatar">
+                {% else %}
+                    <div class="avatar-placeholder">
+                        {% if original.first_name %}{{ original.first_name.0 }}{% endif %}{% if original.last_name %}{{ original.last_name.0 }}{% endif %}
+                    </div>
+                {% endif %}
+                {{ form.avatar }}
+                {{ form.avatar.errors }}
+            </div>
+        </div>
+    </div>
+
+    <div class="module">
+        <h2>🏥 Informations Professionnelles</h2>
+        
+        <div class="form-row">
+            <label for="id_role" class="required">Rôle :</label>
+            <div class="field-box">
+                {{ form.role }}
+                {% if original.role %}
+                    <span class="role-badge {{ original.role }}">{{ original.get_role_display }}</span>
+                {% endif %}
+                {{ form.role.errors }}
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <label for="id_speciality">Spécialité :</label>
+            <div class="field-box">
+                {{ form.speciality }}
+                <div class="help">Spécialité médicale (pour les docteurs uniquement)</div>
+                {{ form.speciality.errors }}
+            </div>
+        </div>
+    </div>
+
+    <div class="module">
+        <h2>⚙️ Paramètres du Compte</h2>
+        
+        <div class="form-row">
+            <label for="id_is_active">Compte actif :</label>
+            <div class="field-box checkbox-row">
+                {{ form.is_active }}
+                <span>Autoriser la connexion de cet utilisateur</span>
+                {{ form.is_active.errors }}
+            </div>
+        </div>
+        
+        {% if original %}
+        <div class="form-row">
+            <label for="id_is_staff">Accès administration :</label>
+            <div class="field-box checkbox-row">
+                {{ form.is_staff }}
+                <span>Accès à l'interface d'administration</span>
+                {{ form.is_staff.errors }}
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <label for="id_is_superuser">Super utilisateur :</label>
+            <div class="field-box checkbox-row">
+                {{ form.is_superuser }}
+                <span>Tous les droits d'administration</span>
+                {{ form.is_superuser.errors }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="submit-row">
+        <input type="submit" value="{% if original %}Mettre à jour{% else %}Créer l'utilisateur{% endif %}" class="default">
+        {% if original %}
+            <a href="{% url 'admin:cabinet_user_delete' original.pk %}" class="deletelink">Supprimer</a>
+        {% endif %}
+        <a href="{% url 'admin:cabinet_user_changelist' %}" style="margin-left: 1rem; color: #6b7280; text-decoration: none;">Annuler</a>
+    </div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion dynamique de l'affichage des champs selon le rôle
+    const roleField = document.getElementById('id_role');
+    const specialityRow = document.querySelector('label[for="id_speciality"]').closest('.form-row');
+    
+    function toggleSpecialityField() {
+        if (roleField.value === 'doctor') {
+            specialityRow.style.display = 'flex';
+        } else {
+            specialityRow.style.display = 'none';
+        }
+    }
+    
+    if (roleField) {
+        roleField.addEventListener('change', toggleSpecialityField);
+        toggleSpecialityField(); // Initial check
+    }
+    
+    // Animation des champs au focus
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.closest('.form-row').style.backgroundColor = 'rgba(176, 54, 139, 0.05)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.closest('.form-row').style.backgroundColor = '';
+        });
+    });
+});
+</script>
+{% endblock %}
