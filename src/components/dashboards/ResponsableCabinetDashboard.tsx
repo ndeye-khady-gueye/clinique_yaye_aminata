@@ -150,21 +150,22 @@ const ResponsableCabinetDashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-          <Building className="h-8 w-8 text-primary" />
-          Bienvenue, {user?.firstName} {user?.lastName}
-        </h1>
-        <p className="text-gray-600">Tableau de bord - Responsable Cabinet</p>
+    <div className="space-responsive">
+      {/* En-tête - Responsive */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="text-center sm:text-left">
+          <h1 className="text-responsive-xl font-bold text-gray-900 flex items-center justify-center sm:justify-start gap-2 sm:gap-3">
+            <Building className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
+            <span className="break-words">Bienvenue, {user?.firstName} {user?.lastName}</span>
+          </h1>
+          <p className="text-responsive text-gray-600 mt-1">Tableau de bord - Responsable Cabinet</p>
         </div>
         
-        {/* Bouton Nouveau RDV pour le Responsable */}
+        {/* Bouton Nouveau RDV pour le Responsable - Responsive */}
         <Dialog open={isAppointmentFormOpen} onOpenChange={setIsAppointmentFormOpen}>
           <DialogTrigger asChild>
             <Button 
-              className="hover:opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl" 
+              className="w-full sm:w-auto hover:opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl btn-responsive" 
               style={{ background: 'linear-gradient(135deg, #6C2476 0%, #B0368B 100%)' }}
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -178,50 +179,50 @@ const ResponsableCabinetDashboard = () => {
         </Dialog>
       </div>
 
-      {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Statistiques - Responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+          <Card key={stat.title} className="card-responsive">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 truncate">
                 {stat.title}
               </CardTitle>
-              <stat.icon className={`h-4 w-4 ${stat.color}`} />
+              <stat.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.color} flex-shrink-0`} />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-gray-500 mt-1">{stat.description}</p>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{stat.value}</div>
+              <p className="text-xs text-gray-500 mt-1 break-words">{stat.description}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Actions rapides */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Rendez-vous du jour</CardTitle>
-            <CardDescription>Planification d'aujourd'hui</CardDescription>
+      {/* Actions rapides - Responsive */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <Card className="card-responsive">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-responsive">Rendez-vous du jour</CardTitle>
+            <CardDescription className="text-sm">Planification d'aujourd'hui</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             {loading ? (
               <div className="flex items-center justify-center py-4">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
-                <span className="ml-2">Chargement...</span>
+                <span className="ml-2 text-sm">Chargement...</span>
               </div>
             ) : todayAppointments.length === 0 ? (
-              <div className="text-center py-4 text-gray-500">
+              <div className="text-center py-4 text-gray-500 text-sm">
                 Aucun rendez-vous aujourd'hui
               </div>
             ) : (
             <div className="space-y-3">
               {todayAppointments.map((apt, i) => (
                 <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-medium">{apt.patient}</p>
-                    <p className="text-sm text-gray-600">{apt.doctor} - {apt.time}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm sm:text-base truncate">{apt.patient}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">{apt.doctor} - {apt.time}</p>
                   </div>
-                  <span className={`text-sm px-2 py-1 rounded-full ${
+                  <span className={`text-xs sm:text-sm px-2 py-1 rounded-full flex-shrink-0 ml-2 ${
                     apt.status === 'Confirmé' 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-yellow-100 text-yellow-800'
@@ -235,17 +236,17 @@ const ResponsableCabinetDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Activités récentes</CardTitle>
-            <CardDescription>Événements du cabinet</CardDescription>
+        <Card className="card-responsive">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-responsive">Activités récentes</CardTitle>
+            <CardDescription className="text-sm">Événements du cabinet</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <div className="space-y-3 sm:space-y-4">
               {quickActions.map((activity, i) => (
                 <div key={i} className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <p className="text-sm">{activity}</p>
+                  <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+                  <p className="text-sm break-words">{activity}</p>
                 </div>
               ))}
             </div>

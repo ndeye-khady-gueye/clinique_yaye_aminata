@@ -100,4 +100,92 @@
   .hover-scale {
     @apply transition-transform duration-300 hover:scale-105;
   }
+
+  /* Breakpoints personnalisés pour très petits écrans */
+  @media (min-width: 475px) {
+    .xs\:block {
+      display: block;
+    }
+  }
+
+  /* Classes utilitaires pour le responsive design */
+  .container-responsive {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .grid-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+
+  .text-responsive {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl lg:text-2xl xl:text-3xl;
+  }
+
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl lg:text-3xl xl:text-4xl;
+  }
+
+  .padding-responsive {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
+  .margin-responsive {
+    @apply m-4 sm:m-6 lg:m-8;
+  }
+
+  /* Classes pour les cartes responsive */
+  .card-responsive {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700;
+  }
+
+  /* Classes pour les boutons responsive */
+  .btn-responsive {
+    @apply px-4 py-2 text-sm sm:px-6 sm:py-3 sm:text-base;
+  }
+
+  /* Classes pour les formulaires responsive */
+  .form-responsive {
+    @apply space-y-4 sm:space-y-6;
+  }
+
+  .input-responsive {
+    @apply w-full px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base;
+  }
+
+  /* Classes pour les tableaux responsive */
+  .table-responsive {
+    @apply w-full overflow-x-auto;
+  }
+
+  .table-responsive table {
+    @apply min-w-full divide-y divide-gray-200 dark:divide-gray-700;
+  }
+
+  /* Classes pour la navigation responsive */
+  .nav-responsive {
+    @apply flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4;
+  }
+
+  /* Classes pour les images responsive */
+  .img-responsive {
+    @apply w-full h-auto object-cover;
+  }
+
+  /* Classes pour les icônes responsive */
+  .icon-responsive {
+    @apply h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6;
+  }
+
+  /* Classes pour les espacements responsive */
+  .space-responsive {
+    @apply space-y-4 sm:space-y-6 lg:space-y-8;
+  }
+
+  .space-x-responsive {
+    @apply space-x-2 sm:space-x-4 lg:space-x-6;
+  }
 }
