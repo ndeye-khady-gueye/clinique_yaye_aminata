@@ -9,7 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Save, Printer, Plus, Trash2, Calendar } from 'lucide-react';
+import { FileText, Printer, Plus, Trash2, Calendar, Download } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface PrescriptionModalProps {
   patient: any;
@@ -26,6 +29,7 @@ interface Medicament {
 }
 
 const PrescriptionModal = ({ patient }: PrescriptionModalProps) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     dateOrdonnance: new Date().toISOString().split('T')[0],
     diagnostic: '',
@@ -33,17 +37,7 @@ const PrescriptionModal = ({ patient }: PrescriptionModalProps) => {
     recommandations: ''
   });
 
-  const [medicaments, setMedicaments] = useState<Medicament[]>([
-    {
-      id: 1,
-      nom: 'Paracétamol',
-      forme: 'Comprimé',
-      dosage: '500mg',
-      frequence: '3 fois/jour',
-      duree: '7 jours',
-      instructions: 'À prendre après les repas'
-    }
-  ]);
+  const [medicaments, setMedicaments] = useState<Medicament[]>([]);
 
   const [nouveauMedicament, setNouveauMedicament] = useState({
     nom: '',
@@ -81,9 +75,42 @@ const PrescriptionModal = ({ patient }: PrescriptionModalProps) => {
     setMedicaments(prev => prev.filter(m => m.id !== id));
   };
 
-  const handleSave = () => {
-    console.log('Sauvegarde de l\'ordonnance:', { formData, medicaments });
-    // Logique de sauvegarde
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById('prescription-preview');
+    if (!element) return;
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      
+      let position = 0;
+      
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      const fileName = `ordonnance_${patient ? `${patient.prenom || patient.first_name || 'patient'}_${patient.nom || patient.last_name || 'inconnu'}` : 'nouveau_patient'}_${formData.dateOrdonnance}.pdf`;
+      pdf.save(fileName);
+    } catch (error) {
+      console.error('Erreur lors de la génération du PDF:', error);
+    }
   };
 
   const handlePrint = () => {
@@ -92,12 +119,13 @@ const PrescriptionModal = ({ patient }: PrescriptionModalProps) => {
       <div style="font-family: Arial, sans-serif; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
           <h2 style="color: #6C2476;">ORDONNANCE MÉDICALE</h2>
-          <p>Dr. ${formData.diagnostic}</p>
+          <p>Dr. ${user?.firstName} ${user?.lastName} - ${user?.speciality || 'Médecin'}</p>
         </div>
         
         <div style="margin-bottom: 20px;">
-          <strong>Patient:</strong> ${patient ? `${patient.prenom} ${patient.nom}` : 'Nouveau Patient'}<br>
+          <strong>Patient:</strong> ${patient ? `${patient.prenom || patient.first_name || ''} ${patient.nom || patient.last_name || ''}` : 'Nouveau Patient'}<br>
           <strong>Date:</strong> ${formData.dateOrdonnance}
+          ${formData.diagnostic ? `<br><strong>Diagnostic:</strong> ${formData.diagnostic}` : ''}
         </div>
         
         <div style="margin-bottom: 30px;">
@@ -111,10 +139,19 @@ const PrescriptionModal = ({ patient }: PrescriptionModalProps) => {
           `).join('')}
         </div>
         
-        <div style="margin-top: 50px;">
-          <p><strong>Recommandations:</strong></p>
-          <p>${formData.recommandations}</p>
-        </div>
+        ${formData.observations ? `
+          <div style="margin-bottom: 20px;">
+            <p><strong>Observations:</strong></p>
+            <p>${formData.observations}</p>
+          </div>
+        ` : ''}
+        
+        ${formData.recommandations ? `
+          <div style="margin-top: 50px;">
+            <p><strong>Recommandations:</strong></p>
+            <p>${formData.recommandations}</p>
+          </div>
+        ` : ''}
         
         <div style="margin-top: 80px; text-align: right;">
           <p>Signature et cachet du médecin</p>
@@ -131,6 +168,7 @@ const PrescriptionModal = ({ patient }: PrescriptionModalProps) => {
     }
   };
 
+
   return (
     <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
       <DialogHeader>
@@ -145,11 +183,11 @@ const PrescriptionModal = ({ patient }: PrescriptionModalProps) => {
 
       <div className="space-y-6">
         <div className="flex justify-end space-x-2">
-          <Button onClick={handleSave} style={{ backgroundColor: '#6C2476' }}>
-            <Save className="h-4 w-4 mr-2" />
-            Sauvegarder
+          <Button onClick={handleDownloadPDF} style={{ backgroundColor: '#B0368B' }}>
+            <Download className="h-4 w-4 mr-2" />
+            Télécharger PDF
           </Button>
-          <Button onClick={handlePrint} style={{ backgroundColor: '#B0368B' }}>
+          <Button onClick={handlePrint} style={{ backgroundColor: '#6C2476' }}>
             <Printer className="h-4 w-4 mr-2" />
             Imprimer
           </Button>
@@ -347,14 +385,14 @@ const PrescriptionModal = ({ patient }: PrescriptionModalProps) => {
           <CardHeader>
             <CardTitle style={{ color: '#6C2476' }}>Prévisualisation de l'Ordonnance</CardTitle>
           </CardHeader>
-          <CardContent className="bg-gray-50 p-4">
+          <CardContent className="bg-gray-50 p-4" id="prescription-preview">
             <div className="text-center mb-4">
               <h3 className="text-xl font-bold" style={{ color: '#6C2476' }}>ORDONNANCE MÉDICALE</h3>
-              <p className="text-sm text-gray-600">Dr. Nom du Médecin - Spécialité</p>
+              <p className="text-sm text-gray-600">Dr. {user?.firstName} {user?.lastName} - {user?.speciality || 'Médecin'}</p>
             </div>
             
             <div className="mb-4">
-              <p><strong>Patient:</strong> {patient ? `${patient.prenom} ${patient.nom}` : 'Nouveau Patient'}</p>
+              <p><strong>Patient:</strong> {patient ? `${patient.prenom || patient.first_name || ''} ${patient.nom || patient.last_name || ''}` : 'Nouveau Patient'}</p>
               <p><strong>Date:</strong> {formData.dateOrdonnance}</p>
               {formData.diagnostic && <p><strong>Diagnostic:</strong> {formData.diagnostic}</p>}
             </div>

@@ -61,8 +61,7 @@ const Layout = () => {
       case 'doctor':
         return [
           ...baseItems,
-          { path: '/my-appointments', icon: Calendar, label: 'Mes rendez-vous' },
-          { path: '/patients', icon: Users, label: 'Mes patients' }
+          { path: '/my-appointments', icon: Calendar, label: 'Mes rendez-vous' }
         ];
       case 'receptionist':
         return [
