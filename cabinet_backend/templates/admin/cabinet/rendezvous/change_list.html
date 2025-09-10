@@ -150,8 +150,8 @@
             transition: all 0.3s ease !important;
             position: relative !important;
             overflow: hidden !important;
-            margin-top: 50px;
-            margin-right: 300px !important;
+            margin-top: 65px;
+            margin-right: 250px !important;
         }
  
 
@@ -188,7 +188,7 @@
             background: #ffffff !important;
             color: #B0368B !important;
             border: none !important;
-            padding: 10px 18px !important;
+            padding: 10px 14px !important;
             border-radius: 8px !important;
             font-weight: 600 !important;
             font-size: 13px !important;
@@ -201,8 +201,8 @@
             transition: all 0.3s ease !important;
             position: relative !important;
             overflow: hidden !important; 
-            margin-right:20px !important;
-           margin-top: 50px;
+            margin-right:2px !important;
+            margin-top:65px;
         }
 
         .object-tools li a.addlink:before {
@@ -393,7 +393,7 @@
                     });
                 }
                 
-                // Graphique par service (Bar horizontal)
+                // Graphique par service (Bar vertical avec couleurs dynamiques)
                 if (chartData.services && chartData.services.labels && chartData.services.labels.length > 0) {
                     createChart('serviceChart', {
                         type: 'bar',
@@ -402,32 +402,90 @@
                             datasets: [{
                                 label: 'Nombre de RDV',
                                 data: chartData.services.data,
-                                backgroundColor: '#B0368B',
+                                backgroundColor: chartData.services.colors || [
+                                    '#B0368B', '#6C2476', '#10b981', '#f59e0b', 
+                                    '#3b82f6', '#8b5cf6', '#6b7280', '#84cc16',
+                                    '#f97316', '#06b6d4', '#8b5a2b', '#db2777'
+                                ],
                                 borderColor: '#6C2476',
                                 borderWidth: 1,
-                                borderRadius: 4
+                                borderRadius: 6,
+                                borderSkipped: false,
                             }]
                         },
                         options: {
-                            indexAxis: 'y',
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
                                 legend: {
                                     display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = ((context.parsed.y * 100) / total).toFixed(1);
+                                            return context.label + ': ' + context.parsed.y + ' RDV (' + percentage + '%)';
+                                        }
+                                    }
                                 }
                             },
                             scales: {
-                                x: {
+                                y: {
                                     beginAtZero: true,
                                     grid: {
                                         color: '#f3f4f6'
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Nombre de rendez-vous',
+                                        color: '#374151',
+                                        font: {
+                                            weight: 'bold'
+                                        }
                                     }
                                 },
-                                y: {
+                                x: {
                                     grid: {
                                         display: false
+                                    },
+                                    ticks: {
+                                        maxRotation: 45,
+                                        minRotation: 0,
+                                        color: '#374151'
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Services médicaux',
+                                        color: '#ffffff',
+                                        font: {
+                                            weight: 'bold'
+                                        }
                                     }
+                                }
+                            },
+                            interaction: {
+                                intersect: false,
+                                mode: 'index'
+                            },
+                            animation: {
+                                duration: 1000,
+                                easing: 'easeInOutQuart'
+                            },
+                            onHover: (event, activeElements) => {
+                                event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                            },
+                            onClick: (event, activeElements) => {
+                                if (activeElements.length > 0) {
+                                    const index = activeElements[0].index;
+                                    const serviceName = chartData.services.labels[index];
+                                    const serviceCount = chartData.services.data[index];
+                                    
+                                    // Afficher une info-bulle personnalisée
+                                    alert(`Service: ${serviceName}\nNombre de RDV: ${serviceCount}\n\nCliquez sur "OK" pour voir les détails dans l'interface d'administration.`);
+                                    
+                                    // Optionnel: rediriger vers la page de filtrage par service
+                                    // window.location.href = `?service__nom=${encodeURIComponent(serviceName)}`;
                                 }
                             }
                         }
@@ -525,15 +583,15 @@
                 }
                 
                 // Nouveau: Graphique par prix de consultation
-                if (chartData.prices && chartData.prices.labels && chartData.prices.labels.length > 0) {
+                if (chartData.prix && chartData.prix.labels && chartData.prix.labels.length > 0) {
                     createChart('priceChart', {
                         type: 'bar',
                         data: {
-                            labels: chartData.prices.labels,
+                            labels: chartData.prix.labels,
                             datasets: [{
                                 label: 'Prix de Consultation',
-                                data: chartData.prices.data,
-                                backgroundColor: chartData.prices.colors || ['#B0368B', '#6C2476', '#10b981', '#f59e0b', '#ef4444'],
+                                data: chartData.prix.data,
+                                backgroundColor: chartData.prix.colors || ['#B0368B', '#6C2476', '#10b981', '#f59e0b', '#ef4444'],
                                 borderColor: '#6C2476',
                                 borderWidth: 1,
                                 borderRadius: 4
@@ -587,4 +645,3 @@
         });
     </script>
 {% endblock %}
-

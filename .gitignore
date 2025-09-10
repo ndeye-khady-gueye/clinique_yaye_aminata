@@ -1,8 +1,10 @@
-*.pyc
-__pycache__/
-env/
-db.sqlite3
-my_django_project-1/
-my_django_project/
-cabinet_backend/cabinet/management/commands/__pycache__/
-cabinet_backend/cabinet/migrations/__pycache__/
+(
+echo *.pyc
+echo __pycache__/
+echo env/
+echo db.sqlite3
+echo my_django_project-1/
+echo my_django_project/
+echo cabinet_backend/cabinet/management/commands/__pycache__/
+echo cabinet_backend/cabinet/migrations/__pycache__/
+) > .gitignore

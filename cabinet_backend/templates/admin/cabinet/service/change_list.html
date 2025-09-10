@@ -53,7 +53,7 @@
             
             <!-- Graphique services les plus demandés -->
             <div class="chart-container">
-                <div class="chart-card">
+                <div class="chart-card" style="">
                     <h3>Tous les Services</h3>
                     <div style="margin-bottom: 10px;">
                         <input type="text" id="serviceFilter" placeholder="Filtrer par nom de service..." 
@@ -93,7 +93,7 @@
         }
         
         .chart-card {
-            background:#6C2476;
+            background:#ffffff;
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -106,7 +106,7 @@
         }
         
         .chart-card h3 {
-            color: #ffffff;
+            color: #B0368B;
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 15px;
@@ -144,7 +144,7 @@
             position: relative !important;
             overflow: hidden !important;
             margin-top: 50px;
-            margin-right: 300px !important;
+            margin-right: 250px !important;
         }
 
         .service-btn.pdf:before {
@@ -191,7 +191,7 @@
             transition: all 0.3s ease !important;
             position: relative !important;
             overflow: hidden !important; 
-            margin-right: 20px !important;
+            margin-right: 15px !important;
             margin-top: 50px;
         }
 
@@ -285,12 +285,12 @@
                     {% else %}
                         // Données de test si pas de données du backend
                         chartData = {
-                            status: {
+                            statut: {
                                 labels: ['Actifs', 'Inactifs'],
                                 data: [15, 3],
                                 colors: ['#10b981', '#ef4444']
                             },
-                            prices: {
+                            prix: {
                                 labels: ['0-25k', '25k-50k', '50k-75k', '75k+'],
                                 data: [8, 6, 3, 1],
                                 colors: ['#B0368B', '#6C2476', '#10b981', '#f59e0b']
@@ -299,7 +299,7 @@
                                 labels: ['Consultation Générale', 'Échographie', 'Vaccination'],
                                 data: [25, 15, 10]
                             },
-                            duration: {
+                            duree: {
                                 labels: ['15-30 min', '30-45 min', '45-60 min', '60+ min'],
                                 data: [5, 8, 4, 1]
                             }
@@ -326,8 +326,8 @@
                 
                 // Vérifier si nous avons des données à afficher
                 const hasData = chartData && (
-                    (chartData.status && chartData.status.data && chartData.status.data.length > 0) ||
-                    (chartData.prices && chartData.prices.data && chartData.prices.data.length > 0) ||
+                    (chartData.statut && chartData.statut.data && chartData.statut.data.length > 0) ||
+                    (chartData.prix && chartData.prix.data && chartData.prix.data.length > 0) ||
                     (chartData.popular && chartData.popular.data && chartData.popular.data.length > 0)
                 );
                 
@@ -352,14 +352,14 @@
                 }
                 
                 // Graphique par statut (Doughnut)
-                if (chartData.status && chartData.status.labels && chartData.status.labels.length > 0) {
+                if (chartData.statut && chartData.statut.labels && chartData.statut.labels.length > 0) {
                     createChart('statusChart', {
                         type: 'doughnut',
                         data: {
-                            labels: chartData.status.labels,
+                            labels: chartData.statut.labels,
                             datasets: [{
-                                data: chartData.status.data,
-                                backgroundColor: chartData.status.colors || ['#10b981', '#ef4444'],
+                                data: chartData.statut.data,
+                                backgroundColor: chartData.statut.colors || ['#10b981', '#ef4444'],
                                 borderWidth: 2,
                                 borderColor: '#ffffff'
                             }]
@@ -390,15 +390,15 @@
                 }
                 
                 // Graphique par prix (Bar)
-                if (chartData.prices && chartData.prices.labels && chartData.prices.labels.length > 0) {
+                if (chartData.prix && chartData.prix.labels && chartData.prix.labels.length > 0) {
                     createChart('priceChart', {
                         type: 'bar',
                         data: {
-                            labels: chartData.prices.labels,
+                            labels: chartData.prix.labels,
                             datasets: [{
                                 label: 'Nombre de services',
-                                data: chartData.prices.data,
-                                backgroundColor: chartData.prices.colors || ['#B0368B', '#6C2476', '#10b981', '#f59e0b'],
+                                data: chartData.prix.data,
+                                backgroundColor: chartData.prix.colors || ['#B0368B', '#6C2476', '#10b981', '#f59e0b'],
                                 borderWidth: 0,
                                 borderRadius: 6
                             }]
@@ -456,7 +456,10 @@
                                     backgroundColor: data.colors,
                                     borderColor: '#6C2476',
                                     borderWidth: 1,
-                                    borderRadius: 4
+                                    borderRadius: 4,
+                                    barThickness: 18,
+                                    categoryPercentage: 0.7,
+                                    barPercentage: 0.5
                                 }]
                             },
                             options: {
@@ -516,14 +519,16 @@
                 });
 
                 // Graphique durée consultation (Pie)
-                if (chartData.duration && chartData.duration.labels && chartData.duration.labels.length > 0) {
+                console.log('Debug: Vérification données durée:', chartData.duree);
+                if (chartData.duree && chartData.duree.labels && chartData.duree.labels.length > 0) {
+                    console.log('Debug: Création graphique durée avec données:', chartData.duree);
                     createChart('durationChart', {
                         type: 'pie',
                         data: {
-                            labels: chartData.duration.labels,
+                            labels: chartData.duree.labels,
                             datasets: [{
-                                data: chartData.duration.data,
-                                backgroundColor: chartData.duration.colors,
+                                data: chartData.duree.data,
+                                backgroundColor: chartData.duree.colors,
                                 borderWidth: 2,
                                 borderColor: '#ffffff'
                             }]
@@ -542,6 +547,8 @@
                             }
                         }
                     });
+                } else {
+                    console.log('Debug: Pas de données durée ou données vides');
                 }
                 
                 debugDiv.innerHTML = 'Graphiques des services créés avec succès! Données filtrées affichées.';
