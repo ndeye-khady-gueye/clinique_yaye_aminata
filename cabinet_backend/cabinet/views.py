@@ -28,7 +28,9 @@ from .permissions import (
     IsOwnerOrStaff, CanManageUsers, CanViewReports, CanManageAppointments, CanViewPatients,
     CanViewUsersForAppointments
 )
+from .decorators import csrf_exempt_method_decorator
 
+@csrf_exempt_method_decorator
 class AuthViewSet(viewsets.ViewSet):
     """Vues pour l'authentification"""
     
@@ -94,6 +96,7 @@ class AuthViewSet(viewsets.ViewSet):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@csrf_exempt_method_decorator
 class AdminViewSet(viewsets.ViewSet):
     """Vues d'administration système"""
     permission_classes = [IsAdminUser]
@@ -266,6 +269,7 @@ class AdminViewSet(viewsets.ViewSet):
                 'error': f'Erreur de connexion: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@csrf_exempt_method_decorator
 class UserViewSet(viewsets.ModelViewSet):
     """Vues pour les utilisateurs"""
     queryset = User.objects.all()
@@ -350,6 +354,7 @@ class UserViewSet(viewsets.ModelViewSet):
             }
         })
 
+@csrf_exempt_method_decorator
 class PatientViewSet(viewsets.ModelViewSet):
     """Vues pour les patients"""
     queryset = Patient.objects.all()
@@ -380,6 +385,7 @@ class PatientViewSet(viewsets.ModelViewSet):
         except DossierMedical.DoesNotExist:
             return Response({'error': 'Dossier médical non trouvé'}, status=status.HTTP_404_NOT_FOUND)
 
+@csrf_exempt_method_decorator
 class ServiceViewSet(viewsets.ModelViewSet):
     """Vues pour les services"""
     queryset = Service.objects.filter(is_active=True)
@@ -392,6 +398,7 @@ class ServiceViewSet(viewsets.ModelViewSet):
         services = Service.objects.filter(is_active=True)
         return Response(ServiceSerializer(services, many=True).data)
 
+@csrf_exempt_method_decorator
 class RendezVousViewSet(viewsets.ModelViewSet):
     """Vues pour les rendez-vous"""
     queryset = RendezVous.objects.all()
@@ -584,6 +591,7 @@ class RendezVousViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+@csrf_exempt_method_decorator
 class ConsultationViewSet(viewsets.ModelViewSet):
     """Vues pour les consultations"""
     queryset = Consultation.objects.all()
@@ -599,6 +607,7 @@ class ConsultationViewSet(viewsets.ModelViewSet):
         else:
             return Consultation.objects.all()
 
+@csrf_exempt_method_decorator
 class PrescriptionViewSet(viewsets.ModelViewSet):
     """Vues pour les prescriptions"""
     queryset = Prescription.objects.all()
@@ -614,6 +623,7 @@ class PrescriptionViewSet(viewsets.ModelViewSet):
         else:
             return Prescription.objects.all()
 
+@csrf_exempt_method_decorator
 class PaiementViewSet(viewsets.ModelViewSet):
     """Vues pour les paiements"""
     queryset = Paiement.objects.all()
@@ -636,6 +646,7 @@ class PaiementViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+@csrf_exempt_method_decorator
 class DossierMedicalViewSet(viewsets.ModelViewSet):
     """Vues pour les dossiers médicaux"""
     queryset = DossierMedical.objects.all()
@@ -651,6 +662,7 @@ class DossierMedicalViewSet(viewsets.ModelViewSet):
         else:
             return DossierMedical.objects.all()
 
+@csrf_exempt_method_decorator
 class StatistiquesViewSet(viewsets.ViewSet):
     """Vues pour les statistiques"""
     permission_classes = [permissions.IsAuthenticated]
@@ -732,6 +744,7 @@ class StatistiquesViewSet(viewsets.ViewSet):
         serializer = StatistiquesSerializer(data)
         return Response(serializer.data)
 
+@csrf_exempt_method_decorator
 class ContactViewSet(viewsets.ModelViewSet):
     """Vues pour les messages de contact"""
     queryset = Contact.objects.all()
@@ -868,6 +881,7 @@ class ContactViewSet(viewsets.ModelViewSet):
             'messages_traites': messages_traites,
         })
 
+@csrf_exempt_method_decorator
 class RendezVousResponsableViewSet(viewsets.ModelViewSet):
     """Vues pour la gestion des rendez-vous par le responsable de cabinet"""
     queryset = RendezVous.objects.all()
@@ -1114,6 +1128,7 @@ class RendezVousResponsableViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(f"Erreur lors de l'envoi de l'email: {e}")
 
+@csrf_exempt_method_decorator
 class PatientEnregistreViewSet(viewsets.ModelViewSet):
     """Vues pour la gestion des enregistrements de patients temporaires"""
     queryset = PatientEnregistre.objects.all()

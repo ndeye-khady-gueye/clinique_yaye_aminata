@@ -55,6 +55,20 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Middleware personnalisé pour désactiver CSRF sur les API REST
+class DisableCSRFMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Désactiver CSRF pour toutes les URLs API
+        if request.path.startswith('/api/'):
+            setattr(request, '_dont_enforce_csrf_checks', True)
+        return self.get_response(request)
+
+# Ajouter le middleware personnalisé après CsrfViewMiddleware
+MIDDLEWARE.insert(MIDDLEWARE.index('django.middleware.csrf.CsrfViewMiddleware') + 1, 'cabinet_backend.settings.DisableCSRFMiddleware')
+
 ROOT_URLCONF = 'cabinet_backend.urls'
 
 TEMPLATES = [
@@ -205,4 +219,20 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+]
+
+# CSRF Settings pour API REST
+# Désactiver CSRF pour les API REST car nous utilisons JWT
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://localhost:8081",
+    "http://127.0.0.1:8081",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+# Exemption CSRF pour les vues API
+CSRF_EXEMPT_URLS = [
+    r'^/api/.*$',  # Toutes les URLs API sont exemptées de CSRF
 ]

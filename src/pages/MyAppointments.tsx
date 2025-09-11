@@ -574,23 +574,23 @@ const MyAppointments = () => {
 
     return (
       <>
-        {/* Statistiques du jour - Responsive */}
-        <div className="grid grid-cols-3 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        {/* Statistiques du jour - Responsive amélioré */}
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-3 gap-2 xs:gap-3 sm:gap-4 mb-4 sm:mb-6">
           {/* Carte Aujourd'hui */}
           <Card 
             className={`hover:shadow-md transition-all duration-200 cursor-pointer ${
               activeFilter === 'today' 
-                ? 'ring-2 ring-blue-500 bg-blue-50' 
+                ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20' 
                 : 'hover:shadow-lg'
             }`}
             onClick={() => handleCardClick('today')}
           >
-            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Aujourd'hui</CardTitle>
+            <CardHeader className="pb-2 xs:pb-3 px-3 xs:px-4 sm:px-6">
+              <CardTitle className="text-xs xs:text-sm sm:text-base font-medium text-gray-600 dark:text-gray-400">Aujourd'hui</CardTitle>
             </CardHeader>
-            <CardContent className="px-3 sm:px-6">
-              <div className="text-xl sm:text-2xl font-bold">{todayAppointments.length}</div>
-              <p className="text-xs text-gray-500">rendez-vous</p>
+            <CardContent className="px-3 xs:px-4 sm:px-6">
+              <div className="text-lg xs:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{todayAppointments.length}</div>
+              <p className="text-xs xs:text-sm text-gray-500 dark:text-gray-400">rendez-vous</p>
             </CardContent>
           </Card>
 
@@ -599,17 +599,17 @@ const MyAppointments = () => {
           <Card 
             className={`hover:shadow-md transition-all duration-200 cursor-pointer ${
               activeFilter === 'realise' 
-                ? 'ring-2 ring-green-500 bg-green-50' 
+                ? 'ring-2 ring-green-500 bg-green-50 dark:bg-green-900/20' 
                 : 'hover:shadow-lg'
             }`}
             onClick={() => handleCardClick('realise')}
           >
-            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Terminés</CardTitle>
+            <CardHeader className="pb-2 xs:pb-3 px-3 xs:px-4 sm:px-6">
+              <CardTitle className="text-xs xs:text-sm sm:text-base font-medium text-gray-600 dark:text-gray-400">Terminés</CardTitle>
             </CardHeader>
-            <CardContent className="px-3 sm:px-6">
-              <div className="text-xl sm:text-2xl font-bold text-green-600">{completedAppointments.length}</div>
-              <p className="text-xs text-gray-500">réalisés</p>
+            <CardContent className="px-3 xs:px-4 sm:px-6">
+              <div className="text-lg xs:text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">{completedAppointments.length}</div>
+              <p className="text-xs xs:text-sm text-gray-500 dark:text-gray-400">réalisés</p>
             </CardContent>
           </Card>
 
@@ -617,22 +617,22 @@ const MyAppointments = () => {
           <Card 
             className={`hover:shadow-md transition-all duration-200 cursor-pointer ${
               activeFilter === 'annule' 
-                ? 'ring-2 ring-red-500 bg-red-50' 
+                ? 'ring-2 ring-red-500 bg-red-50 dark:bg-red-900/20' 
                 : 'hover:shadow-lg'
             }`}
             onClick={() => handleCardClick('annule')}
           >
-            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Annulés</CardTitle>
+            <CardHeader className="pb-2 xs:pb-3 px-3 xs:px-4 sm:px-6">
+              <CardTitle className="text-xs xs:text-sm sm:text-base font-medium text-gray-600 dark:text-gray-400">Annulés</CardTitle>
             </CardHeader>
-            <CardContent className="px-3 sm:px-6">
-              <div className="text-xl sm:text-2xl font-bold text-red-600">{cancelledAppointments.length}</div>
-              <p className="text-xs text-gray-500">annulés</p>
+            <CardContent className="px-3 xs:px-4 sm:px-6">
+              <div className="text-lg xs:text-xl sm:text-2xl font-bold text-red-600 dark:text-red-400">{cancelledAppointments.length}</div>
+              <p className="text-xs xs:text-sm text-gray-500 dark:text-gray-400">annulés</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Bouton pour voir tous les terminés */}
+        {/* Bouton pour voir tous les terminés - Responsive */}
         <div className="mb-4 sm:mb-6 flex justify-center">
           <Button
             onClick={() => {
@@ -642,130 +642,135 @@ const MyAppointments = () => {
               setFilterDate('');
             }}
             variant={showCompletedOnly ? "default" : "outline"}
-            className={`transition-all duration-200 ${
+            className={`transition-all duration-200 text-xs xs:text-sm sm:text-base px-3 xs:px-4 sm:px-6 py-2 xs:py-2.5 sm:py-3 ${
               showCompletedOnly 
                 ? "bg-green-600 hover:bg-green-700 text-white" 
-                : "border-green-600 text-green-600 hover:bg-green-50"
+                : "border-green-600 text-green-600 hover:bg-green-50 dark:border-green-400 dark:text-green-400 dark:hover:bg-green-900/20"
             }`}
             disabled={activeFilter !== null && activeFilter !== 'realise'}
           >
-            <Check className="h-4 w-4 mr-2" />
-            {showCompletedOnly ? "Voir tous les rendez-vous" : `Voir tous les terminés (${completedAppointments.length})`}
+            <Check className="h-3 w-3 xs:h-4 xs:w-4 mr-1 xs:mr-2" />
+            <span className="hidden xs:inline">
+              {showCompletedOnly ? "Voir tous les rendez-vous" : `Voir tous les terminés (${completedAppointments.length})`}
+            </span>
+            <span className="xs:hidden">
+              {showCompletedOnly ? "Tous" : `Terminés (${completedAppointments.length})`}
+            </span>
           </Button>
         </div>
 
-      {/* Liste des rendez-vous - Responsive */}
-      <Card>
-        <CardHeader className="pb-3 sm:pb-6">
-          <CardTitle className="text-base sm:text-lg">
+      {/* Liste des rendez-vous - Responsive amélioré */}
+      <Card className="card-responsive">
+        <CardHeader className="pb-3 xs:pb-4 sm:pb-6 px-3 xs:px-4 sm:px-6">
+          <CardTitle className="text-sm xs:text-base sm:text-lg lg:text-xl text-gray-900 dark:text-white">
             {showCompletedOnly ? "Rendez-vous terminés" : "Mes rendez-vous"}
           </CardTitle>
-          <CardDescription className="text-sm sm:text-base">
+          <CardDescription className="text-xs xs:text-sm sm:text-base text-gray-600 dark:text-gray-400">
             {showCompletedOnly 
               ? "Liste de tous les rendez-vous terminés avec leurs rapports"
               : "Gérez vos consultations et ajoutez des comptes rendus"
             }
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-0 sm:p-6">
+        <CardContent className="p-0 xs:p-3 sm:p-6">
           {/* Tableau responsive avec scroll horizontal sur mobile */}
-          <div className="overflow-x-auto">
+          <div className="table-responsive">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[120px]">Patient</TableHead>
-                  <TableHead className="min-w-[140px] hidden sm:table-cell">Contact</TableHead>
-                  <TableHead className="min-w-[120px]">Date & Heure</TableHead>
-                  <TableHead className="min-w-[100px] hidden md:table-cell">Type</TableHead>
-                  <TableHead className="min-w-[80px]">Statut</TableHead>
-                  <TableHead className="min-w-[200px]">Actions</TableHead>
+                <TableRow className="bg-gray-50 dark:bg-gray-800">
+                  <TableHead className="min-w-[120px] text-xs xs:text-sm font-semibold text-gray-700 dark:text-gray-300">Patient</TableHead>
+                  <TableHead className="min-w-[140px] hidden xs:table-cell text-xs xs:text-sm font-semibold text-gray-700 dark:text-gray-300">Contact</TableHead>
+                  <TableHead className="min-w-[120px] text-xs xs:text-sm font-semibold text-gray-700 dark:text-gray-300">Date & Heure</TableHead>
+                  <TableHead className="min-w-[100px] hidden sm:table-cell text-xs xs:text-sm font-semibold text-gray-700 dark:text-gray-300">Type</TableHead>
+                  <TableHead className="min-w-[80px] text-xs xs:text-sm font-semibold text-gray-700 dark:text-gray-300">Statut</TableHead>
+                  <TableHead className="min-w-[200px] text-xs xs:text-sm font-semibold text-gray-700 dark:text-gray-300">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
               {filteredAppointments.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={6} className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm xs:text-base">
                     Aucun rendez-vous trouvé
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredAppointments.map((appointment) => (
-                  <TableRow key={appointment.id} className="hover:bg-gray-50">
-                    <TableCell className="py-3 sm:py-4">
+                  <TableRow key={appointment.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                    <TableCell className="py-2 xs:py-3 sm:py-4">
                       <div>
-                        <div className="font-medium text-sm sm:text-base">
+                        <div className="font-medium text-xs xs:text-sm sm:text-base text-gray-900 dark:text-white">
                           {appointment.patient 
                             ? `${appointment.patient.user.first_name} ${appointment.patient.user.last_name}`
                             : appointment.client_nom || 'Patient non défini'
                           }
                         </div>
                         {appointment.notes && (
-                          <div className="text-xs text-gray-500 mt-1">
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
                             {appointment.notes}
                           </div>
                         )}
                         {/* Contact info visible sur mobile */}
-                        <div className="sm:hidden mt-2 space-y-1">
-                          <div className="flex items-center text-xs text-gray-600">
-                            <Phone className="h-3 w-3 mr-1" />
-                            {appointment.patient?.user.phone || appointment.client_telephone || 'Non renseigné'}
+                        <div className="xs:hidden mt-2 space-y-1">
+                          <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
+                            <Phone className="h-3 w-3 mr-1 flex-shrink-0" />
+                            <span className="truncate">{appointment.patient?.user.phone || appointment.client_telephone || 'Non renseigné'}</span>
                           </div>
-                          <div className="flex items-center text-xs text-gray-600">
-                            <Mail className="h-3 w-3 mr-1" />
-                            {appointment.patient?.user.email || appointment.client_email || 'Non renseigné'}
+                          <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
+                            <Mail className="h-3 w-3 mr-1 flex-shrink-0" />
+                            <span className="truncate">{appointment.patient?.user.email || appointment.client_email || 'Non renseigné'}</span>
                           </div>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell py-3 sm:py-4">
+                    <TableCell className="hidden xs:table-cell py-2 xs:py-3 sm:py-4">
                       <div className="space-y-1">
-                        <div className="flex items-center text-xs">
-                          <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                          {appointment.patient?.user.phone || appointment.client_telephone || 'Non renseigné'}
+                        <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
+                          <Phone className="h-3 w-3 mr-1 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                          <span className="truncate">{appointment.patient?.user.phone || appointment.client_telephone || 'Non renseigné'}</span>
                         </div>
-                        <div className="flex items-center text-xs">
-                          <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                          {appointment.patient?.user.email || appointment.client_email || 'Non renseigné'}
+                        <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
+                          <Mail className="h-3 w-3 mr-1 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                          <span className="truncate">{appointment.patient?.user.email || appointment.client_email || 'Non renseigné'}</span>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="py-3 sm:py-4">
+                    <TableCell className="py-2 xs:py-3 sm:py-4">
                       <div className="space-y-1">
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm">{appointment.date_confirmee ? new Date(appointment.date_confirmee).toLocaleDateString('fr-FR') : 'Non confirmé'}</span>
+                        <div className="flex items-center space-x-1 xs:space-x-2">
+                          <Calendar className="h-3 w-3 xs:h-4 xs:w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                          <span className="text-xs xs:text-sm text-gray-900 dark:text-white">{appointment.date_confirmee ? new Date(appointment.date_confirmee).toLocaleDateString('fr-FR') : 'Non confirmé'}</span>
                         </div>
                         {appointment.date_confirmee && (
-                          <div className="flex items-center text-xs text-gray-500">
-                            <Clock className="h-3 w-3 mr-1" />
+                          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                            <Clock className="h-3 w-3 mr-1 flex-shrink-0" />
                             {new Date(appointment.date_confirmee).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                           </div>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell py-3 sm:py-4">
+                    <TableCell className="hidden sm:table-cell py-2 xs:py-3 sm:py-4">
                       <div>
-                        <div className="font-medium text-sm">{appointment.service.nom}</div>
-                        <div className="text-xs text-gray-500">{appointment.service.prix} FCFA</div>
+                        <div className="font-medium text-xs xs:text-sm text-gray-900 dark:text-white">{appointment.service.nom}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{appointment.service.prix} FCFA</div>
                       </div>
                     </TableCell>
-                    <TableCell className="py-3 sm:py-4">
-                      <Badge className={`${getStatusColor(appointment.statut)} text-xs`}>
+                    <TableCell className="py-2 xs:py-3 sm:py-4">
+                      <Badge className={`${getStatusColor(appointment.statut)} text-xs px-2 py-1`}>
                         {getStatusText(appointment.statut)}
                       </Badge>
                     </TableCell>
-                    <TableCell className="py-3 sm:py-4">
-                      <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                    <TableCell className="py-2 xs:py-3 sm:py-4">
+                      <div className="flex flex-wrap items-center gap-1 xs:gap-1.5 sm:gap-2">
                         {/* Action Réaliser - pour les RDV assignés */}
                         {appointment.statut === 'assigne' && (
                           <Button 
                             variant="outline" 
                             size="sm" 
                             onClick={() => handleRealizeAppointment(appointment.id)}
-                            className="text-green-600 hover:bg-green-50 text-xs sm:text-sm px-2 sm:px-3"
+                            className="text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20 text-xs px-2 py-1 xs:px-3 xs:py-1.5"
                             title="Marquer comme réalisé"
                           >
-                            <Check className="h-3 w-3 mr-1" />
+                            <Check className="h-3 w-3 mr-1 flex-shrink-0" />
                             <span className="hidden xs:inline">Réaliser</span>
                             <span className="xs:hidden">✓</span>
                           </Button>
@@ -779,9 +784,9 @@ const MyAppointments = () => {
                                 variant="outline" 
                                 size="sm" 
                                 onClick={() => setSelectedAppointment(appointment)}
-                                className="text-blue-600 hover:bg-blue-50 text-xs sm:text-sm px-2 sm:px-3"
+                                className="text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 text-xs px-2 py-1 xs:px-3 xs:py-1.5"
                               >
-                                <Check className="h-3 w-3 mr-1" />
+                                <Check className="h-3 w-3 mr-1 flex-shrink-0" />
                                 <span className="hidden xs:inline">Terminer</span>
                                 <span className="xs:hidden">✓</span>
                               </Button>
@@ -825,10 +830,10 @@ const MyAppointments = () => {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="text-blue-600 hover:bg-blue-50 p-1 sm:p-2"
+                              className="text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 p-1 xs:p-1.5 sm:p-2"
                               title="Voir les détails"
                             >
-                              <Eye className="h-3 w-3" />
+                              <Eye className="h-3 w-3 xs:h-3.5 xs:w-3.5" />
                             </Button>
                           </DialogTrigger>
                           <DialogContent>
@@ -904,11 +909,11 @@ const MyAppointments = () => {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="text-purple-600 hover:bg-purple-50 p-1 sm:p-2"
+                              className="text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20 p-1 xs:p-1.5 sm:p-2"
                               title="Modifier le RDV"
                               onClick={() => handleEditAppointment(appointment)}
                             >
-                              <Settings className="h-3 w-3" />
+                              <Settings className="h-3 w-3 xs:h-3.5 xs:w-3.5" />
                             </Button>
                           </DialogTrigger>
                           <DialogContent>
@@ -966,10 +971,10 @@ const MyAppointments = () => {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                className="text-gray-600 hover:bg-gray-50 p-1 sm:p-2"
+                                className="text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50 p-1 xs:p-1.5 sm:p-2"
                                 title="Voir le rapport"
                               >
-                                <FileText className="h-3 w-3" />
+                                <FileText className="h-3 w-3 xs:h-3.5 xs:w-3.5" />
                               </Button>
                             </DialogTrigger>
                             <DialogContent>
@@ -1036,10 +1041,10 @@ const MyAppointments = () => {
                             variant="outline" 
                             size="sm" 
                             onClick={() => handleMarkAsAbsent(appointment.id)}
-                            className="text-orange-600 hover:bg-orange-50 text-xs sm:text-sm px-2 sm:px-3"
+                            className="text-orange-600 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-900/20 text-xs px-2 py-1 xs:px-3 xs:py-1.5"
                             title="Marquer comme absent"
                           >
-                            <X className="h-3 w-3 mr-1" />
+                            <X className="h-3 w-3 mr-1 flex-shrink-0" />
                             <span className="hidden xs:inline">Absent</span>
                             <span className="xs:hidden">✗</span>
                           </Button>
@@ -1051,10 +1056,10 @@ const MyAppointments = () => {
                             variant="outline" 
                             size="sm" 
                             onClick={() => handleCancelAppointment(appointment.id)}
-                            className="text-red-600 hover:bg-red-50 text-xs sm:text-sm px-2 sm:px-3"
+                            className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 text-xs px-2 py-1 xs:px-3 xs:py-1.5"
                             title="Annuler le RDV"
                           >
-                            <X className="h-3 w-3 mr-1" />
+                            <X className="h-3 w-3 mr-1 flex-shrink-0" />
                             <span className="hidden xs:inline">Annuler</span>
                             <span className="xs:hidden">✗</span>
                           </Button>
@@ -1070,57 +1075,57 @@ const MyAppointments = () => {
         </CardContent>
       </Card>
 
-      {/* Filtres et recherche - Responsive */}
-      <Card className="mb-4 sm:mb-6">
-        <CardHeader className="pb-3 sm:pb-6">
-          <CardTitle className="text-base sm:text-lg">Filtres et recherche</CardTitle>
+      {/* Filtres et recherche - Responsive amélioré */}
+      <Card className="card-responsive mb-4 sm:mb-6">
+        <CardHeader className="pb-3 xs:pb-4 sm:pb-6 px-3 xs:px-4 sm:px-6">
+          <CardTitle className="text-sm xs:text-base sm:text-lg text-gray-900 dark:text-white">Filtres et recherche</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <CardContent className="px-3 xs:px-4 sm:px-6">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 xs:gap-4 sm:gap-4">
             {/* Recherche */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 xs:h-4 xs:w-4 text-gray-400 dark:text-gray-500" />
               <Input
                 placeholder="Rechercher un patient..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-10 sm:h-11"
+                className="pl-8 xs:pl-10 h-8 xs:h-9 sm:h-10 text-xs xs:text-sm bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
               />
             </div>
             
             {/* Filtre par statut */}
             <div className="w-full">
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="h-10 sm:h-11">
+                <SelectTrigger className="h-8 xs:h-9 sm:h-10 text-xs xs:text-sm bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                   <SelectValue placeholder="Filtrer par statut" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les statuts</SelectItem>
-                  <SelectItem value="en_attente">En attente</SelectItem>
-                  <SelectItem value="confirme">Confirmé</SelectItem>
-                  <SelectItem value="assigne">Assigné</SelectItem>
-                  <SelectItem value="realise">Terminé</SelectItem>
-                  <SelectItem value="annule">Annulé</SelectItem>
-                  <SelectItem value="absent">Absent</SelectItem>
+                <SelectContent className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                  <SelectItem value="all" className="text-xs xs:text-sm">Tous les statuts</SelectItem>
+                  <SelectItem value="en_attente" className="text-xs xs:text-sm">En attente</SelectItem>
+                  <SelectItem value="confirme" className="text-xs xs:text-sm">Confirmé</SelectItem>
+                  <SelectItem value="assigne" className="text-xs xs:text-sm">Assigné</SelectItem>
+                  <SelectItem value="realise" className="text-xs xs:text-sm">Terminé</SelectItem>
+                  <SelectItem value="annule" className="text-xs xs:text-sm">Annulé</SelectItem>
+                  <SelectItem value="absent" className="text-xs xs:text-sm">Absent</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             {/* Filtre par date */}
-            <div className="w-full sm:col-span-2 lg:col-span-1">
+            <div className="w-full xs:col-span-2 sm:col-span-2 lg:col-span-1">
               <Input
                 type="date"
                 value={filterDate}
                 onChange={(e) => setFilterDate(e.target.value)}
                 placeholder="Filtrer par date"
-                className="h-10 sm:h-11"
+                className="h-8 xs:h-9 sm:h-10 text-xs xs:text-sm bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
               />
             </div>
           </div>
           
           {/* Bouton pour effacer les filtres */}
           {(searchTerm || filterStatus !== 'all' || filterDate) && (
-            <div className="mt-3 sm:mt-4 flex justify-end">
+            <div className="mt-3 xs:mt-4 sm:mt-4 flex justify-end">
               <Button
                 variant="outline"
                 size="sm"
@@ -1129,10 +1134,11 @@ const MyAppointments = () => {
                   setFilterStatus('all');
                   setFilterDate('');
                 }}
-                className="text-xs sm:text-sm"
+                className="text-xs xs:text-sm px-3 xs:px-4 py-1.5 xs:py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
               >
-                <X className="h-3 w-3 mr-1" />
-                Effacer les filtres
+                <X className="h-3 w-3 mr-1 flex-shrink-0" />
+                <span className="hidden xs:inline">Effacer les filtres</span>
+                <span className="xs:hidden">Effacer</span>
               </Button>
             </div>
           )}
@@ -1180,17 +1186,22 @@ const MyAppointments = () => {
 
     return (
     <>
-      {/* Actions rapides */}
-      <Card className="bg-gradient-clinic text-white mb-6">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Besoin d'un rendez-vous ?</h3>
-              <p className="opacity-90">Réservez facilement votre prochaine consultation</p>
+      {/* Actions rapides - Responsive amélioré */}
+      <Card className="bg-gradient-clinic text-white mb-4 xs:mb-6">
+        <CardContent className="p-4 xs:p-6">
+          <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between space-y-4 xs:space-y-0">
+            <div className="flex-1">
+              <h3 className="text-lg xs:text-xl font-semibold mb-2">Besoin d'un rendez-vous ?</h3>
+              <p className="opacity-90 text-sm xs:text-base">Réservez facilement votre prochaine consultation</p>
             </div>
             <Dialog open={isAppointmentFormOpen} onOpenChange={setIsAppointmentFormOpen}>
               <DialogTrigger asChild>
-                <Button variant="secondary" size="lg" onClick={() => setIsAppointmentFormOpen(true)}>
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  onClick={() => setIsAppointmentFormOpen(true)}
+                  className="w-full xs:w-auto text-sm xs:text-base px-4 xs:px-6 py-2 xs:py-3"
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   Prendre RDV
                 </Button>
@@ -1204,97 +1215,117 @@ const MyAppointments = () => {
         </CardContent>
       </Card>
 
-      {/* Statistiques personnelles */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Prochain RDV</CardTitle>
+      {/* Statistiques personnelles - Responsive amélioré */}
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-3 xs:gap-4 mb-4 xs:mb-6">
+        <Card className="card-responsive-compact">
+          <CardHeader className="pb-2 xs:pb-3 px-3 xs:px-4">
+            <CardTitle className="text-xs xs:text-sm font-medium text-gray-600 dark:text-gray-400">Prochain RDV</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold">15 Jan</div>
-            <p className="text-xs text-gray-500">Dr. Fatou Diop</p>
+          <CardContent className="px-3 xs:px-4">
+            <div className="text-base xs:text-lg font-bold text-gray-900 dark:text-white">15 Jan</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Dr. Fatou Diop</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Cette année</CardTitle>
+        <Card className="card-responsive-compact">
+          <CardHeader className="pb-2 xs:pb-3 px-3 xs:px-4">
+            <CardTitle className="text-xs xs:text-sm font-medium text-gray-600 dark:text-gray-400">Cette année</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-gray-500">consultations</p>
+          <CardContent className="px-3 xs:px-4">
+            <div className="text-xl xs:text-2xl font-bold text-gray-900 dark:text-white">8</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">consultations</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Dernière visite</CardTitle>
+        <Card className="card-responsive-compact xs:col-span-2 md:col-span-1">
+          <CardHeader className="pb-2 xs:pb-3 px-3 xs:px-4">
+            <CardTitle className="text-xs xs:text-sm font-medium text-gray-600 dark:text-gray-400">Dernière visite</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold">8 Jan</div>
-            <p className="text-xs text-gray-500">Cardiologie</p>
+          <CardContent className="px-3 xs:px-4">
+            <div className="text-base xs:text-lg font-bold text-gray-900 dark:text-white">8 Jan</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Cardiologie</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Mes rendez-vous */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Mes rendez-vous</CardTitle>
-          <CardDescription>Consultez l'historique et gérez vos rendez-vous</CardDescription>
+      {/* Mes rendez-vous - Responsive amélioré */}
+      <Card className="card-responsive">
+        <CardHeader className="pb-3 xs:pb-4 sm:pb-6 px-3 xs:px-4 sm:px-6">
+          <CardTitle className="text-sm xs:text-base sm:text-lg text-gray-900 dark:text-white">Mes rendez-vous</CardTitle>
+          <CardDescription className="text-xs xs:text-sm text-gray-600 dark:text-gray-400">Consultez l'historique et gérez vos rendez-vous</CardDescription>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Médecin</TableHead>
-                <TableHead>Spécialité</TableHead>
-                <TableHead>Date & Heure</TableHead>
-                <TableHead>Lieu</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
+        <CardContent className="p-0 xs:p-3 sm:p-6">
+          <div className="table-responsive">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-50 dark:bg-gray-800">
+                  <TableHead className="text-xs xs:text-sm font-semibold text-gray-700 dark:text-gray-300">Médecin</TableHead>
+                  <TableHead className="hidden xs:table-cell text-xs xs:text-sm font-semibold text-gray-700 dark:text-gray-300">Spécialité</TableHead>
+                  <TableHead className="text-xs xs:text-sm font-semibold text-gray-700 dark:text-gray-300">Date & Heure</TableHead>
+                  <TableHead className="hidden sm:table-cell text-xs xs:text-sm font-semibold text-gray-700 dark:text-gray-300">Lieu</TableHead>
+                  <TableHead className="text-xs xs:text-sm font-semibold text-gray-700 dark:text-gray-300">Statut</TableHead>
+                  <TableHead className="text-xs xs:text-sm font-semibold text-gray-700 dark:text-gray-300">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
             <TableBody>
               {patientAppointments.map((appointment) => (
-                <TableRow key={appointment.id}>
-                  <TableCell>
-                    <div className="font-medium">{appointment.doctor}</div>
+                <TableRow key={appointment.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  <TableCell className="py-2 xs:py-3">
+                    <div className="font-medium text-xs xs:text-sm text-gray-900 dark:text-white">{appointment.doctor}</div>
+                    <div className="xs:hidden text-xs text-gray-500 dark:text-gray-400 mt-1">{appointment.specialty}</div>
                   </TableCell>
-                  <TableCell>{appointment.specialty}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="h-4 w-4 text-gray-400" />
-                      <span>{appointment.date}</span>
-                      <Clock className="h-4 w-4 text-gray-400" />
-                      <span>{appointment.time}</span>
+                  <TableCell className="hidden xs:table-cell py-2 xs:py-3">
+                    <span className="text-xs xs:text-sm text-gray-600 dark:text-gray-400">{appointment.specialty}</span>
+                  </TableCell>
+                  <TableCell className="py-2 xs:py-3">
+                    <div className="flex items-center space-x-1 xs:space-x-2">
+                      <Calendar className="h-3 w-3 xs:h-4 xs:w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                      <span className="text-xs xs:text-sm text-gray-900 dark:text-white">{appointment.date}</span>
+                      <Clock className="h-3 w-3 xs:h-4 xs:w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                      <span className="text-xs xs:text-sm text-gray-900 dark:text-white">{appointment.time}</span>
                     </div>
+                    <div className="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-1">{appointment.location}</div>
                   </TableCell>
-                  <TableCell>{appointment.location}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell py-2 xs:py-3">
+                    <span className="text-xs xs:text-sm text-gray-600 dark:text-gray-400">{appointment.location}</span>
+                  </TableCell>
+                  <TableCell className="py-2 xs:py-3">
                     <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(appointment.status)}`}>
                       {getStatusText(appointment.status)}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
+                  <TableCell className="py-2 xs:py-3">
+                    <div className="flex items-center space-x-1 xs:space-x-2">
                       {appointment.status === 'confirmed' && (
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-red-600"
+                          className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 text-xs px-2 py-1"
                           onClick={() => handleCancelAppointment(appointment.id)}
                         >
-                          <X className="h-3 w-3 mr-1" />
-                          Annuler
+                          <X className="h-3 w-3 mr-1 flex-shrink-0" />
+                          <span className="hidden xs:inline">Annuler</span>
+                          <span className="xs:hidden">✗</span>
                         </Button>
                       )}
                       {appointment.status === 'completed' && appointment.report && (
-                        <Button variant="outline" size="sm" onClick={() => handleViewReport(appointment.id)}>
-                          <FileText className="h-3 w-3 mr-1" />
-                          Rapport
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 text-xs px-2 py-1"
+                          onClick={() => handleViewReport(appointment.id)}
+                        >
+                          <FileText className="h-3 w-3 mr-1 flex-shrink-0" />
+                          <span className="hidden xs:inline">Rapport</span>
+                          <span className="xs:hidden">📄</span>
                         </Button>
                       )}
-                      <Button variant="outline" size="sm">
-                        Détails
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50 text-xs px-2 py-1"
+                      >
+                        <Eye className="h-3 w-3 mr-1 flex-shrink-0" />
+                        <span className="hidden xs:inline">Détails</span>
+                        <span className="xs:hidden">👁</span>
                       </Button>
                     </div>
                   </TableCell>
@@ -1302,6 +1333,7 @@ const MyAppointments = () => {
               ))}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
     </>
@@ -1309,13 +1341,13 @@ const MyAppointments = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+    <div className="space-y-4 xs:space-y-6">
+      <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center space-y-2 xs:space-y-0">
+        <div className="flex-1">
+          <h1 className="text-xl xs:text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             {user?.role === 'doctor' ? 'Mes consultations' : 'Mes rendez-vous'}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm xs:text-base text-gray-600 dark:text-gray-400 mt-1">
             {user?.role === 'doctor' 
               ? 'Gérez vos consultations et rédigez vos comptes rendus'
               : 'Consultez et gérez vos rendez-vous médicaux'

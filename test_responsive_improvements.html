@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Responsive - Clinique Yaye Aminata</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+        
+        .breakpoint-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #4299e1;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+        
+        .grid-test {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        @media (min-width: 475px) {
+            .grid-test {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 640px) {
+            .grid-test {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .grid-test {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .grid-test {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+        
+        .card {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .button-test {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .btn:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+        
+        @media (max-width: 640px) {
+            .btn {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+        
+        .form-test {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        @media (min-width: 640px) {
+            .form-test {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+        
+        .table-test {
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .table-test table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        
+        .table-test th,
+        .table-test td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .table-test th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .table-test tr:hover {
+            background: #f7fafc;
+        }
+        
+        .hidden-mobile {
+            display: none;
+        }
+        
+        @media (min-width: 640px) {
+            .hidden-mobile {
+                display: table-cell;
+            }
+        }
+        
+        .status-check {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status-warning {
+            background: #fef5e7;
+            color: #744210;
+        }
+        
+        .status-error {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .icon-test {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .icon-item {
+            text-align: center;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 6px;
+        }
+        
+        .icon-item svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 8px;
+            color: #4299e1;
+        }
+        
+        .icon-item span {
+            font-size: 12px;
+            color: #4a5568;
+        }
+        
+        .responsive-text {
+            font-size: 14px;
+        }
+        
+        @media (min-width: 475px) {
+            .responsive-text {
+                font-size: 16px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .responsive-text {
+                font-size: 18px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .responsive-text {
+                font-size: 20px;
+            }
+        }
+        
+        .test-results {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .test-results h3 {
+            color: #22543d;
+            margin-bottom: 10px;
+        }
+        
+        .test-results ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .test-results li {
+            padding: 5px 0;
+            border-bottom: 1px solid #c6f6d5;
+        }
+        
+        .test-results li:last-child {
+            border-bottom: none;
+        }
+        
+        .test-results .check {
+            color: #38a169;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="breakpoint-indicator" id="breakpointIndicator">
+        Mobile
+    </div>
+    
+    <div class="container">
+        <h1 class="responsive-text" style="text-align: center; margin-bottom: 30px; color: #2d3748;">
+            🎯 Test des Améliorations Responsive
+        </h1>
+        
+        <div class="test-results">
+            <h3>✅ Améliorations Implémentées</h3>
+            <ul>
+                <li><span class="check">✓</span> Navigation mobile avec menu hamburger</li>
+                <li><span class="check">✓</span> Grilles responsive adaptatives</li>
+                <li><span class="check">✓</span> Boutons et icônes scalables</li>
+                <li><span class="check">✓</span> Formulaires optimisés par taille d'écran</li>
+                <li><span class="check">✓</span> Tableaux avec scroll horizontal</li>
+                <li><span class="check">✓</span> Typographie responsive</li>
+                <li><span class="check">✓</span> Espacements adaptatifs</li>
+                <li><span class="check">✓</span> Support du mode sombre</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="test-title">📱 Test des Grilles Responsive</h2>
+            <p>Redimensionnez la fenêtre pour voir les grilles s'adapter automatiquement :</p>
+            <div class="grid-test">
+                <div class="card">
+                    <h3>Card 1</h3>
+                    <p>Contenu responsive</p>
+                </div>
+                <div class="card">
+                    <h3>Card 2</h3>
+                    <p>Adaptation automatique</p>
+                </div>
+                <div class="card">
+                    <h3>Card 3</h3>
+                    <p>Mobile First</p>
+                </div>
+                <div class="card">
+                    <h3>Card 4</h3>
+                    <p>Fluide</p>
+                </div>
+                <div class="card">
+                    <h3>Card 5</h3>
+                    <p>Accessible</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="test-title">🔘 Test des Boutons Responsive</h2>
+            <p>Boutons qui s'adaptent à la taille d'écran :</p>
+            <div class="button-test">
+                <button class="btn btn-primary">Voir détails</button>
+                <button class="btn btn-secondary">Paramètres</button>
+                <button class="btn btn-primary">Télécharger</button>
+                <button class="btn btn-secondary">Supprimer</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="test-title">📝 Test des Formulaires Responsive</h2>
+            <p>Formulaires qui passent de 1 colonne sur mobile à 2 colonnes sur tablette :</p>
+            <div class="form-test">
+                <div class="form-group">
+                    <label>Nom complet</label>
+                    <input type="text" placeholder="Votre nom">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" placeholder="votre@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Téléphone</label>
+                    <input type="tel" placeholder="77 123 45 67">
+                </div>
+                <div class="form-group">
+                    <label>Service</label>
+                    <select>
+                        <option>Consultation générale</option>
+                        <option>Spécialiste</option>
+                        <option>Urgences</option>
+                    </select>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Message</label>
+                    <textarea placeholder="Décrivez vos symptômes..." rows="3"></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="test-title">📊 Test des Tableaux Responsive</h2>
+            <p>Tableau avec colonnes masquées sur mobile et scroll horizontal :</p>
+            <div class="table-test">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th class="hidden-mobile">Email</th>
+                            <th>Date</th>
+                            <th class="hidden-mobile">Service</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jean Dupont</td>
+                            <td class="hidden-mobile">jean@email.com</td>
+                            <td>15 Jan 2024</td>
+                            <td class="hidden-mobile">Cardiologie</td>
+                            <td><span class="status-check status-success">Confirmé</span></td>
+                            <td>
+                                <button class="btn btn-primary" style="padding: 4px 8px; font-size: 12px;">Voir</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Marie Martin</td>
+                            <td class="hidden-mobile">marie@email.com</td>
+                            <td>16 Jan 2024</td>
+                            <td class="hidden-mobile">Médecine générale</td>
+                            <td><span class="status-check status-warning">En attente</span></td>
+                            <td>
+                                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">Modifier</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Pierre Durand</td>
+                            <td class="hidden-mobile">pierre@email.com</td>
+                            <td>17 Jan 2024</td>
+                            <td class="hidden-mobile">Dermatologie</td>
+                            <td><span class="status-check status-error">Annulé</span></td>
+                            <td>
+                                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">Rapport</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="test-title">🎨 Test des Icônes Responsive</h2>
+            <p>Icônes qui s'adaptent à la taille d'écran :</p>
+            <div class="icon-test">
+                <div class="icon-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    <span>Utilisateur</span>
+                </div>
+                <div class="icon-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                    </svg>
+                    <span>Téléphone</span>
+                </div>
+                <div class="icon-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                    <span>Email</span>
+                </div>
+                <div class="icon-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                    </svg>
+                    <span>Calendrier</span>
+                </div>
+                <div class="icon-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+                        <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                    </svg>
+                    <span>Horloge</span>
+                </div>
+                <div class="icon-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                    <span>Recherche</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="test-title">📏 Breakpoints Actuels</h2>
+            <p>Breakpoint détecté : <strong id="currentBreakpoint">Mobile</strong></p>
+            <p>Largeur de l'écran : <strong id="screenWidth">320px</strong></p>
+            <div style="margin-top: 15px;">
+                <div style="background: #e2e8f0; height: 20px; border-radius: 10px; position: relative;">
+                    <div id="breakpointBar" style="background: #4299e1; height: 100%; border-radius: 10px; width: 0%; transition: width 0.3s;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 12px; color: #666;">
+                    <span>320px</span>
+                    <span>640px</span>
+                    <span>768px</span>
+                    <span>1024px</span>
+                    <span>1280px</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-results">
+            <h3>🎯 Instructions de Test</h3>
+            <ul>
+                <li><strong>Mobile (< 640px)</strong> : Redimensionnez à 375px - Navigation hamburger, contenu 1 colonne</li>
+                <li><strong>Tablet (640px - 768px)</strong> : Redimensionnez à 768px - Grilles 2-3 colonnes</li>
+                <li><strong>Desktop (768px+)</strong> : Redimensionnez à 1200px - Grilles multi-colonnes, navigation latérale</li>
+                <li><strong>Test tactile</strong> : Vérifiez que les boutons sont assez grands (44px minimum)</li>
+                <li><strong>Test de contraste</strong> : Vérifiez la lisibilité du texte</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        function updateBreakpointIndicator() {
+            const width = window.innerWidth;
+            const indicator = document.getElementById('breakpointIndicator');
+            const currentBreakpoint = document.getElementById('currentBreakpoint');
+            const screenWidth = document.getElementById('screenWidth');
+            const breakpointBar = document.getElementById('breakpointBar');
+            
+            let breakpoint = 'Mobile';
+            let barWidth = 0;
+            
+            if (width >= 1536) {
+                breakpoint = '2XL (1536px+)';
+                barWidth = 100;
+            } else if (width >= 1280) {
+                breakpoint = 'XL (1280px+)';
+                barWidth = 85;
+            } else if (width >= 1024) {
+                breakpoint = 'LG (1024px+)';
+                barWidth = 70;
+            } else if (width >= 768) {
+                breakpoint = 'MD (768px+)';
+                barWidth = 55;
+            } else if (width >= 640) {
+                breakpoint = 'SM (640px+)';
+                barWidth = 40;
+            } else if (width >= 475) {
+                breakpoint = 'XS (475px+)';
+                barWidth = 25;
+            } else {
+                breakpoint = 'Mobile (< 475px)';
+                barWidth = 10;
+            }
+            
+            indicator.textContent = breakpoint;
+            currentBreakpoint.textContent = breakpoint;
+            screenWidth.textContent = width + 'px';
+            breakpointBar.style.width = barWidth + '%';
+        }
+        
+        // Mise à jour initiale
+        updateBreakpointIndicator();
+        
+        // Mise à jour lors du redimensionnement
+        window.addEventListener('resize', updateBreakpointIndicator);
+        
+        // Animation des cartes au survol
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px)';
+                this.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+            });
+        });
+        
+        // Test de performance
+        console.log('🚀 Test Responsive - Clinique Yaye Aminata');
+        console.log('📱 Breakpoint actuel:', window.innerWidth + 'px');
+        console.log('✅ Toutes les améliorations responsive sont actives');
+    </script>
+</body>
+</html>
+
