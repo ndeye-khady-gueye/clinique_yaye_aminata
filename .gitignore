@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 (
 echo *.pyc
 echo __pycache__/
@@ -8,3 +9,29 @@ echo my_django_project/
 echo cabinet_backend/cabinet/management/commands/__pycache__/
 echo cabinet_backend/cabinet/migrations/__pycache__/
 ) > .gitignore
+=======
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+>>>>>>> 3a4a5b16f9f13e388bf3f05de2f172d598aefd7e
