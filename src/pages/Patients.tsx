@@ -272,12 +272,12 @@ const Patients = () => {
         });
         
         // Pied de page
-        const pageCount = doc.internal.getNumberOfPages();
+        const pageCount = (doc as any).internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
           doc.setPage(i);
           doc.setFontSize(8);
           doc.setTextColor(107, 114, 128);
-          doc.text(`Page ${i} sur ${pageCount}`, 105, doc.internal.pageSize.height - 10, { align: 'center' });
+          doc.text(`Page ${i} sur ${pageCount}`, 105, (doc as any).internal.pageSize.height - 10, { align: 'center' });
         }
         
         // Sauvegarde du PDF
@@ -289,20 +289,20 @@ const Patients = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Patients Enregistrés
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Gestion des patients temporaires enregistrés au cabinet
           </p>
         </div>
-                 <div className="flex space-x-3">
+        <div className="flex flex-col sm:flex-row gap-3">
            <Button 
              variant="outline" 
              onClick={exportToPDF}
-             className="border-green-600 text-green-600 hover:bg-green-50 hover:text-green-700"
+            className="border-green-600 text-green-600 hover:bg-green-50 hover:text-green-700 w-full sm:w-auto"
              disabled={patients.length === 0}
            >
              <Download className="mr-2 h-4 w-4" />
@@ -310,7 +310,7 @@ const Patients = () => {
            </Button>
            <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
              <DialogTrigger asChild>
-               <Button className=" hover:opacity-90" onClick={() => setFormData(null)}>
+              <Button className="w-full sm:w-auto hover:opacity-90" onClick={() => setFormData(null)}>
                  <Plus className="mr-2 h-4 w-4" />
                  {formData?.id ? 'Modifier le patient' : 'Enregistrer un patient'}
                </Button>
@@ -327,7 +327,7 @@ const Patients = () => {
       </div>
 
       {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-gray-600">Total patients</CardTitle>
@@ -401,7 +401,7 @@ const Patients = () => {
            </div>
            
            {/* Filtres avancés */}
-           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
              <div>
                <Label htmlFor="filter-type" className="text-sm font-medium">Type consultation</Label>
                <Select value={filters.typeConsultation} onValueChange={(value) => setFilters(prev => ({ ...prev, typeConsultation: value }))}>
@@ -458,7 +458,7 @@ const Patients = () => {
            </div>
            
                        {/* Boutons de filtres */}
-            <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center space-x-2">
                 <Button 
                   variant="outline" 
@@ -500,142 +500,146 @@ const Patients = () => {
             <Users className="mr-2 h-5 w-5" />
             Liste des patients enregistrés
           </CardTitle>
-                     <CardDescription>
-             {filteredPatients.length} patient(s) trouvé(s) sur {patients.length} enregistré(s)
-             {searchTerm || Object.values(filters).some(f => f !== 'all' && f !== '') ? ' (avec filtres actifs)' : ''}
-           </CardDescription>
+          <CardDescription>
+            {filteredPatients.length} patient(s) trouvé(s) sur {patients.length} enregistré(s)
+            {searchTerm || Object.values(filters).some(f => f !== 'all' && f !== '') ? ' (avec filtres actifs)' : ''}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-                         <TableHeader>
-               <TableRow>
-                 <TableHead>ID</TableHead>
-                 <TableHead>Nom complet</TableHead>
-                 <TableHead>Contact</TableHead>
-                 <TableHead>Âge</TableHead>
-                 <TableHead>Motif visite</TableHead>
-                 <TableHead>Type consultation</TableHead>
-                 <TableHead>Prix</TableHead>
-                 <TableHead>Actions</TableHead>
-               </TableRow>
-             </TableHeader>
-            <TableBody>
-                             {loading ? (
-                 <TableRow>
-                   <TableCell colSpan={8} className="text-center py-8">
-                     <div className="flex items-center justify-center space-x-2">
-                       <Loader2 className="h-6 w-6 animate-spin" />
-                       <span>Chargement des patients enregistrés...</span>
-                     </div>
-                   </TableCell>
-                 </TableRow>
-               ) : error ? (
-                 <TableRow>
-                   <TableCell colSpan={8} className="text-center py-8 text-red-600">
-                     <div className="flex items-center justify-center space-x-2">
-                       <AlertTriangle className="h-6 w-6" />
-                       <span>{error}</span>
-                     </div>
-                   </TableCell>
-                 </TableRow>
-               ) : filteredPatients.length === 0 ? (
-                 <TableRow>
-                   <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                     Aucun patient enregistré trouvé
-                   </TableCell>
-                 </TableRow>
-              ) : (
-                                 filteredPatients.map((patient) => (
-                   <TableRow key={patient.id}>
-                     <TableCell>
-                       <div className="text-center">
-                         <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
-                           #{patient.id}
-                         </span>
-                       </div>
-                     </TableCell>
-                     <TableCell>
-                       <div>
-                         <div className="font-medium">
-                           {patient.nom} {patient.prenom}
-                         </div>
-                         {patient.profession && (
-                           <div className="text-sm text-gray-500 mt-1">
-                             {patient.profession}
-                           </div>
-                         )}
-                       </div>
-                     </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="flex items-center text-sm">
-                          <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                          {patient.email || 'Non renseigné'}
-                        </div>
-                        <div className="flex items-center text-sm">
-                          <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                          {patient.telephone || 'Non renseigné'}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {patient.age ? `${patient.age} ans` : '-'}
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">{patient.motif_visite}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">{patient.type_consultation}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-medium text-green-600">
-                        {patient.prix_consultation?.toLocaleString()} FCFA
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Dialog open={isDetailsOpen && selectedPatient?.id === patient.id} onOpenChange={(open) => {
-                          if (!open) {
-                            setIsDetailsOpen(false);
-                            setSelectedPatient(null);
-                          }
-                        }}>
-                          <DialogTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleViewDetails(patient)}
-                            >
-                              <Eye className="h-3 w-3 mr-1" />
-                              Voir
-                            </Button>
-                          </DialogTrigger>
-                          <PatientEnregistreDetailsModal patient={patient} />
-                        </Dialog>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleEditPatient(patient)}
-                        >
-                          <FileText className="h-3 w-3 mr-1" />
-                          Modifier
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleDeletePatient(patient.id!)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <X className="h-3 w-3 mr-1" />
-                          Supprimer
-                        </Button>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Nom complet</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Âge</TableHead>
+                  <TableHead>Motif visite</TableHead>
+                  <TableHead>Type consultation</TableHead>
+                  <TableHead>Prix</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      <div className="flex items-center justify-center space-x-2">
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                        <span>Chargement des patients enregistrés...</span>
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : error ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-red-600">
+                      <div className="flex items-center justify-center space-x-2">
+                        <AlertTriangle className="h-6 w-6" />
+                        <span>{error}</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : filteredPatients.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                      Aucun patient enregistré trouvé
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredPatients.map((patient) => (
+                    <TableRow key={patient.id}>
+                      <TableCell>
+                        <div className="text-center">
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                            #{patient.id}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">
+                            {patient.nom} {patient.prenom}
+                          </div>
+                          {patient.profession && (
+                            <div className="text-sm text-gray-500 mt-1">
+                              {patient.profession}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center text-sm">
+                            <Mail className="h-3 w-3 mr-1 text-gray-400" />
+                            {patient.email || 'Non renseigné'}
+                          </div>
+                          <div className="flex items-center text-sm">
+                            <Phone className="h-3 w-3 mr-1 text-gray-400" />
+                            {patient.telephone || 'Non renseigné'}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {patient.age ? `${patient.age} ans` : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{patient.motif_visite}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{patient.type_consultation}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-medium text-green-600">
+                          {patient.prix_consultation?.toLocaleString()} FCFA
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <Dialog open={isDetailsOpen && selectedPatient?.id === patient.id} onOpenChange={(open) => {
+                            if (!open) {
+                              setIsDetailsOpen(false);
+                              setSelectedPatient(null);
+                            }
+                          }}>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleViewDetails(patient)}
+                                className="w-full sm:w-auto"
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                Voir
+                              </Button>
+                            </DialogTrigger>
+                            <PatientEnregistreDetailsModal patient={patient} />
+                          </Dialog>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditPatient(patient)}
+                            className="w-full sm:w-auto"
+                          >
+                            <FileText className="h-3 w-3 mr-1" />
+                            Modifier
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDeletePatient(patient.id!)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 w-full sm:w-auto"
+                          >
+                            <X className="h-3 w-3 mr-1" />
+                            Supprimer
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
