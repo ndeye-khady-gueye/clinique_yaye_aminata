@@ -1,3 +1,17 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Environnement virtuel
+env/
+
+# Base de données locale
+db.sqlite3
+
+# Django specific folders
+cabinet_backend/cabinet/management/commands/__pycache__/
+cabinet_backend/cabinet/migrations/__pycache__/
+
 # Logs
 logs
 *.log
@@ -7,22 +21,19 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Node / frontend
+node_modules/
+dist/
+dist-ssr/
 *.local
 
-# Editor directories and files
-.vscode/*
+# IDE / editor files
+.vscode/
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-
-__pycache__/
-*.pyc
-

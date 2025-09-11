@@ -6,50 +6,60 @@
 {% block extrastyle %}
 <style>
     :root {
-        --primary: #2563eb;
-        --secondary: #64748b;
-        --accent: #f59e0b;
+        --primary: #B0368B;
+        --secondary: #6C2476;
+        --accent: #D946EF;
         --primary-fg: #ffffff;
-        --body-fg: #333333;
+        --body-fg: #ffffff;
         --body-bg: #f8fafc;
         --header-color: #ffffff;
         --header-branding-color: #ffffff;
-        --header-bg: #1e40af;
+        --header-bg: #B0368B;
         --header-link-color: #ffffff;
     }
 
     #header {
-        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        background: #B0368B 0%;
         color: #ffffff;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(176, 54, 139, 0.3);
     }
 
     #branding h1 {
         color: #ffffff;
         font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    #branding img {
+        height: 40px;
+        width: auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
     .module h2, .module caption, .inline-group h2 {
-        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+        background: #B0368B ;
         color: #ffffff;
     }
 
     div.breadcrumbs {
-        background: #f1f5f9;
-        color: #64748b;
+        background: #B0368B;
+        color: #ffffff;
         border-bottom: 1px solid #e2e8f0;
     }
 
     div.breadcrumbs a {
-        color: #2563eb;
+        color: #B0368B;
     }
 
     div.breadcrumbs a:hover {
-        color: #1e40af;
+        color: #6C2476;
     }
 
     .button, input[type=submit], input[type=button], .submit-row input, a.button {
-        background: #2563eb;
+        background: #B0368B;
         color: #ffffff;
         border-radius: 6px;
         border: none;
@@ -59,9 +69,9 @@
     }
 
     .button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
-        background: #1e40af;
+        background: #6C2476;
         transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+        box-shadow: 0 4px 8px rgba(176, 54, 139, 0.3);
     }
 
     .button.default, input[type=submit].default, .submit-row input.default {
@@ -73,7 +83,7 @@
     }
 
     .object-tools a:link, .object-tools a:visited {
-        background: #2563eb;
+        background: #B0368B;
         color: #ffffff;
         border-radius: 6px;
         padding: 8px 16px;
@@ -83,9 +93,9 @@
     }
 
     .object-tools a:hover {
-        background: #1e40af;
+        background: #6C2476;
         transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+        box-shadow: 0 4px 8px rgba(176, 54, 139, 0.3);
     }
 
     .module {
@@ -102,11 +112,12 @@
         border-radius: 8px;
         overflow: hidden;
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        color: #ffffff;
     }
 
     thead th {
-        background: #f8fafc;
-        color: #374151;
+        background: #B0368B;
+        color: #ffffff;
         font-weight: 600;
         border-bottom: 2px solid #e5e7eb;
     }
@@ -116,13 +127,13 @@
     }
 
     .field-get_user_link a {
-        color: #2563eb;
+        color: #B0368B;
         text-decoration: none;
         font-weight: 500;
     }
 
     .field-get_user_link a:hover {
-        color: #1e40af;
+        color: #6C2476;
         text-decoration: underline;
     }
 
@@ -150,18 +161,268 @@
         color: #d97706;
     }
 
+    /* Styles pour les liens de navigation */
+    #nav-sidebar a {
+        color: #121212ef;
+        
+    }
+
+    #nav-sidebar a:hover {
+        background: #D946EF;
+        color: #ffffff;
+    }
+
+    /* Styles pour les onglets */
+    .tab {
+        background: #B0368B;
+        color: #ffffff;
+    }
+
+    .tab:hover {
+        background: #6C2476;
+    }
+
+    /* Boutons d'export PDF personnalisés */
+    .export-pdf-btn {
+        background: linear-gradient(135deg, #B0368B 0%, #6C2476 100%);
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(176, 54, 139, 0.2);
+    }
+
+    .export-pdf-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(176, 54, 139, 0.3);
+        color: #ffffff;
+        text-decoration: none;
+    }
+
+    .export-pdf-btn::before {
+        content: "📄";
+        font-size: 16px;
+    }
+
     /* Responsive */
+    @media (max-width: 480px) {
+        /* Mobile très petit */
+        #header {
+            padding: 8px;
+        }
+        
+        #branding h1 {
+            font-size: 14px;
+            flex-direction: column;
+            gap: 5px;
+            text-align: center;
+        }
+        
+        #branding img {
+            height: 25px;
+        }
+        
+        .module {
+            margin: 8px 0;
+            padding: 10px;
+        }
+        
+        .button, input[type=submit], input[type=button], .submit-row input, a.button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .object-tools a:link, .object-tools a:visited {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        table {
+            font-size: 12px;
+        }
+        
+        thead th {
+            padding: 8px 4px;
+            font-size: 11px;
+        }
+        
+        tbody td {
+            padding: 6px 4px;
+        }
+        
+        .export-pdf-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        
+        /* Navigation sidebar pour mobile */
+        #nav-sidebar {
+            width: 100% !important;
+            position: relative !important;
+        }
+        
+        #nav-sidebar a {
+            display: block;
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+    }
+    
     @media (max-width: 768px) {
+        /* Mobile et tablette */
         #header {
             padding: 10px;
         }
         
         #branding h1 {
             font-size: 18px;
+            flex-direction: column;
+            gap: 8px;
+            text-align: center;
+        }
+        
+        #branding img {
+            height: 30px;
         }
         
         .module {
             margin: 10px 0;
+        }
+        
+        /* Tableaux responsive */
+        .results {
+            overflow-x: auto;
+        }
+        
+        table {
+            min-width: 600px;
+        }
+        
+        thead th {
+            padding: 10px 8px;
+            font-size: 13px;
+        }
+        
+        tbody td {
+            padding: 8px;
+        }
+        
+        /* Boutons responsive */
+        .object-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .object-tools li {
+            margin: 0;
+        }
+        
+        /* Navigation responsive */
+        #nav-sidebar {
+            width: 100%;
+        }
+        
+        /* Formulaires responsive */
+        .form-row {
+            flex-direction: column;
+        }
+        
+        .form-row .field-box {
+            width: 100% !important;
+            margin-bottom: 10px;
+        }
+    }
+    
+    @media (min-width: 769px) and (max-width: 1024px) {
+        /* Tablette */
+        #header {
+            padding: 12px;
+        }
+        
+        #branding h1 {
+            font-size: 20px;
+        }
+        
+        #branding img {
+            height: 35px;
+        }
+        
+        table {
+            font-size: 14px;
+        }
+        
+        thead th {
+            padding: 12px 10px;
+        }
+        
+        tbody td {
+            padding: 10px;
+        }
+    }
+    
+    @media (min-width: 1025px) {
+        /* Desktop */
+        #header {
+            padding: 15px;
+        }
+        
+        #branding h1 {
+            font-size: 22px;
+        }
+        
+        #branding img {
+            height: 40px;
+        }
+        
+        .module {
+            margin: 15px 0;
+        }
+        
+        table {
+            font-size: 15px;
+        }
+        
+        thead th {
+            padding: 15px 12px;
+        }
+        
+        tbody td {
+            padding: 12px;
+        }
+    }
+    
+    /* Styles généraux responsive */
+    @media (max-width: 768px) {
+        /* Masquer certains éléments sur mobile */
+        .hide-mobile {
+            display: none !important;
+        }
+        
+        /* Ajuster les marges et paddings */
+        .content {
+            padding: 10px;
+        }
+        
+        .breadcrumbs {
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+        
+        /* Améliorer l'affichage des messages */
+        .messagelist {
+            margin: 10px 0;
+        }
+        
+        .messagelist li {
+            padding: 8px 10px;
+            font-size: 13px;
         }
     }
 </style>
@@ -169,7 +430,8 @@
 
 {% block branding %}
 <h1 id="site-name">
-    🏥 Clinique Yaye Aminata - Administration
+    <img src="{% static 'images/Logo.jpg' %}" alt="Logo Clinique Yaye Aminata">
+    Clinique Yaye Aminata - Administration
 </h1>
 {% endblock %}
 

@@ -5,13 +5,14 @@
 {{ block.super }}
 <style>
     .dashboard-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background:#B0368B;
         min-height: 100vh;
         padding: 2rem 0;
+        color: #ffffff;
     }
 
     .dashboard-header {
-        background: white;
+        background: linear-gradient(135deg, #B0368B, #6C2476);
         border-radius: 15px;
         padding: 2rem;
         margin-bottom: 2rem;
@@ -20,7 +21,7 @@
     }
 
     .dashboard-title {
-        color: #B0368B;
+        color: #ffffff;
         font-size: 2.5rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
@@ -28,7 +29,7 @@
     }
 
     .dashboard-subtitle {
-        color: #6b7280;
+        color: #ffffff;
         font-size: 1.1rem;
         margin-bottom: 1rem;
     }
@@ -59,7 +60,7 @@
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(90deg, #B0368B, #6C2476);
+        background:  #B0368B;
     }
 
     .stat-card:hover {
@@ -77,7 +78,7 @@
 
     .stat-label {
         font-size: 0.9rem;
-        color: #6b7280;
+        color: #ffffff;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         font-weight: 600;
@@ -101,7 +102,7 @@
     .chart-title {
         font-size: 1.2rem;
         font-weight: 600;
-        color: #374151;
+        color:#B0368B;
         margin-bottom: 1rem;
         text-align: center;
         padding-bottom: 0.5rem;
@@ -124,7 +125,7 @@
     }
 
     .export-btn {
-        background: linear-gradient(135deg, #B0368B, #6C2476);
+        background:  #B0368B;
         color: white;
         border: none;
         padding: 1rem 2rem;
@@ -170,7 +171,7 @@
 
     .filter-badge {
         display: inline-block;
-        background: linear-gradient(135deg, #B0368B, #6C2476);
+        background:  #B0368B;
         color: white;
         padding: 0.5rem 1rem;
         border-radius: 20px;
@@ -186,8 +187,8 @@
     }
 
     .results table thead th {
-        background: linear-gradient(135deg, #B0368B, #6C2476);
-        color: white;
+        background: #B0368B;
+        color: #ffffff;
         font-weight: 600;
         padding: 1rem;
         border: none;
@@ -248,7 +249,7 @@
 
 <div class="export-section">
     <h3 style="margin-top: 0; color: #374151;">Export des Données & Actions</h3>
-    <p style="color: #6b7280; margin-bottom: 1.5rem;">Téléchargez un rapport PDF complet des utilisateurs filtrés ou ajoutez un nouvel utilisateur</p>
+    <p style="color: #ffffff; margin-bottom: 1.5rem;">Téléchargez un rapport PDF complet des utilisateurs filtrés ou ajoutez un nouvel utilisateur</p>
     <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
         <a href="{{ pdf_export_url }}" class="export-btn" style="color:#B0368B; background:#ffffff; border: 1px solid #B0368B !important;">
             Télécharger PDF
@@ -331,6 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     backgroundColor: chartData.roles.colors || ['#B0368B', '#6C2476', '#10b981', '#f59e0b', '#ef4444'],
                     borderWidth: 3,
                     borderColor: '#ffffff'
+                
                 }]
             },
             options: {
@@ -386,6 +388,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (chartData.activity && chartData.activity.labels && chartData.activity.data) {
         const activityCtx = document.getElementById('activityChart').getContext('2d');
+        
+        // Générer des couleurs différentes pour chaque barre
+        const generateColors = (count) => {
+            const colors = [];
+            const baseColors = [
+                'rgba(176, 54, 139, 0.8)',   // Violet principal
+                'rgba(108, 36, 118, 0.8)',   // Violet foncé
+                'rgba(16, 185, 129, 0.8)',   // Vert
+                'rgba(245, 158, 11, 0.8)',   // Orange
+                'rgba(239, 68, 68, 0.8)',    // Rouge
+                'rgba(59, 130, 246, 0.8)',   // Bleu
+                'rgba(139, 92, 246, 0.8)',   // Indigo
+                'rgba(236, 72, 153, 0.8)',   // Rose
+                'rgba(34, 197, 94, 0.8)',    // Vert clair
+                'rgba(251, 146, 60, 0.8)',   // Orange clair
+            ];
+            
+            for (let i = 0; i < count; i++) {
+                colors.push(baseColors[i % baseColors.length]);
+            }
+            return colors;
+        };
+        
+        const borderColors = generateColors(chartData.activity.data.length).map(color => 
+            color.replace('0.8)', '1)')
+        );
+        
         new Chart(activityCtx, {
             type: 'bar',
             data: {
@@ -393,8 +422,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Connexions',
                     data: chartData.activity.data,
-                    backgroundColor: 'rgba(176, 54, 139, 0.8)',
-                    borderColor: '#B0368B',
+                    backgroundColor: generateColors(chartData.activity.data.length),
+                    borderColor: borderColors,
                     borderWidth: 2,
                     borderRadius: 8,
                     borderSkipped: false,

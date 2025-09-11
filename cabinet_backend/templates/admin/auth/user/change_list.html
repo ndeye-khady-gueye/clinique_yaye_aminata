@@ -1,0 +1,675 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="?export=pdf" class="user-btn pdf" title="Télécharger la liste des utilisateurs en PDF">
+             Télécharger PDF
+        </a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    <!-- Section des graphiques -->
+    <div class="charts-dashboard" style="margin-bottom: 30px;">
+        <h2 style="color: #B0368B; margin-bottom: 20px; font-size: 24px;"> Tableau de Bord des Utilisateurs</h2>
+        
+        <!-- Informations sur les filtres actifs -->
+        <div id="filter-info" style="background: #e0f2fe; padding: 12px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #B0368B; font-size: 14px;">
+            <strong>Données affichées:</strong> 
+            <span id="filter-count">{{ total_filtered_count|default:"Tous les utilisateurs" }}</span> utilisateurs
+        </div>
+        
+        <!-- Debug info -->
+        <div id="debug-info" style="background: #f0f0f0; padding: 10px; margin-bottom: 20px; border-radius: 5px; font-family: monospace; font-size: 12px;">
+            Debug: Chargement des données...
+        </div>
+        
+        <div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-bottom: 30px;">
+            <!-- Graphique par rôle -->
+            <div class="chart-container">
+                <div class="chart-card">
+                    <h3>Répartition par Rôle</h3>
+                    <canvas id="roleChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+            
+            <!-- Graphique par statut -->
+            <div class="chart-container">
+                <div class="chart-card">
+                    <h3>Utilisateurs par Statut</h3>
+                    <canvas id="statusChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+            
+            <!-- Graphique évolution mensuelle -->
+            <div class="chart-container">
+                <div class="chart-card">
+                    <h3>Inscriptions Mensuelles</h3>
+                    <canvas id="monthlyChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+            
+            <!-- Graphique activité -->
+            <div class="chart-container">
+                <div class="chart-card">
+                    <h3>Activité (30 derniers jours)</h3>
+                    <canvas id="activityChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Espacement entre les graphiques et les boutons -->
+    <div style="margin: 30px 0;"></div>
+    
+    {{ block.super }}
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Styles pour les graphiques */
+        .charts-dashboard {
+            background: #e8afde;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .chart-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            height: 380px;
+        }
+        
+        .chart-card canvas {
+            max-height: 280px !important;
+        }
+        
+        .chart-card h3 {
+            color: #B0368B;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid #B0368B;
+            padding-bottom: 8px;
+        }
+        
+        /* Styles pour les en-têtes de tableau des utilisateurs */
+        .results table thead th {
+            background: #B0368B !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            padding: 1rem !important;
+            border: none !important;
+        }
+        
+        .results table thead th a {
+            color: #ffffff !important;
+            text-decoration: none !important;
+        }
+        
+        .results table thead th a:hover {
+            color: #f0f0f0 !important;
+        }
+        
+        /* Styles pour le bouton Télécharger PDF */
+        .user-btn.pdf {
+            background: #6C2476 !important;
+            color: #ffffff !important;
+            border: none !important;
+            padding: 10px 18px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 8px !important;
+            box-shadow: 0 3px 12px rgba(108, 36, 118, 0.3) !important;
+            transition: all 0.3s ease !important;
+            position: relative !important;
+            overflow: hidden !important;
+            margin-top: 50px;
+            margin-right: 300px !important;
+        }
+
+        .user-btn.pdf:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .user-btn.pdf:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 5px 15px rgba(108, 36, 118, 0.4) !important;
+            background: linear-gradient(135deg, #6C2476, #B0368B) !important;
+        }
+
+        .user-btn.pdf:hover:before {
+            left: 100%;
+        }
+
+        .user-btn.pdf:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 8px rgba(108, 36, 118, 0.3) !important;
+        }
+
+        /* Amélioration du bouton Ajouter existant */
+        .object-tools li a.addlink {
+            background: #ffffff !important;
+            color: #B0368B !important;
+            border: none !important;
+            padding: 10px 18px !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+            text-decoration: none !important;
+            border: 1px solid #B0368B !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            box-shadow: 0 4px 15px rgba(176, 54, 139, 0.3) !important;
+            transition: all 0.3s ease !important;
+            position: relative !important;
+            overflow: hidden !important; 
+            margin-right: 20px !important;
+            margin-top: 50px;
+        }
+
+        .object-tools li a.addlink:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .object-tools li a.addlink:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(176, 54, 139, 0.4) !important;
+            background: linear-gradient(135deg, #6C2476, #B0368B) !important;
+            color: white !important;
+        }
+
+        .object-tools li a.addlink:hover:before {
+            left: 100%;
+        }
+
+        .object-tools li a.addlink:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 10px rgba(176, 54, 139, 0.3) !important;
+        }
+
+        /* Responsive design pour les graphiques */
+        @media (max-width: 480px) {
+            /* Mobile très petit */
+            .charts-dashboard {
+                padding: 10px;
+                margin-bottom: 15px;
+            }
+            
+            .charts-dashboard h2 {
+                font-size: 18px;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+            
+            .chart-card {
+                padding: 10px;
+                height: 250px;
+                min-height: 250px;
+            }
+            
+            .chart-card h3 {
+                font-size: 13px;
+                margin-bottom: 10px;
+            }
+            
+            .chart-card canvas {
+                max-height: 180px !important;
+            }
+            
+            #filter-info {
+                padding: 8px;
+                font-size: 12px;
+            }
+            
+            #debug-info {
+                padding: 6px;
+                font-size: 10px;
+            }
+            
+            /* Boutons responsive pour mobile très petit */
+            .user-btn.pdf {
+                padding: 8px 12px !important;
+                font-size: 11px !important;
+                margin-top: 20px !important;
+                margin-right: 10px !important;
+                width: calc(100% - 20px) !important;
+                text-align: center !important;
+                justify-content: center !important;
+            }
+            
+            .object-tools li a.addlink {
+                padding: 8px 12px !important;
+                font-size: 11px !important;
+                margin-top: 20px !important;
+                margin-right: 10px !important;
+                width: calc(100% - 20px) !important;
+                text-align: center !important;
+                justify-content: center !important;
+            }
+            
+            .object-tools {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 10px !important;
+                align-items: stretch !important;
+            }
+            
+            /* Tableaux pour mobile très petit */
+            .results {
+                overflow-x: auto;
+                margin: 10px 0;
+            }
+            
+            .results table {
+                min-width: 500px;
+                font-size: 11px;
+            }
+            
+            .results table thead th {
+                padding: 6px 4px !important;
+                font-size: 10px !important;
+            }
+            
+            .results table tbody td {
+                padding: 4px 2px;
+                font-size: 11px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            /* Mobile et tablette */
+            .charts-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px;
+            }
+            
+            .chart-card {
+                padding: 15px;
+                height: 300px;
+                min-height: 300px;
+            }
+            
+            .chart-card canvas {
+                max-height: 220px !important;
+            }
+            
+            .charts-dashboard {
+                padding: 15px;
+            }
+            
+            .charts-dashboard h2 {
+                font-size: 20px;
+                text-align: center;
+            }
+            
+            /* Boutons responsive */
+            .user-btn.pdf {
+                margin-top: 30px !important;
+                margin-right: 20px !important;
+                padding: 8px 14px !important;
+                font-size: 12px !important;
+            }
+            
+            .object-tools li a.addlink {
+                margin-top: 30px !important;
+                margin-right: 10px !important;
+                padding: 8px 14px !important;
+                font-size: 12px !important;
+            }
+            
+            .object-tools {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+            }
+            
+            /* Améliorer l'affichage des filtres */
+            #filter-info {
+                padding: 10px;
+                font-size: 13px;
+                text-align: center;
+            }
+            
+            #debug-info {
+                padding: 8px;
+                font-size: 11px;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            /* Tablette */
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 25px;
+            }
+            
+            .chart-card {
+                padding: 18px;
+                height: 350px;
+            }
+            
+            .chart-card canvas {
+                max-height: 250px !important;
+            }
+            
+            .charts-dashboard {
+                padding: 18px;
+            }
+            
+            .user-btn.pdf {
+                margin-top: 40px !important;
+                margin-right: 150px !important;
+            }
+            
+            .object-tools li a.addlink {
+                margin-top: 40px !important;
+            }
+        }
+        
+        @media (min-width: 1025px) and (max-width: 1200px) {
+            /* Desktop petit */
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 25px;
+            }
+            
+            .chart-card {
+                height: 380px;
+            }
+        }
+        
+        @media (min-width: 1201px) {
+            /* Desktop large */
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+            
+            .chart-card {
+                height: 380px;
+            }
+        }
+        
+        /* Responsive pour l'orientation paysage sur mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 15px;
+            }
+            
+            .chart-card {
+                height: 280px;
+            }
+            
+            .chart-card canvas {
+                max-height: 200px !important;
+            }
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const debugDiv = document.getElementById('debug-info');
+            
+            // Vérifier si Chart.js est chargé
+            if (typeof Chart === 'undefined') {
+                debugDiv.innerHTML = 'Erreur: Chart.js non chargé. Vérifiez votre connexion internet.';
+                debugDiv.style.background = '#fef2f2';
+                debugDiv.style.color = '#B0368B';
+                debugDiv.style.border = '1px solid #B0368B';
+                return;
+            }
+            
+            try {
+                // Configuration globale Chart.js
+                Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+                Chart.defaults.color = '#374151';
+                
+                debugDiv.innerHTML = 'Debug: Chart.js chargé, récupération des données...';
+                
+                // Données des graphiques depuis Django
+                let chartData;
+                try {
+                    {% if chart_data_json %}
+                        chartData = {{ chart_data_json|safe }};
+                        debugDiv.innerHTML = 'Debug: Données filtrées reçues - Total: {{ total_filtered_count|default:0 }} utilisateurs';
+                        
+                        // Mettre à jour l'affichage du nombre de données
+                        const filterCountSpan = document.getElementById('filter-count');
+                        if (filterCountSpan) {
+                            filterCountSpan.textContent = '{{ total_filtered_count|default:0 }}';
+                        }
+                    {% else %}
+                        // Données de test si pas de données du backend
+                        chartData = {
+                            roles: {
+                                labels: ['Administrateur', 'Docteur', 'Patient', 'Réceptionniste'],
+                                data: [2, 5, 15, 3],
+                                colors: ['#B0368B', '#6C2476', '#10b981', '#f59e0b']
+                            },
+                            status: {
+                                labels: ['Actifs', 'Inactifs'],
+                                data: [20, 5],
+                                colors: ['#10b981', '#ef4444']
+                            },
+                            monthly: {
+                                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+                                data: [3, 5, 2, 8, 4, 3],
+                                color: '#B0368B'
+                            },
+                            activity: {
+                                labels: ['01/01', '02/01', '03/01', '04/01', '05/01'],
+                                data: [12, 8, 15, 10, 18],
+                                color: '#6C2476'
+                            }
+                        };
+                        debugDiv.innerHTML = 'Debug: Utilisation de données de test (aucune donnée backend)';
+                    {% endif %}
+                } catch (parseError) {
+                    debugDiv.innerHTML = 'Debug: Erreur parsing données - ' + parseError.message;
+                    debugDiv.style.background = '#fef2f2';
+                    debugDiv.style.color = '#B0368B';
+                    debugDiv.style.border = '1px solid #B0368B';
+                    return;
+                }
+                
+                // Fonction helper pour créer les graphiques
+                function createChart(canvasId, config) {
+                    const canvas = document.getElementById(canvasId);
+                    if (!canvas) {
+                        console.warn('Canvas ' + canvasId + ' non trouvé');
+                        return null;
+                    }
+                    return new Chart(canvas.getContext('2d'), config);
+                }
+                
+                // Graphique par rôle (Doughnut)
+                if (chartData.roles && chartData.roles.labels && chartData.roles.labels.length > 0) {
+                    createChart('roleChart', {
+                        type: 'doughnut',
+                        data: {
+                            labels: chartData.roles.labels,
+                            datasets: [{
+                                data: chartData.roles.data,
+                                backgroundColor: chartData.roles.colors,
+                                borderWidth: 2,
+                                borderColor: '#ffffff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 15,
+                                        usePointStyle: true
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Graphique par statut (Pie)
+                if (chartData.status && chartData.status.labels && chartData.status.labels.length > 0) {
+                    createChart('statusChart', {
+                        type: 'pie',
+                        data: {
+                            labels: chartData.status.labels,
+                            datasets: [{
+                                data: chartData.status.data,
+                                backgroundColor: chartData.status.colors,
+                                borderWidth: 2,
+                                borderColor: '#ffffff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 15,
+                                        usePointStyle: true
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Graphique évolution mensuelle (Line)
+                if (chartData.monthly && chartData.monthly.labels && chartData.monthly.labels.length > 0) {
+                    createChart('monthlyChart', {
+                        type: 'line',
+                        data: {
+                            labels: chartData.monthly.labels,
+                            datasets: [{
+                                label: 'Inscriptions',
+                                data: chartData.monthly.data,
+                                borderColor: chartData.monthly.color,
+                                backgroundColor: chartData.monthly.color + '20',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: '#f3f4f6'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Graphique activité (Bar)
+                if (chartData.activity && chartData.activity.labels && chartData.activity.labels.length > 0) {
+                    createChart('activityChart', {
+                        type: 'bar',
+                        data: {
+                            labels: chartData.activity.labels,
+                            datasets: [{
+                                label: 'Connexions',
+                                data: chartData.activity.data,
+                                backgroundColor: chartData.activity.color,
+                                borderColor: chartData.activity.color,
+                                borderWidth: 1,
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: '#f3f4f6'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                debugDiv.innerHTML = 'Graphiques des utilisateurs créés avec succès!';
+                debugDiv.style.background = '#f0fdf4';
+                debugDiv.style.color = '#166534';
+                debugDiv.style.border = '1px solid #22c55e';
+                
+            } catch (error) {
+                debugDiv.innerHTML = 'Debug: Erreur - ' + error.message;
+                debugDiv.style.background = '#fef2f2';
+                debugDiv.style.color = '#B0368B';
+                debugDiv.style.border = '1px solid #B0368B';
+                console.error('Erreur graphiques utilisateurs:', error);
+            }
+        });
+    </script>
+{% endblock %}
