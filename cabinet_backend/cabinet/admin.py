@@ -138,24 +138,52 @@ class UserAdmin(BaseUserAdmin):
         cl = self.get_changelist_instance(request)
         queryset = cl.get_queryset(request)
         
+        # Récupération des données par rôle
         role_data = queryset.values('role').annotate(count=Count('id'))
-        role_labels = []
-        role_counts = []
+        
+        # Définition des couleurs pour chaque rôle
+        role_colors = {
+            'admin': '#B0368B',         # Violet foncé
+            'doctor': '#3b82f6',        # Bleu
+            'patient': '#10b981',       # Vert
+            'receptionist': '#f59e0b',  # Orange
+            'responsable_cabinet': '#8b5cf6',  # Violet clair
+            'secretaire': '#ec4899',    # Rose
+            'infirmier': '#06b6d4',     # Cyan
+            'autre': '#6b7280'          # Gris
+        }
+        
+        # Traduction des rôles pour l'affichage
         role_translations = {
             'admin': 'Administrateur',
             'doctor': 'Docteur', 
             'patient': 'Patient',
             'receptionist': 'Réceptionniste',
-            'responsable_cabinet': 'Responsable Cabinet'
+            'responsable_cabinet': 'Responsable',
+            'secretaire': 'Secrétaire',
+            'infirmier': 'Infirmier',
+            'autre': 'Autre'
         }
         
-        for item in role_data:
-            role_labels.append(role_translations.get(item['role'], item['role']))
-            role_counts.append(item['count'])
+        # Initialisation des listes pour le graphique
+        role_labels = []
+        role_counts = []
+        colors = []
         
+        # Remplir les données en maintenant l'ordre des rôles
+        for role, label in role_translations.items():
+            # Vérifier si ce rôle existe dans les données
+            role_count = next((item['count'] for item in role_data if item['role'] == role), None)
+            if role_count is not None:
+                role_labels.append(label)
+                role_counts.append(role_count)
+                colors.append(role_colors[role])
+        
+        # Comptage des utilisateurs actifs/inactifs
         active_count = queryset.filter(is_active=True).count()
         inactive_count = queryset.filter(is_active=False).count()
         
+        # Données mensuelles (6 derniers mois)
         six_months_ago = timezone.now() - timedelta(days=180)
         monthly_data = (queryset.filter(date_joined__gte=six_months_ago)
                        .annotate(month=TruncMonth('date_joined'))
@@ -169,6 +197,7 @@ class UserAdmin(BaseUserAdmin):
             monthly_labels.append(item['month'].strftime('%B %Y'))
             monthly_counts.append(item['count'])
         
+        # Données d'activité (30 derniers jours)
         thirty_days_ago = timezone.now() - timedelta(days=30)
         activity_data = (queryset.filter(last_login__gte=thirty_days_ago)
                         .annotate(day=TruncDate('last_login'))
@@ -182,11 +211,12 @@ class UserAdmin(BaseUserAdmin):
             activity_labels.append(item['day'].strftime('%d/%m'))
             activity_counts.append(item['count'])
         
+        # Préparation des données pour le template
         chart_data_json = json.dumps({
             'roles': {
                 'labels': role_labels,
                 'data': role_counts,
-                'colors': generate_colors(len(role_labels))
+                'colors': colors  # Utilisation des couleurs spécifiques
             },
             'status': {
                 'labels': ['Actifs', 'Inactifs'],
@@ -201,7 +231,7 @@ class UserAdmin(BaseUserAdmin):
             'activity': {
                 'labels': activity_labels,
                 'data': activity_counts,
-                'color': '#6C2476'
+                'color': '#3b82f6'
             }
         })
         
@@ -455,13 +485,40 @@ class RendezVousAdmin(admin.ModelAdmin):
         
         # 1. Graphique par statut
         statut_data = queryset.values('statut').annotate(count=Count('id'))
+        
+        # Définition des couleurs pour chaque statut possible
+        statut_colors = {
+            'en_attente': '#f59e0b',  # Orange
+            'confirme': '#10b981',     # Vert
+            'assigne': '#3b82f6',      # Bleu
+            'realise': '#8b5cf6',      # Violet
+            'annule': '#ef4444',       # Rouge
+            'absent': '#6b7280'        # Gris
+        }
+        
+        # Traduction des statuts pour l'affichage
+        statut_labels_fr = {
+            'en_attente': 'En attente',
+            'confirme': 'Confirmé',
+            'assigne': 'Assigné',
+            'realise': 'Réalisé',
+            'annule': 'Annulé',
+            'absent': 'Absent'
+        }
+        
+        # Initialisation des listes pour le graphique
         statut_labels = []
         statut_counts = []
-        statut_colors = ['#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6']
+        colors = []
         
-        for item in statut_data:
-            statut_labels.append(item['statut'].replace('_', ' ').title())
-            statut_counts.append(item['count'])
+        # Remplir les données en maintenant l'ordre des statuts
+        for statut, label in statut_labels_fr.items():
+            # Vérifier si ce statut existe dans les données
+            statut_count = next((item['count'] for item in statut_data if item['statut'] == statut), None)
+            if statut_count is not None:
+                statut_labels.append(label)
+                statut_counts.append(statut_count)
+                colors.append(statut_colors[statut])
         
         # 2. Graphique par service (top 10)
         service_data = (queryset.values('service__nom')
@@ -535,7 +592,7 @@ class RendezVousAdmin(admin.ModelAdmin):
             'statut': {
                 'labels': statut_labels,
                 'data': statut_counts,
-                'colors': statut_colors[:len(statut_labels)]
+                'colors': colors  # Utilisation des couleurs spécifiques
             },
             'services': {
                 'labels': service_labels,

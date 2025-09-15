@@ -4,6 +4,7 @@
 {% block title %}{{ title }} | Clinique Yaye Aminata{% endblock %}
 
 {% block extrastyle %}
+{{ block.super }}
 <style>
     :root {
         --primary: #B0368B;
@@ -56,6 +57,25 @@
 
     div.breadcrumbs a:hover {
         color: #6C2476;
+    }
+
+    div.breadcrumbs a:link, div.breadcrumbs a:visited {
+        color: #ffffff;  /* Couleur du texte des liens */
+    }
+
+    div.breadcrumbs a:focus, div.breadcrumbs a:hover {
+        color: #f8f8f8;  /* Légèrement plus clair au survol */
+    }
+
+    /* Style pour le texte "Accueil" dans la barre de navigation */
+    .breadcrumbs .breadcrumbs-separator,
+    .breadcrumbs .breadcrumb-label {
+        color: #ffffff !important;
+    }
+
+    /* Style pour le lien "Accueil" */
+    .breadcrumbs a[href*="admin:index"] {
+        color: #ffffff !important;
     }
 
     .button, input[type=submit], input[type=button], .submit-row input, a.button {
@@ -425,6 +445,87 @@
             font-size: 13px;
         }
     }
+
+    /* Styles pour les actions récentes */
+    #recent-actions-module {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+
+    #recent-actions-module h2 {
+        background: #B0368B;
+        color: #ffffff;
+        padding: 12px 15px;
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    #recent-actions-module .actionlist {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    #recent-actions-module .actionlist li {
+        padding: 10px 15px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    #recent-actions-module .actionlist li:last-child {
+        border-bottom: none;
+    }
+
+    #recent-actions-module .actionlist .action {
+        display: flex;
+        align-items: flex-start;
+    }
+
+    #recent-actions-module .actionlist .action-type {
+        font-weight: 600;
+        margin-right: 5px;
+        color: #6b7280;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    #recent-actions-module .actionlist .action-content {
+        flex: 1;
+    }
+
+    #recent-actions-module .actionlist .action-time {
+        color: #9ca3af;
+        font-size: 11px;
+        margin-top: 2px;
+    }
+
+    #recent-actions-module .actionlist .action-model {
+        display: inline-block;
+        background: #f3f4f6;
+        color: #6b7280;
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-top: 3px;
+    }
+
+    #recent-actions-module .actionlist .action-add .action-type {
+        color: #10b981;
+    }
+
+    #recent-actions-module .actionlist .action-change .action-type {
+        color: #3b82f6;
+    }
+
+    #recent-actions-module .actionlist .action-delete .action-type {
+        color: #ef4444;
+    }
 </style>
 {% endblock %}
 
@@ -436,3 +537,48 @@
 {% endblock %}
 
 {% block nav-global %}{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Amélioration des actions récentes
+        const recentActions = document.querySelector('#recent-actions-module');
+        if (recentActions) {
+            const items = recentActions.querySelectorAll('li');
+            
+            items.forEach(item => {
+                const text = item.textContent.trim();
+                const actionMatch = text.match(/^(Ajout|Modif|Suppr)\.*?:/);
+                
+                if (actionMatch) {
+                    const actionType = actionMatch[1];
+                    const actionText = text.replace(actionMatch[0], '').trim();
+                    const modelMatch = item.querySelector('a');
+                    const modelName = modelMatch ? modelMatch.textContent : '';
+                    const timeAgo = item.querySelector('.mini') ? item.querySelector('.mini').textContent : '';
+                    
+                    // Créer la nouvelle structure HTML
+                    const actionClass = {
+                        'Ajout': 'action-add',
+                        'Modif': 'action-change',
+                        'Suppr': 'action-delete'
+                    }[actionType] || '';
+                    
+                    item.className = actionClass;
+                    item.innerHTML = `
+                        <div class="action">
+                            <span class="action-type">${actionType === 'Ajout' ? 'Ajouté' : actionType === 'Modif' ? 'Modifié' : 'Supprimé'}</span>
+                            <div class="action-content">
+                                <div>${actionText}</div>
+                                ${timeAgo ? `<div class="action-time">${timeAgo}</div>` : ''}
+                                ${modelName ? `<span class="action-model">${modelName}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
