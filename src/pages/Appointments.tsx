@@ -10,7 +10,7 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import AppointmentForm from '@/components/forms/AppointmentForm';
 import DetailsModal from '@/components/modals/DetailsModal';
 import PDFExportForm from '@/components/forms/PDFExportForm';
-import { apiService } from '@/services/api';
+import apiService from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 
 const Appointments = () => {

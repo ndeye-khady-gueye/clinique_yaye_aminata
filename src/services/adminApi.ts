@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/environment';
 
 // Configuration axios pour l'API
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -236,6 +237,82 @@ class AdminApiService {
     });
     return response.data;
   }
+
+  // Méthodes pour les notifications
+  async getNotifications(params?: {
+    type?: string;
+    is_read?: boolean;
+    priority?: string;
+    page?: number;
+    page_size?: number;
+  }): Promise<NotificationResponse> {
+    const response = await api.get('/admin/notifications/', { params });
+    return response.data;
+  }
+
+  async createNotification(data: CreateNotificationData): Promise<{ success: boolean; notification: Notification }> {
+    const response = await api.post('/admin/create_notification/', data);
+    return response.data;
+  }
+
+  async markNotificationRead(notificationId: number): Promise<{ success: boolean; message: string }> {
+    const response = await api.put('/admin/mark_notification_read/', { notification_id: notificationId });
+    return response.data;
+  }
+
+  async markAllNotificationsRead(): Promise<{ success: boolean; message: string }> {
+    const response = await api.put('/admin/mark_all_notifications_read/');
+    return response.data;
+  }
+
+  async deleteNotification(notificationId: number): Promise<{ success: boolean; message: string }> {
+    const response = await api.delete('/admin/delete_notification/', { data: { notification_id: notificationId } });
+    return response.data;
+  }
+
+  // Rapports système
+  async getSystemReports(): Promise<any> {
+    const response = await api.get('/admin/system_reports/');
+    return response.data;
+  }
 }
+
+// Interfaces pour les notifications
+export interface Notification {
+  id: number;
+  type: string;
+  type_display: string;
+  title: string;
+  message: string;
+  priority: string;
+  priority_display: string;
+  user?: number;
+  user_name?: string;
+  user_role?: string;
+  data: any;
+  is_read: boolean;
+  is_archived: boolean;
+  created_at: string;
+  read_at?: string;
+  time_ago: string;
+}
+
+export interface NotificationResponse {
+  notifications: Notification[];
+  total: number;
+  page: number;
+  page_size: number;
+  unread_count: number;
+}
+
+export interface CreateNotificationData {
+  type: string;
+  title: string;
+  message: string;
+  priority?: string;
+  user?: number;
+  data?: any;
+}
+
 
 export const adminApi = new AdminApiService();

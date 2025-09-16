@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+import { API_BASE_URL } from '@/config/environment';
 
 // Types pour l'API
 export interface LoginRequest {
@@ -148,15 +148,15 @@ class ApiService {
     
     if (emailRegex.test(identifier)) {
       // C'est un email
-      payload = { email: identifier, password };
+      payload = { identifier: identifier, password };
       console.log('Login payload (email):', payload); // Debug log
     } else if (phoneRegex.test(identifier)) {
       // C'est un numéro de téléphone
-      payload = { phone: identifier, password };
+      payload = { identifier: identifier, password };
       console.log('Login payload (phone):', payload); // Debug log
     } else {
-      // Fallback: envoyer comme email (comportement par défaut)
-      payload = { email: identifier, password };
+      // Fallback: envoyer comme identifier (comportement par défaut)
+      payload = { identifier: identifier, password };
       console.log('Login payload (fallback):', payload); // Debug log
     }
     
@@ -367,15 +367,39 @@ class ApiService {
 
   // Rendez-vous
   async getRendezVous(): Promise<any[]> {
-    return await this.request<any[]>('/rendez-vous/');
+    const response = await this.request<any>('/rendez-vous/');
+    // Gérer la pagination Django qui retourne {results: [...]}
+    if (response && typeof response === 'object' && 'results' in response) {
+      return response.results;
+    }
+    // Si c'est déjà un tableau, le retourner tel quel
+    if (Array.isArray(response)) {
+      return response;
+    }
+    // Sinon, retourner un tableau vide
+    return [];
   }
 
   async getRendezVousAujourdHui(): Promise<any[]> {
-    return await this.request<any[]>('/rendez-vous/aujourd_hui/');
+    const response = await this.request<any>('/rendez-vous/aujourd_hui/');
+    if (response && typeof response === 'object' && 'results' in response) {
+      return response.results;
+    }
+    if (Array.isArray(response)) {
+      return response;
+    }
+    return [];
   }
 
   async getRendezVousCetteSemaine(): Promise<any[]> {
-    return await this.request<any[]>('/rendez-vous/cette_semaine/');
+    const response = await this.request<any>('/rendez-vous/cette_semaine/');
+    if (response && typeof response === 'object' && 'results' in response) {
+      return response.results;
+    }
+    if (Array.isArray(response)) {
+      return response;
+    }
+    return [];
   }
 
   async createRendezVous(rdvData: any): Promise<any> {
@@ -453,10 +477,31 @@ class ApiService {
   async getStatistiques(): Promise<any> {
     return await this.request<any>('/statistiques/dashboard/');
   }
+
+  // Récupérer le profil patient
+  async getPatientProfile(): Promise<any> {
+    return await this.request<any>('/patients/profile/');
+  }
+
+  // Mettre à jour le profil patient
+  async updatePatientProfile(profileData: any): Promise<any> {
+    return await this.request<any>('/patients/update_profile/', {
+      method: 'PATCH',
+      body: JSON.stringify(profileData),
+    });
+  }
+
+  // Changer le mot de passe
+  async changePassword(passwordData: { current_password: string; new_password: string }): Promise<any> {
+    return await this.request<any>('/auth/change-password/', {
+      method: 'POST',
+      body: JSON.stringify(passwordData),
+    });
+  }
 }
 
 // Instance singleton
-export const apiService = new ApiService(API_BASE_URL);
+const apiService = new ApiService(API_BASE_URL);
 
 // API pour les contacts
 export const contactApi = {
@@ -706,19 +751,23 @@ export const rdvResponsableApi = {
 
   // Supprimer un rendez-vous
   supprimerRendezVous: async (rdvId: number): Promise<any> => {
-    const response = await fetch(`${API_BASE_URL}/rdv-responsable/${rdvId}/`, {
-      method: 'DELETE',
+    const response = await fetch(`${API_BASE_URL}/rdv-responsable/supprimer_rendez_vous/`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${getToken()}`,
       },
+      body: JSON.stringify({ rendez_vous_id: rdvId }),
     });
     
     if (!response.ok) {
-      throw new Error('Erreur lors de la suppression');
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Erreur lors de la suppression');
     }
     
     return response.json();
   },
 };
+
+export default apiService;
 

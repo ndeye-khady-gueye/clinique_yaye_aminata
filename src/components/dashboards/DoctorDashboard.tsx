@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import PatientDetailsModal from '@/components/modals/PatientDetailsModal';
 import PrescriptionModal from '@/components/modals/PrescriptionModal';
 import MedicalReportModal from '@/components/modals/MedicalReportModal';
-import { apiService } from '@/services/api';
+import apiService from '@/services/api';
 import { doctorAppointmentsService } from '@/services/doctorAppointmentsService';
 import { 
   BarChart, 

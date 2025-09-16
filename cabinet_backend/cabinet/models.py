@@ -154,6 +154,21 @@ class Service(models.Model):
     
     def __str__(self):
         return f"{self.nom} - {self.prix} FCFA"
+    
+    @classmethod
+    def get_or_create_default(cls):
+        """Créer un service par défaut s'il n'existe pas"""
+        service, created = cls.objects.get_or_create(
+            code='SUIVI_GROSSESSE',
+            defaults={
+                'nom': 'Suivi de grossesse',
+                'description': 'Suivi médical de la grossesse',
+                'prix': 8000,
+                'duree_consultation': 45,
+                'is_active': True
+            }
+        )
+        return service
 
 class RendezVous(models.Model):
     """Modèle pour les rendez-vous"""
@@ -333,3 +348,87 @@ class Contact(models.Model):
     
     def __str__(self):
         return f"Message de {self.nom} - {self.sujet} ({self.created_at.strftime('%d/%m/%Y %H:%M')})"
+
+
+class Notification(models.Model):
+    """Modèle pour les notifications système"""
+    
+    TYPE_CHOICES = [
+        ('login', 'Connexion'),
+        ('logout', 'Déconnexion'),
+        ('appointment_request', 'Demande de RDV'),
+        ('appointment_created', 'RDV créé'),
+        ('appointment_updated', 'RDV modifié'),
+        ('appointment_cancelled', 'RDV annulé'),
+        ('patient_created', 'Patient créé'),
+        ('patient_updated', 'Patient modifié'),
+        ('user_created', 'Utilisateur créé'),
+        ('user_updated', 'Utilisateur modifié'),
+        ('system_alert', 'Alerte système'),
+        ('other', 'Autre'),
+    ]
+    
+    PRIORITY_CHOICES = [
+        ('low', 'Faible'),
+        ('medium', 'Moyenne'),
+        ('high', 'Élevée'),
+        ('urgent', 'Urgente'),
+    ]
+    
+    type = models.CharField(max_length=30, choices=TYPE_CHOICES, verbose_name="Type de notification")
+    title = models.CharField(max_length=200, verbose_name="Titre")
+    message = models.TextField(verbose_name="Message")
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium', verbose_name="Priorité")
+    
+    # Utilisateur concerné par la notification
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications', null=True, blank=True, verbose_name="Utilisateur concerné")
+    
+    # Données supplémentaires (JSON)
+    data = models.JSONField(default=dict, blank=True, verbose_name="Données supplémentaires")
+    
+    # Statut de la notification
+    is_read = models.BooleanField(default=False, verbose_name="Lue")
+    is_archived = models.BooleanField(default=False, verbose_name="Archivée")
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+    read_at = models.DateTimeField(null=True, blank=True, verbose_name="Date de lecture")
+    
+    class Meta:
+        verbose_name = "Notification"
+        verbose_name_plural = "Notifications"
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['type', 'is_read']),
+            models.Index(fields=['created_at']),
+            models.Index(fields=['user', 'is_read']),
+        ]
+    
+    def __str__(self):
+        return f"{self.get_type_display()} - {self.title} ({self.created_at.strftime('%d/%m/%Y %H:%M')})"
+    
+    def mark_as_read(self):
+        """Marquer la notification comme lue"""
+        if not self.is_read:
+            from django.utils import timezone
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save(update_fields=['is_read', 'read_at'])
+    
+    def mark_as_unread(self):
+        """Marquer la notification comme non lue"""
+        self.is_read = False
+        self.read_at = None
+        self.save(update_fields=['is_read', 'read_at'])
+    
+    @classmethod
+    def create_notification(cls, type, title, message, user=None, priority='medium', data=None):
+        """Méthode utilitaire pour créer une notification"""
+        return cls.objects.create(
+            type=type,
+            title=title,
+            message=message,
+            user=user,
+            priority=priority,
+            data=data or {}
+        )

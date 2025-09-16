@@ -36,9 +36,11 @@ import {
   Line
 } from 'recharts';
 import { patientEnregistreService, PatientEnregistre } from '@/services/patientEnregistreService';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import PatientEnregistreForm from '@/components/forms/PatientEnregistreForm';
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
+import jsPDF from 'jspdf';
+import { toPng } from 'html-to-image';
 
 const ReceptionistDashboard = () => {
   const { user } = useAuth();
@@ -63,11 +65,7 @@ const ReceptionistDashboard = () => {
       setPatients(patientsData);
     } catch (error) {
       console.error('Erreur lors du chargement des patients:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les patients",
-        variant: "destructive",
-      });
+      toast.error("Impossible de charger les patients");
     } finally {
       setLoading(false);
     }
@@ -193,20 +191,12 @@ const ReceptionistDashboard = () => {
   const handleCreatePatient = async (data: any) => {
     try {
       await patientEnregistreService.createPatientEnregistre(data);
-      toast({
-        title: "Succès",
-        description: "Patient enregistré avec succès !",
-        variant: "success",
-      });
+      toast.success("Patient enregistré avec succès !");
       setIsFormOpen(false);
       await loadPatients();
     } catch (error) {
       console.error('Erreur lors de la création du patient:', error);
-      toast({
-        title: "Erreur",
-        description: "Erreur lors de l'enregistrement du patient",
-        variant: "destructive",
-      });
+      toast.error("Erreur lors de l'enregistrement du patient");
     }
   };
 
@@ -233,159 +223,243 @@ const ReceptionistDashboard = () => {
     );
   }
 
-  const exportDashboardToPDF = () => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
+  const exportDashboardToPDF = async () => {
+    try {
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
 
-    let y = 20;
+      let y = 20;
 
-    // Add header
-    doc.setFontSize(20);
-    doc.text('Tableau de Bord du Cabinet Médical', pageWidth / 2, y, { align: 'center' });
-    y += 15;
+      // Add header
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Tableau de Bord du Cabinet Médical', pageWidth / 2, y, { align: 'center' });
+      y += 15;
 
-    // Add date
-    doc.setFontSize(12);
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth / 2, y, { align: 'center' });
-    y += 10;
+      // Add date
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Date: ${new Date().toLocaleDateString('fr-FR')}`, pageWidth / 2, y, { align: 'center' });
+      y += 20;
 
-    // Add total patients
-    doc.setFontSize(16);
-    doc.text(`Total Patients: ${totalPatients}`, 20, y);
-    y += 10;
+      // Add statistics section
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Statistiques Générales', 20, y);
+      y += 10;
 
-    // Add total enfants
-    doc.text(`Enfants (0-14 ans): ${totalEnfants}`, 20, y);
-    y += 10;
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Total Patients: ${totalPatients}`, 20, y);
+      y += 8;
+      doc.text(`Enfants (0-14 ans): ${totalEnfants}`, 20, y);
+      y += 8;
+      doc.text(`Adultes (15+ ans): ${totalAdultes}`, 20, y);
+      y += 8;
+      doc.text(`Patients enregistrés aujourd'hui: ${patients.filter(p => 
+        p.date_enregistrement === new Date().toISOString().split('T')[0]
+      ).length}`, 20, y);
+      y += 20;
 
-    // Add total adultes
-    doc.text(`Adultes (15+ ans): ${totalAdultes}`, 20, y);
-    y += 10;
+      // Add age distribution section
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Répartition par Âge', 20, y);
+      y += 10;
 
-    // Add today's patients
-    doc.text(`Patients enregistrés aujourd'hui: ${patients.filter(p => 
-      p.date_enregistrement === new Date().toISOString().split('T')[0]
-    ).length}`, 20, y);
-    y += 10;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      Object.values(ageStats).forEach((group) => {
+        if (group.count > 0) {
+          const percentage = ((group.count / totalPatients) * 100).toFixed(1);
+          doc.text(`${group.label}: ${group.count} patients (${percentage}%)`, 20, y);
+          y += 6;
+        }
+      });
 
-    // Add age distribution chart
-    y += 20;
-    doc.setFontSize(14);
-    doc.text('Répartition par âge', 20, y);
-    y += 5;
+      y += 15;
 
-    const ageDistributionData = chartData.ageDistribution.filter(item => item.value > 0);
-    const pieChartWidth = (pageWidth - 40) / 2; // Half of the page width minus padding
-    const pieChartHeight = pieChartWidth;
+      // Add status distribution section
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Répartition par Statut', 20, y);
+      y += 10;
 
-    doc.addImage(
-      `data:image/png;base64,${toPng(
-        <ResponsiveContainer width={pieChartWidth} height={pieChartHeight}>
-          <RechartsPieChart>
-            <Pie
-              data={ageDistributionData}
-              cx="50%"
-              cy="50%"
-              outerRadius={pieChartWidth / 2 - 10}
-              fill="#8884d8"
-              dataKey="value"
-              label={({ name, value }) => `${name}: ${value}`}
-            >
-              {ageDistributionData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip />
-          </RechartsPieChart>
-        </ResponsiveContainer>
-      )}`,
-      pageWidth / 2 + 10,
-      y,
-      pieChartWidth,
-      pieChartHeight,
-      'PNG',
-      'FAST'
-    );
-    y += pieChartHeight + 10;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const statusData = [
+        { status: 'Enregistré', count: patients.filter(p => p.statut === 'enregistre').length },
+        { status: 'En consultation', count: patients.filter(p => p.statut === 'en_consultation').length },
+        { status: 'Terminé', count: patients.filter(p => p.statut === 'termine').length },
+        { status: 'Annulé', count: patients.filter(p => p.statut === 'annule').length }
+      ];
 
-    // Add trends chart
-    y += 20;
-    doc.setFontSize(14);
-    doc.text('Évolution hebdomadaire', 20, y);
-    y += 5;
+      statusData.forEach((status) => {
+        if (status.count > 0) {
+          const percentage = ((status.count / totalPatients) * 100).toFixed(1);
+          doc.text(`${status.status}: ${status.count} patients (${percentage}%)`, 20, y);
+          y += 6;
+        }
+      });
 
-    const trendsData = chartData.trends.slice(0, 2);
-    const trendsChartWidth = pageWidth - 40;
-    const trendsChartHeight = 150;
+      y += 15;
 
-    doc.addImage(
-      `data:image/png;base64,${toPng(
-        <ResponsiveContainer width={trendsChartWidth} height={trendsChartHeight}>
-          <RechartsLineChart data={trendsData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="period" />
-            <YAxis />
-            <Tooltip />
-            <Line 
-              type="monotone" 
-              dataKey="patients" 
-              stroke="#6C2476" 
-              strokeWidth={3}
-              dot={{ fill: '#6C2476', strokeWidth: 2, r: 6 }}
-            />
-          </RechartsLineChart>
-        </ResponsiveContainer>
-      )}`,
-      20,
-      y,
-      trendsChartWidth,
-      trendsChartHeight,
-      'PNG',
-      'FAST'
-    );
-    y += trendsChartHeight + 10;
+      // Add trends section
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Évolution Temporelle', 20, y);
+      y += 10;
 
-    // Add status chart
-    y += 20;
-    doc.setFontSize(14);
-    doc.text('Statuts des patients', 20, y);
-    y += 5;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      chartData.trends.forEach((trend) => {
+        const trendIcon = trend.trend === 'up' ? '↗' : '↘';
+        doc.text(`${trend.period}: ${trend.patients} patients ${trendIcon}`, 20, y);
+        y += 6;
+      });
 
-    const statusData = [
-      { status: 'Enregistré', count: patients.filter(p => p.statut === 'enregistre').length },
-      { status: 'En consultation', count: patients.filter(p => p.statut === 'en_consultation').length },
-      { status: 'Terminé', count: patients.filter(p => p.statut === 'termine').length },
-      { status: 'Annulé', count: patients.filter(p => p.statut === 'annule').length }
-    ];
-    const statusChartWidth = pageWidth - 40;
-    const statusChartHeight = 150;
+      // Add footer
+      y = pageHeight - 20;
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
+      doc.text('Généré automatiquement par le système de gestion de clinique', pageWidth / 2, y, { align: 'center' });
 
-    doc.addImage(
-      `data:image/png;base64,${toPng(
-        <ResponsiveContainer width={statusChartWidth} height={statusChartHeight}>
-          <BarChart data={statusData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="status" />
-            <YAxis />
-            <Tooltip />
-            <Bar 
-              dataKey="count" 
-              fill="#6C2476"
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      )}`,
-      20,
-      y,
-      statusChartWidth,
-      statusChartHeight,
-      'PNG',
-      'FAST'
-    );
-    y += statusChartHeight + 10;
+      // Save the PDF
+      doc.save(`tableau_de_bord_${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      toast.success("Rapport PDF généré avec succès !");
+    } catch (error) {
+      console.error('Erreur lors de la génération du PDF:', error);
+      toast.error("Impossible de générer le rapport PDF");
+    }
+  };
 
-    doc.save('tableau_de_bord.pdf');
+  const exportDashboardWithCharts = async () => {
+    try {
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      let y = 20;
+
+      // Add header
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Tableau de Bord du Cabinet Médical', pageWidth / 2, y, { align: 'center' });
+      y += 15;
+
+      // Add date
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Date: ${new Date().toLocaleDateString('fr-FR')}`, pageWidth / 2, y, { align: 'center' });
+      y += 20;
+
+      // Add statistics section
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Statistiques Générales', 20, y);
+      y += 10;
+
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Total Patients: ${totalPatients}`, 20, y);
+      y += 8;
+      doc.text(`Enfants (0-14 ans): ${totalEnfants}`, 20, y);
+      y += 8;
+      doc.text(`Adultes (15+ ans): ${totalAdultes}`, 20, y);
+      y += 8;
+      doc.text(`Patients enregistrés aujourd'hui: ${patients.filter(p => 
+        p.date_enregistrement === new Date().toISOString().split('T')[0]
+      ).length}`, 20, y);
+      y += 20;
+
+      // Try to capture charts
+      try {
+        // Capture the pie chart
+        const pieChartElement = document.querySelector('[data-chart="pie"]');
+        if (pieChartElement) {
+          const pieChartDataUrl = await toPng(pieChartElement as HTMLElement);
+          const imgWidth = 80;
+          const imgHeight = 60;
+          doc.addImage(pieChartDataUrl, 'PNG', 20, y, imgWidth, imgHeight);
+          y += imgHeight + 10;
+        }
+      } catch (chartError) {
+        console.log('Impossible de capturer les graphiques, utilisation du format texte');
+      }
+
+      // Add age distribution section
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Répartition par Âge', 20, y);
+      y += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      Object.values(ageStats).forEach((group) => {
+        if (group.count > 0) {
+          const percentage = ((group.count / totalPatients) * 100).toFixed(1);
+          doc.text(`${group.label}: ${group.count} patients (${percentage}%)`, 20, y);
+          y += 6;
+        }
+      });
+
+      y += 15;
+
+      // Add status distribution section
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Répartition par Statut', 20, y);
+      y += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const statusData = [
+        { status: 'Enregistré', count: patients.filter(p => p.statut === 'enregistre').length },
+        { status: 'En consultation', count: patients.filter(p => p.statut === 'en_consultation').length },
+        { status: 'Terminé', count: patients.filter(p => p.statut === 'termine').length },
+        { status: 'Annulé', count: patients.filter(p => p.statut === 'annule').length }
+      ];
+
+      statusData.forEach((status) => {
+        if (status.count > 0) {
+          const percentage = ((status.count / totalPatients) * 100).toFixed(1);
+          doc.text(`${status.status}: ${status.count} patients (${percentage}%)`, 20, y);
+          y += 6;
+        }
+      });
+
+      y += 15;
+
+      // Add trends section
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Évolution Temporelle', 20, y);
+      y += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      chartData.trends.forEach((trend) => {
+        const trendIcon = trend.trend === 'up' ? '↗' : '↘';
+        doc.text(`${trend.period}: ${trend.patients} patients ${trendIcon}`, 20, y);
+        y += 6;
+      });
+
+      // Add footer
+      y = pageHeight - 20;
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
+      doc.text('Généré automatiquement par le système de gestion de clinique', pageWidth / 2, y, { align: 'center' });
+
+      // Save the PDF
+      doc.save(`tableau_de_bord_complet_${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      toast.success("Rapport PDF avec graphiques généré avec succès !");
+    } catch (error) {
+      console.error('Erreur lors de la génération du PDF avec graphiques:', error);
+      toast.error("Impossible de générer le rapport PDF avec graphiques");
+    }
   };
 
   return (
@@ -410,6 +484,22 @@ const ReceptionistDashboard = () => {
             </div>
           )}
           
+          {/* Bouton Ajouter Patient */}
+          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-primary hover:bg-primary/90 text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                Ajouter Patient
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <PatientEnregistreForm
+                onSubmit={handleCreatePatient}
+                onCancel={() => setIsFormOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+          
           {/* Bouton Export PDF */}
           <Button 
             onClick={exportDashboardToPDF}
@@ -418,6 +508,16 @@ const ReceptionistDashboard = () => {
           >
             <Download className="h-4 w-4 mr-2" />
             Export PDF
+          </Button>
+          
+          {/* Bouton Export PDF avec Graphiques */}
+          <Button 
+            onClick={exportDashboardWithCharts}
+            variant="outline" 
+            className="border-green-600 text-green-600 hover:bg-green-600 hover:text-white"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export PDF + Graphiques
           </Button>
         </div>
       </div>
@@ -519,7 +619,7 @@ const ReceptionistDashboard = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <RechartsPieChart>
+              <RechartsPieChart data-chart="pie">
                 <Pie
                   data={chartData.ageDistribution.filter(item => item.value > 0)}
                   cx="50%"
@@ -581,7 +681,7 @@ const ReceptionistDashboard = () => {
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
-            {selectedChart === 'age' && (
+            {selectedChart === 'age' ? (
               <BarChart data={chartData.ageBars}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -591,16 +691,11 @@ const ReceptionistDashboard = () => {
                   dataKey="patients" 
                   fill="#6C2476"
                   onClick={(data) => {
-                    toast({
-                      title: "Détails",
-                      description: `${data.name}: ${data.patients} patients`,
-                    });
+                    toast.info(`${data.name}: ${data.patients} patients`);
                   }}
                 />
               </BarChart>
-            )}
-            
-            {selectedChart === 'trend' && (
+            ) : selectedChart === 'trend' ? (
               <RechartsLineChart data={chartData.trends}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="period" />
@@ -612,17 +707,9 @@ const ReceptionistDashboard = () => {
                   stroke="#6C2476" 
                   strokeWidth={3}
                   dot={{ fill: '#6C2476', strokeWidth: 2, r: 6 }}
-                  onClick={(data) => {
-                    toast({
-                      title: "Tendance",
-                      description: `${data.period}: ${data.patients} patients`,
-                    });
-                  }}
                 />
               </RechartsLineChart>
-            )}
-            
-            {selectedChart === 'status' && (
+            ) : (
               <BarChart data={[
                 { status: 'Enregistré', count: patients.filter(p => p.statut === 'enregistre').length },
                 { status: 'En consultation', count: patients.filter(p => p.statut === 'en_consultation').length },
@@ -637,10 +724,7 @@ const ReceptionistDashboard = () => {
                   dataKey="count" 
                   fill="#6C2476"
                   onClick={(data) => {
-                    toast({
-                      title: "Statut",
-                      description: `${data.status}: ${data.count} patients`,
-                    });
+                    toast.info(`${data.status}: ${data.count} patients`);
                   }}
                 />
               </BarChart>

@@ -47,10 +47,62 @@ const AppointmentRequestForm = () => {
         const response = await fetch('/api/services/');
         if (response.ok) {
           const data = await response.json();
-          setServices(data);
+          if (Array.isArray(data) && data.length > 0) {
+            setServices(data);
+          } else {
+            // Services par défaut si aucun service n'est trouvé
+            const defaultServices = [
+              { id: 1, code: 'SUIVI_GROSSESSE', nom: 'Suivi de grossesse', description: 'Suivi médical de la grossesse', prix: 8000, duree_consultation: 45 },
+              { id: 2, code: 'PREP_NAISSANCE', nom: 'Préparation à la naissance', description: 'Préparation à la naissance', prix: 6000, duree_consultation: 60 },
+              { id: 3, code: 'PREP_PARENTALITE', nom: 'Préparation à la parentalité', description: 'Préparation à la parentalité', prix: 5000, duree_consultation: 45 },
+              { id: 4, code: 'SUIVI_MONITORING', nom: 'Suivi monitoring', description: 'Suivi monitoring', prix: 7000, duree_consultation: 30 },
+              { id: 5, code: 'ECHOGRAPHIE', nom: 'Réalisation d\'échographie', description: 'Réalisation d\'échographie', prix: 10000, duree_consultation: 60 },
+              { id: 6, code: 'PRISE_CHARGE', nom: 'Prise en charge du mère et de l\'enfant après l\'accouchement', description: 'Prise en charge du mère et de l\'enfant après l\'accouchement', prix: 12000, duree_consultation: 90 },
+              { id: 7, code: 'SUIVI_ALLAITEMENT', nom: 'Suivi de l\'allaitement', description: 'Suivi de l\'allaitement', prix: 4000, duree_consultation: 30 },
+              { id: 8, code: 'CONSULT_POST_NATAL', nom: 'Consultations post-natales', description: 'Consultations post-natales', prix: 6000, duree_consultation: 45 },
+              { id: 9, code: 'PLANIFICATION_FAMILIALE', nom: 'Planification familiale', description: 'Planification familiale', prix: 5000, duree_consultation: 30 },
+              { id: 10, code: 'DEPISTAGE_CANCER', nom: 'Dépistage du cancer', description: 'Dépistage du cancer', prix: 15000, duree_consultation: 120 },
+              { id: 11, code: 'VACCINATION', nom: 'Vaccination', description: 'Vaccination', prix: 3000, duree_consultation: 15 },
+              { id: 12, code: 'TELECONSULTATION', nom: 'Téléconsultation', description: 'Téléconsultation', prix: 4000, duree_consultation: 30 }
+            ];
+            setServices(defaultServices);
+          }
+        } else {
+          // Services par défaut si l'API ne fonctionne pas
+          const defaultServices = [
+            { id: 1, code: 'SUIVI_GROSSESSE', nom: 'Suivi de grossesse', description: 'Suivi médical de la grossesse', prix: 8000, duree_consultation: 45 },
+            { id: 2, code: 'PREP_NAISSANCE', nom: 'Préparation à la naissance', description: 'Préparation à la naissance', prix: 6000, duree_consultation: 60 },
+            { id: 3, code: 'PREP_PARENTALITE', nom: 'Préparation à la parentalité', description: 'Préparation à la parentalité', prix: 5000, duree_consultation: 45 },
+            { id: 4, code: 'SUIVI_MONITORING', nom: 'Suivi monitoring', description: 'Suivi monitoring', prix: 7000, duree_consultation: 30 },
+            { id: 5, code: 'ECHOGRAPHIE', nom: 'Réalisation d\'échographie', description: 'Réalisation d\'échographie', prix: 10000, duree_consultation: 60 },
+            { id: 6, code: 'PRISE_CHARGE', nom: 'Prise en charge du mère et de l\'enfant après l\'accouchement', description: 'Prise en charge du mère et de l\'enfant après l\'accouchement', prix: 12000, duree_consultation: 90 },
+            { id: 7, code: 'SUIVI_ALLAITEMENT', nom: 'Suivi de l\'allaitement', description: 'Suivi de l\'allaitement', prix: 4000, duree_consultation: 30 },
+            { id: 8, code: 'CONSULT_POST_NATAL', nom: 'Consultations post-natales', description: 'Consultations post-natales', prix: 6000, duree_consultation: 45 },
+            { id: 9, code: 'PLANIFICATION_FAMILIALE', nom: 'Planification familiale', description: 'Planification familiale', prix: 5000, duree_consultation: 30 },
+            { id: 10, code: 'DEPISTAGE_CANCER', nom: 'Dépistage du cancer', description: 'Dépistage du cancer', prix: 15000, duree_consultation: 120 },
+            { id: 11, code: 'VACCINATION', nom: 'Vaccination', description: 'Vaccination', prix: 3000, duree_consultation: 15 },
+            { id: 12, code: 'TELECONSULTATION', nom: 'Téléconsultation', description: 'Téléconsultation', prix: 4000, duree_consultation: 30 }
+          ];
+          setServices(defaultServices);
         }
       } catch (error) {
         console.error('Erreur lors du chargement des services:', error);
+        // Services par défaut en cas d'erreur
+        const defaultServices = [
+          { id: 1, code: 'SUIVI_GROSSESSE', nom: 'Suivi de grossesse', description: 'Suivi médical de la grossesse', prix: 8000, duree_consultation: 45 },
+          { id: 2, code: 'PREP_NAISSANCE', nom: 'Préparation à la naissance', description: 'Préparation à la naissance', prix: 6000, duree_consultation: 60 },
+          { id: 3, code: 'PREP_PARENTALITE', nom: 'Préparation à la parentalité', description: 'Préparation à la parentalité', prix: 5000, duree_consultation: 45 },
+          { id: 4, code: 'SUIVI_MONITORING', nom: 'Suivi monitoring', description: 'Suivi monitoring', prix: 7000, duree_consultation: 30 },
+          { id: 5, code: 'ECHOGRAPHIE', nom: 'Réalisation d\'échographie', description: 'Réalisation d\'échographie', prix: 10000, duree_consultation: 60 },
+          { id: 6, code: 'PRISE_CHARGE', nom: 'Prise en charge du mère et de l\'enfant après l\'accouchement', description: 'Prise en charge du mère et de l\'enfant après l\'accouchement', prix: 12000, duree_consultation: 90 },
+          { id: 7, code: 'SUIVI_ALLAITEMENT', nom: 'Suivi de l\'allaitement', description: 'Suivi de l\'allaitement', prix: 4000, duree_consultation: 30 },
+          { id: 8, code: 'CONSULT_POST_NATAL', nom: 'Consultations post-natales', description: 'Consultations post-natales', prix: 6000, duree_consultation: 45 },
+          { id: 9, code: 'PLANIFICATION_FAMILIALE', nom: 'Planification familiale', description: 'Planification familiale', prix: 5000, duree_consultation: 30 },
+          { id: 10, code: 'DEPISTAGE_CANCER', nom: 'Dépistage du cancer', description: 'Dépistage du cancer', prix: 15000, duree_consultation: 120 },
+          { id: 11, code: 'VACCINATION', nom: 'Vaccination', description: 'Vaccination', prix: 3000, duree_consultation: 15 },
+          { id: 12, code: 'TELECONSULTATION', nom: 'Téléconsultation', description: 'Téléconsultation', prix: 4000, duree_consultation: 30 }
+        ];
+        setServices(defaultServices);
       }
     };
 
@@ -124,12 +176,36 @@ const AppointmentRequestForm = () => {
     setIsLoading(true);
 
     try {
+      // Trouver le service sélectionné
+      const selectedService = services.find(s => s.id.toString() === formData.service);
+      if (!selectedService) {
+        toast({
+          title: "Erreur",
+          description: "Service non trouvé",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Préparer les données pour l'API
+      const appointmentData = {
+        client_nom: formData.client_nom,
+        client_email: formData.client_email,
+        client_telephone: formData.client_telephone,
+        service: selectedService.code || selectedService.nom,
+        message: formData.message,
+        date_souhaitee: formData.date_souhaitee ? new Date(formData.date_souhaitee).toISOString() : null,
+        statut: 'en_attente'
+      };
+
+      console.log('Données de la demande de rendez-vous:', appointmentData);
+
       const response = await fetch('/api/rendez-vous/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(appointmentData),
       });
 
       const data = await response.json();

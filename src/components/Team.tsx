@@ -43,18 +43,19 @@ const Team = () => {
 
   const teamMembers = [
     {
-      name: "Mme. Daouda Seck",
+      name: "Mme. Diasse SECK",
       role: "Sage-femme",
       experience: "15+ années d'expérience",
-      expertise: ["Suivi de grossesse", "Accouchement", "Soins post-natals"],
-      image: "/lovable-uploads/lolo.jpg"
-    },
-    {
-      name: "Dr. Samba Sarr",
-      role: "Odontologue",
-      experience: "12+ années d'expérience", 
-      expertise: ["Soins dentaires", "Chirurgie orale", "Prévention"],
-      image: "/lovable-uploads/lolo2.jpg"
+      expertise: [
+        "Diplômée de l'École Supérieure Internationale des Praticiens de la Santé de Thiès",
+        "Diplôme d'État de Sage-femme",
+        "Diplôme en Échographie Obstétricale - Université Gaston Berger",
+        "Ex-Coordinatrice régionale Marie Stopes International",
+        "Fondatrice du Cabinet Yaye Aminata (Février 2025)",
+        "Spécialisée en santé sexuelle et reproductive",
+        "Soins accessibles aux populations vulnérables"
+      ],
+      image: "/lovable-uploads/photo-madame-daouda.jpg"
     }
   ];
 
@@ -78,44 +79,46 @@ const Team = () => {
             pour vous offrir les meilleurs soins possibles.
           </p>
         </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {teamMembers.map((member, index) => (
-              <Card 
-                key={member.name}
-                className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-white overflow-hidden"
-              >
-                <div className="flex flex-col lg:flex-row">
-                  <div className="lg:w-1/3">
-                    <img 
-                      src={member.image} 
-                      alt={member.name}
-                      className="w-full h-64 lg:h-full object-cover"
-                    />
-                  </div>
-                  <div className="lg:w-2/3 p-8">
-                    <h4 className="text-2xl font-bold mb-2 text-gray-800">{member.name}</h4>
-                    <p className="text-primary font-semibold text-lg mb-2">{member.role}</p>
-                    <p className="text-gray-600 mb-4 flex items-center">
-                      <Clock className="h-4 w-4 mr-2" />
-                      {member.experience}
-                    </p>
-                    <div className="mb-4">
-                      <h5 className="font-semibold text-gray-800 mb-2">Expertise :</h5>
-                      <div className="flex flex-wrap gap-2">
-                        {member.expertise.map((skill) => (
-                          <span 
-                            key={skill}
-                            className="px-3 py-1 bg-gradient-soft text-primary text-sm rounded-full"
-                          >
-                            {skill}
-                          </span>
-                        ))}
+          <div className="flex justify-center">
+            <div className="w-full max-w-4xl">
+              {teamMembers.map((member, index) => (
+                <Card 
+                  key={member.name}
+                  className="border-0 shadow-xl hover:shadow-2xl transition-all duration-300 bg-white overflow-hidden"
+                >
+                  <div className="flex flex-col lg:flex-row">
+                    <div className="lg:w-1/3">
+                      <img 
+                        src={member.image} 
+                        alt={member.name}
+                        className="w-full h-64 lg:h-full object-cover"
+                      />
+                    </div>
+                    <div className="lg:w-2/3 p-8">
+                      <h4 className="text-2xl font-bold mb-2 text-gray-800">{member.name}</h4>
+                      <p className="text-primary font-semibold text-lg mb-2">{member.role}</p>
+                      <p className="text-gray-600 mb-4 flex items-center">
+                        <Clock className="h-4 w-4 mr-2" />
+                        {member.experience}
+                      </p>
+                      <div className="mb-4">
+                        <h5 className="font-semibold text-gray-800 mb-2">Parcours & Expertise :</h5>
+                        <div className="space-y-2">
+                          {member.expertise.map((skill) => (
+                            <div 
+                              key={skill}
+                              className="px-4 py-2 bg-gradient-to-r from-purple-50 to-pink-50 text-primary text-sm rounded-lg border-l-4 border-primary"
+                            >
+                              {skill}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
 

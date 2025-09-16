@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { apiService, User, RegisterRequest } from '@/services/api';
+import apiService, { User, RegisterRequest } from '@/services/api';
 
 export type UserRole = 'admin' | 'responsable_cabinet' | 'doctor' | 'receptionist' | 'patient';
 

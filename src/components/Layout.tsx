@@ -70,7 +70,7 @@ const Layout = () => {
         ];
       case 'patient':
         return [
-          ...baseItems,
+          { path: '/patient-dashboard', icon: Heart, label: 'Mon tableau de bord' },
           { path: '/my-appointments', icon: Calendar, label: 'Mes rendez-vous' },
           { path: '/profile', icon: User, label: 'Mon profil' }
         ];

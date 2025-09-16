@@ -208,44 +208,44 @@ const Contact = () => {
   ];
 
   return (
-    <section id="contact" className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
+    <section id="contact" className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-purple-50 to-pink-50">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold mb-8 text-gray-900">
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-4 sm:mb-6 lg:mb-8 text-gray-900">
             <span className="inline-block">
               {displayText}
               <span 
-                className={`inline-block w-1 h-12 bg-primary ml-1 transition-opacity duration-200 ${
+                className={`inline-block w-1 h-6 sm:h-8 lg:h-12 bg-primary ml-1 transition-opacity duration-200 ${
                   showCursor ? 'opacity-100' : 'opacity-0'
                 }`}
               />
             </span>
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Pour toute question ou information supplémentaire, n'hésitez pas à nous 
             contacter. Nous sommes là pour vous aider.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-start">
           {/* Formulaire de contact */}
           <div className="order-2 lg:order-1">
             <Card className="shadow-xl border-0 bg-white h-fit">
-              <CardContent className="p-10">
-                <div className="space-y-8">
+              <CardContent className="p-4 sm:p-6 lg:p-10">
+                <div className="space-y-4 sm:space-y-6 lg:space-y-8">
                   <div>
                     <Input
                       id="nom"
                       placeholder="Votre nom et prénom"
                       value={formData.nom}
                       onChange={(e) => handleInputChange("nom", e.target.value)}
-                      className={`h-14 text-lg border-2 ${
+                      className={`h-10 sm:h-12 lg:h-14 text-sm sm:text-base lg:text-lg border-2 ${
                         errors.nom ? 'border-red-500' : 'border-gray-200'
                       } focus:border-primary rounded-lg`}
                     />
                     {errors.nom && (
-                      <p className="text-red-500 text-sm mt-2">{errors.nom}</p>
+                      <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2">{errors.nom}</p>
                     )}
                   </div>
 
@@ -256,18 +256,18 @@ const Contact = () => {
                       placeholder="Votre email ou numéro de téléphone"
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
-                      className={`h-14 text-lg border-2 ${
+                      className={`h-10 sm:h-12 lg:h-14 text-sm sm:text-base lg:text-lg border-2 ${
                         errors.email ? 'border-red-500' : 'border-gray-200'
                       } focus:border-primary rounded-lg`}
                     />
                     {errors.email && (
-                      <p className="text-red-500 text-sm mt-2">{errors.email}</p>
+                      <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2">{errors.email}</p>
                     )}
                   </div>
 
                   <div>
                     <Select value={formData.sujet} onValueChange={(value) => handleInputChange("sujet", value)}>
-                      <SelectTrigger className={`h-14 text-lg border-2 ${
+                      <SelectTrigger className={`h-10 sm:h-12 lg:h-14 text-sm sm:text-base lg:text-lg border-2 ${
                         errors.sujet ? 'border-red-500' : 'border-gray-200'
                       } focus:border-primary rounded-lg`}>
                         <SelectValue placeholder="Sujet du message" />
@@ -281,7 +281,7 @@ const Contact = () => {
                       </SelectContent>
                     </Select>
                     {errors.sujet && (
-                      <p className="text-red-500 text-sm mt-2">{errors.sujet}</p>
+                      <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2">{errors.sujet}</p>
                     )}
                   </div>
 
@@ -292,14 +292,14 @@ const Contact = () => {
                       placeholder="Date et heure souhaitée (optionnel)"
                       value={formData.date_heure_souhaitee}
                       onChange={(e) => handleInputChange("date_heure_souhaitee", e.target.value)}
-                      className={`h-14 text-lg border-2 ${
+                      className={`h-10 sm:h-12 lg:h-14 text-sm sm:text-base lg:text-lg border-2 ${
                         errors.date_heure_souhaitee ? 'border-red-500' : 'border-gray-200'
                       } focus:border-primary rounded-lg`}
                     />
                     {errors.date_heure_souhaitee && (
-                      <p className="text-red-500 text-sm mt-2">{errors.date_heure_souhaitee}</p>
+                      <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2">{errors.date_heure_souhaitee}</p>
                     )}
-                    <p className="text-gray-500 text-sm mt-1">
+                    <p className="text-gray-500 text-xs sm:text-sm mt-1">
                       Si vous souhaitez un rendez-vous, indiquez une date et heure préférée
                     </p>
                   </div>
@@ -310,20 +310,20 @@ const Contact = () => {
                       placeholder="Votre message"
                       value={formData.message}
                       onChange={(e) => handleInputChange("message", e.target.value)}
-                      rows={6}
-                      className={`text-lg border-2 ${
+                      rows={4}
+                      className={`text-sm sm:text-base lg:text-lg border-2 ${
                         errors.message ? 'border-red-500' : 'border-gray-200'
                       } focus:border-primary rounded-lg resize-none`}
                     />
                     {errors.message && (
-                      <p className="text-red-500 text-sm mt-2">{errors.message}</p>
+                      <p className="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2">{errors.message}</p>
                     )}
                   </div>
 
                   <Button
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className="w-full h-14 bg-gradient-clinic hover:opacity-90 text-white text-lg font-semibold rounded-lg transition-all duration-300 disabled:opacity-50"
+                    className="w-full h-10 sm:h-12 lg:h-14 bg-gradient-clinic hover:opacity-90 text-white text-sm sm:text-base lg:text-lg font-semibold rounded-lg transition-all duration-300 disabled:opacity-50"
                   >
                     {isSubmitting ? "Envoi en cours..." : "Envoyer"}
                   </Button>
@@ -335,7 +335,7 @@ const Contact = () => {
           {/* Image */}
           <div className="order-1 lg:order-2 relative">
             {/* Image de fond avec bordure bleue */}
-            <div className="relative lg:h-[600px] h-96 rounded-2xl overflow-hidden border-4 border-primary transform lg:-translate-x-8 lg:translate-y-8">
+            <div className="relative h-64 sm:h-80 lg:h-[600px] rounded-2xl overflow-hidden border-2 sm:border-4 border-primary transform lg:-translate-x-8 lg:translate-y-8">
               <img
                 src="/lovable-uploads/contact.png"
                 alt="Contact"

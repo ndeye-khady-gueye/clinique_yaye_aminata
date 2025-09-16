@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
-import { apiService } from '@/services/api';
+import apiService from '@/services/api';
 
 interface AppointmentFormProps {
   onSubmit: (data: any) => void;
@@ -33,6 +33,7 @@ interface Doctor {
 
 interface Service {
   id: number;
+  code?: string;
   nom: string;
   prix: number;
 }
@@ -43,7 +44,7 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData }: AppointmentFormPro
     doctor: initialData?.doctor || '',
     date: initialData?.date || '',
     time: initialData?.time || '',
-    service: initialData?.service || '',
+    service: initialData?.service || '1', // Service par défaut (Suivi de grossesse)
     motif: initialData?.motif || '',
     notes: initialData?.notes || '',
     status: initialData?.status || 'confirme'
@@ -88,9 +89,45 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData }: AppointmentFormPro
       // Charger les services
       const servicesData = await apiService.getActiveServices();
       console.log('Services data:', servicesData); // Debug log
-      setServices(Array.isArray(servicesData) ? servicesData : []);
+      if (Array.isArray(servicesData) && servicesData.length > 0) {
+        setServices(servicesData);
+      } else {
+        // Services par défaut si aucun service n'est trouvé
+        const defaultServices = [
+          { id: 1, code: 'SUIVI_GROSSESSE', nom: 'Suivi de grossesse', prix: 8000 },
+          { id: 2, code: 'PREP_NAISSANCE', nom: 'Préparation à la naissance', prix: 6000 },
+          { id: 3, code: 'PREP_PARENTALITE', nom: 'Préparation à la parentalité', prix: 5000 },
+          { id: 4, code: 'SUIVI_MONITORING', nom: 'Suivi monitoring', prix: 7000 },
+          { id: 5, code: 'ECHOGRAPHIE', nom: 'Réalisation d\'échographie', prix: 10000 },
+          { id: 6, code: 'PRISE_CHARGE', nom: 'Prise en charge du mère et de l\'enfant après l\'accouchement', prix: 12000 },
+          { id: 7, code: 'SUIVI_ALLAITEMENT', nom: 'Suivi de l\'allaitement', prix: 4000 },
+          { id: 8, code: 'CONSULT_POST_NATAL', nom: 'Consultations post-natales', prix: 6000 },
+          { id: 9, code: 'PLANIFICATION_FAMILIALE', nom: 'Planification familiale', prix: 5000 },
+          { id: 10, code: 'DEPISTAGE_CANCER', nom: 'Dépistage du cancer', prix: 15000 },
+          { id: 11, code: 'VACCINATION', nom: 'Vaccination', prix: 3000 },
+          { id: 12, code: 'TELECONSULTATION', nom: 'Téléconsultation', prix: 4000 }
+        ];
+        setServices(defaultServices);
+      }
     } catch (error: any) {
       console.error('Erreur lors du chargement des données:', error);
+      
+      // Services par défaut en cas d'erreur
+      const defaultServices = [
+        { id: 1, code: 'SUIVI_GROSSESSE', nom: 'Suivi de grossesse', prix: 8000 },
+        { id: 2, code: 'PREP_NAISSANCE', nom: 'Préparation à la naissance', prix: 6000 },
+        { id: 3, code: 'PREP_PARENTALITE', nom: 'Préparation à la parentalité', prix: 5000 },
+        { id: 4, code: 'SUIVI_MONITORING', nom: 'Suivi monitoring', prix: 7000 },
+        { id: 5, code: 'ECHOGRAPHIE', nom: 'Réalisation d\'échographie', prix: 10000 },
+        { id: 6, code: 'PRISE_CHARGE', nom: 'Prise en charge du mère et de l\'enfant après l\'accouchement', prix: 12000 },
+        { id: 7, code: 'SUIVI_ALLAITEMENT', nom: 'Suivi de l\'allaitement', prix: 4000 },
+        { id: 8, code: 'CONSULT_POST_NATAL', nom: 'Consultations post-natales', prix: 6000 },
+        { id: 9, code: 'PLANIFICATION_FAMILIALE', nom: 'Planification familiale', prix: 5000 },
+        { id: 10, code: 'DEPISTAGE_CANCER', nom: 'Dépistage du cancer', prix: 15000 },
+        { id: 11, code: 'VACCINATION', nom: 'Vaccination', prix: 3000 },
+        { id: 12, code: 'TELECONSULTATION', nom: 'Téléconsultation', prix: 4000 }
+      ];
+      setServices(defaultServices);
       
       if (error.message?.includes('401') || error.message?.includes('403')) {
         toast({
@@ -125,11 +162,22 @@ const AppointmentForm = ({ onSubmit, onCancel, initialData }: AppointmentFormPro
     try {
       setLoading(true);
       
+      // Trouver le service sélectionné
+      const selectedService = services.find(s => s.id.toString() === formData.service);
+      if (!selectedService) {
+        toast({
+          title: "Erreur",
+          description: "Service non trouvé",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Préparer les données pour l'API
       const appointmentData = {
         patient: parseInt(formData.patient),
         docteur: parseInt(formData.doctor),
-        service: parseInt(formData.service),
+        service: selectedService.code || selectedService.nom, // Envoyer le code ou le nom
         date_confirmee: `${formData.date}T${formData.time}:00`,
         message: formData.motif,
         notes: formData.notes,

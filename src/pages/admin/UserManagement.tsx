@@ -276,30 +276,32 @@ const UserManagement = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 p-4 md:p-6">
       {/* En-tête */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+        <div className="flex flex-col space-y-2 lg:flex-row lg:items-center lg:space-x-4 lg:space-y-0">
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigate('/dashboard')}
+            className="w-fit"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour au Dashboard
+            <ArrowLeft className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+            <span className="hidden sm:inline">Retour au Dashboard</span>
+            <span className="sm:hidden">Retour</span>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Gestion des Utilisateurs</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight">Gestion des Utilisateurs</h1>
+            <p className="text-sm md:text-base text-muted-foreground">
               Gérez tous les utilisateurs du système avec une interface moderne
             </p>
           </div>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <UserPlus className="h-4 w-4 mr-2" />
-              Nouvel Utilisateur
+            <Button className="w-full sm:w-auto">
+              <UserPlus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+              <span className="text-xs md:text-sm">Nouvel Utilisateur</span>
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -319,41 +321,41 @@ const UserManagement = () => {
       </div>
 
       {/* Statistiques */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Utilisateurs</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs md:text-sm font-medium">Total Utilisateurs</CardTitle>
+            <Users className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="text-xl md:text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Utilisateurs Actifs</CardTitle>
-            <UserCheck className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs md:text-sm font-medium">Utilisateurs Actifs</CardTitle>
+            <UserCheck className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.active}</div>
+            <div className="text-xl md:text-2xl font-bold text-green-600">{stats.active}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Utilisateurs Inactifs</CardTitle>
-            <UserX className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs md:text-sm font-medium">Utilisateurs Inactifs</CardTitle>
+            <UserX className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.inactive}</div>
+            <div className="text-xl md:text-2xl font-bold text-red-600">{stats.inactive}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Administrateurs</CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs md:text-sm font-medium">Administrateurs</CardTitle>
+            <Shield className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.byRole.admin}</div>
+            <div className="text-xl md:text-2xl font-bold">{stats.byRole.admin}</div>
           </CardContent>
         </Card>
       </div>
@@ -361,27 +363,27 @@ const UserManagement = () => {
       {/* Filtres */}
       <Card>
         <CardHeader>
-          <CardTitle>Filtres et Recherche</CardTitle>
+          <CardTitle className="text-sm md:text-base">Filtres et Recherche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="search">Rechercher</Label>
+              <Label htmlFor="search" className="text-xs md:text-sm">Rechercher</Label>
               <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-2 top-2.5 h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
                 <Input
                   id="search"
                   placeholder="Nom, email, username..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
+                  className="pl-7 md:pl-8 text-xs md:text-sm"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="role-filter">Rôle</Label>
+              <Label htmlFor="role-filter" className="text-xs md:text-sm">Rôle</Label>
               <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="text-xs md:text-sm">
                   <SelectValue placeholder="Tous les rôles" />
                 </SelectTrigger>
                 <SelectContent>
@@ -395,9 +397,9 @@ const UserManagement = () => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="status-filter">Statut</Label>
+              <Label htmlFor="status-filter" className="text-xs md:text-sm">Statut</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="text-xs md:text-sm">
                   <SelectValue placeholder="Tous les statuts" />
                 </SelectTrigger>
                 <SelectContent>
@@ -410,14 +412,14 @@ const UserManagement = () => {
             <div className="flex items-end">
               <Button 
                 variant="outline" 
-                className="w-full"
+                className="w-full text-xs md:text-sm"
                 onClick={() => {
                   setSearchTerm('');
                   setRoleFilter('all');
                   setStatusFilter('all');
                 }}
               >
-                <Filter className="h-4 w-4 mr-2" />
+                <Filter className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
                 Réinitialiser
               </Button>
             </div>
@@ -428,81 +430,85 @@ const UserManagement = () => {
       {/* Table des utilisateurs */}
       <Card>
         <CardHeader>
-          <CardTitle>Liste des Utilisateurs</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-sm md:text-base">Liste des Utilisateurs</CardTitle>
+          <CardDescription className="text-xs md:text-sm">
             {filteredUsers.length} utilisateur(s) trouvé(s)
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Utilisateur</TableHead>
-                <TableHead>Rôle</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Dernière Connexion</TableHead>
-                <TableHead>Actions</TableHead>
+                  <TableHead className="text-xs md:text-sm">ID</TableHead>
+                  <TableHead className="text-xs md:text-sm">Utilisateur</TableHead>
+                  <TableHead className="text-xs md:text-sm">Rôle</TableHead>
+                  <TableHead className="text-xs md:text-sm hidden sm:table-cell">Contact</TableHead>
+                  <TableHead className="text-xs md:text-sm">Statut</TableHead>
+                  <TableHead className="text-xs md:text-sm hidden lg:table-cell">Dernière Connexion</TableHead>
+                  <TableHead className="text-xs md:text-sm">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredUsers.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>
-                    <div className="font-mono font-medium text-center">
+                    <div className="font-mono font-medium text-center text-xs md:text-sm">
                       {user.user_id || 'N/A'}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center space-x-3">
-                      <Avatar>
+                    <div className="flex items-center space-x-2 md:space-x-3">
+                      <Avatar className="h-6 w-6 md:h-8 md:w-8">
                         <AvatarImage src={user.avatar} />
-                        <AvatarFallback>
+                        <AvatarFallback className="text-xs">
                           {getInitials(user.first_name, user.last_name)}
                         </AvatarFallback>
                       </Avatar>
-                      <div>
-                        <div className="font-medium">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-xs md:text-sm truncate">
                           {user.first_name} {user.last_name}
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-xs text-muted-foreground truncate">
                           @{user.username}
                         </div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
+                    <div className="text-xs">
                     {getRoleBadge(user.role)}
+                    </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <div className="space-y-1">
-                      <div className="flex items-center text-sm">
+                      <div className="flex items-center text-xs">
                         <Mail className="h-3 w-3 mr-1" />
-                        {user.email}
+                        <span className="truncate">{user.email}</span>
                       </div>
                       {user.phone && (
-                        <div className="flex items-center text-sm text-muted-foreground">
+                        <div className="flex items-center text-xs text-muted-foreground">
                           <Phone className="h-3 w-3 mr-1" />
-                          {user.phone}
+                          <span className="truncate">{user.phone}</span>
                         </div>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1 md:space-x-2">
                       <Switch
                         checked={user.is_active}
                         onCheckedChange={() => handleToggleStatus(user.id)}
                         disabled={toggleUserStatusMutation.isPending}
+                        className="scale-75 md:scale-100"
                       />
-                      <Badge variant={user.is_active ? 'default' : 'secondary'}>
+                      <Badge variant={user.is_active ? 'default' : 'secondary'} className="text-xs">
                         {user.is_active ? 'Actif' : 'Inactif'}
                       </Badge>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center text-sm text-muted-foreground">
+                  <TableCell className="hidden lg:table-cell">
+                    <div className="flex items-center text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3 mr-1" />
                       {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Jamais'}
                     </div>
@@ -510,32 +516,32 @@ const UserManagement = () => {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
+                        <Button variant="ghost" className="h-6 w-6 md:h-8 md:w-8 p-0">
+                          <MoreHorizontal className="h-3 w-3 md:h-4 md:w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuContent align="end" className="text-xs">
+                        <DropdownMenuLabel className="text-xs">Actions</DropdownMenuLabel>
                         <DropdownMenuItem onClick={() => {
                           setSelectedUser(user);
                           setIsViewDialogOpen(true);
-                        }}>
-                          <Eye className="h-4 w-4 mr-2" />
+                        }} className="text-xs">
+                          <Eye className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                           Voir détails
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => {
                           setSelectedUser(user);
                           setIsEditDialogOpen(true);
-                        }}>
-                          <Edit className="h-4 w-4 mr-2" />
+                        }} className="text-xs">
+                          <Edit className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                           Modifier
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem 
                           onClick={() => handleDeleteUser(user.id)}
-                          className="text-red-600"
+                          className="text-red-600 text-xs"
                         >
-                          <Trash2 className="h-4 w-4 mr-2" />
+                          <Trash2 className="h-3 w-3 md:h-4 md:w-4 mr-2" />
                           Supprimer
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -545,6 +551,7 @@ const UserManagement = () => {
               ))}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 
@@ -552,8 +559,8 @@ const UserManagement = () => {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Modifier l'utilisateur</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-sm md:text-base">Modifier l'utilisateur</DialogTitle>
+            <DialogDescription className="text-xs md:text-sm">
               Modifiez les informations de l'utilisateur sélectionné
             </DialogDescription>
           </DialogHeader>
@@ -573,52 +580,54 @@ const UserManagement = () => {
 
       {/* Dialog de détails */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Détails de l'utilisateur</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-sm md:text-base">Détails de l'utilisateur</DialogTitle>
+            <DialogDescription className="text-xs md:text-sm">
               Informations complètes sur l'utilisateur sélectionné
             </DialogDescription>
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-16 w-16">
+              <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                <Avatar className="h-12 w-12 md:h-16 md:w-16">
                   <AvatarImage src={selectedUser.avatar} />
-                  <AvatarFallback className="text-lg">
+                  <AvatarFallback className="text-sm md:text-lg">
                     {getInitials(selectedUser.first_name, selectedUser.last_name)}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <h3 className="text-lg font-semibold">
+                <div className="text-center sm:text-left">
+                  <h3 className="text-base md:text-lg font-semibold">
                     {selectedUser.first_name} {selectedUser.last_name}
                   </h3>
-                  <p className="text-muted-foreground">@{selectedUser.username}</p>
-                  {getRoleBadge(selectedUser.role)}
+                  <p className="text-xs md:text-sm text-muted-foreground">@{selectedUser.username}</p>
+                  <div className="mt-1">
+                    {getRoleBadge(selectedUser.role)}
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label>ID Utilisateur</Label>
-                  <p className="text-sm font-mono">{selectedUser.user_id || 'N/A'}</p>
+                  <Label className="text-xs md:text-sm">ID Utilisateur</Label>
+                  <p className="text-xs md:text-sm font-mono">{selectedUser.user_id || 'N/A'}</p>
                 </div>
                 <div>
-                  <Label>Email</Label>
-                  <p className="text-sm">{selectedUser.email}</p>
+                  <Label className="text-xs md:text-sm">Email</Label>
+                  <p className="text-xs md:text-sm break-all">{selectedUser.email}</p>
                 </div>
                 <div>
-                  <Label>Téléphone</Label>
-                  <p className="text-sm">{selectedUser.phone || 'Non renseigné'}</p>
+                  <Label className="text-xs md:text-sm">Téléphone</Label>
+                  <p className="text-xs md:text-sm">{selectedUser.phone || 'Non renseigné'}</p>
                 </div>
                 <div>
-                  <Label>Statut</Label>
-                  <Badge variant={selectedUser.is_active ? 'default' : 'secondary'}>
+                  <Label className="text-xs md:text-sm">Statut</Label>
+                  <Badge variant={selectedUser.is_active ? 'default' : 'secondary'} className="text-xs">
                     {selectedUser.is_active ? 'Actif' : 'Inactif'}
                   </Badge>
                 </div>
-                <div>
-                  <Label>Date de création</Label>
-                  <p className="text-sm">{new Date(selectedUser.date_joined).toLocaleDateString()}</p>
+                <div className="sm:col-span-2">
+                  <Label className="text-xs md:text-sm">Date de création</Label>
+                  <p className="text-xs md:text-sm">{new Date(selectedUser.date_joined).toLocaleDateString()}</p>
                 </div>
               </div>
             </div>

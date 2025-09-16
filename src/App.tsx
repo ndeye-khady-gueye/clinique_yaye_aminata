@@ -16,8 +16,9 @@ import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 import RendezVousManagement from "./pages/admin/RendezVousManagement";
 import Users from "./pages/Users";
-import Reports from "./pages/Reports";
+import ReportsAnalytics from "./pages/admin/ReportsAnalytics";
 import MyAppointments from "./pages/MyAppointments";
+import PatientDashboard from "./pages/PatientDashboard";
 import Patients from "./pages/Patients";
 import Profile from "./pages/Profile";
 import SystemConfig from "./pages/admin/SystemConfig";
@@ -93,8 +94,8 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 <Route path="reports" element={
-                  <ProtectedRoute allowedRoles={['responsable_cabinet']}>
-                    <Reports />
+                  <ProtectedRoute allowedRoles={['responsable_cabinet', 'admin']}>
+                    <ReportsAnalytics />
                   </ProtectedRoute>
                 } />
                 <Route path="cabinet-settings" element={
@@ -107,6 +108,11 @@ const App = () => (
                 <Route path="my-appointments" element={
                   <ProtectedRoute allowedRoles={['doctor', 'patient']}>
                     <MyAppointments />
+                  </ProtectedRoute>
+                } />
+                <Route path="patient-dashboard" element={
+                  <ProtectedRoute allowedRoles={['patient']}>
+                    <PatientDashboard />
                   </ProtectedRoute>
                 } />
                 <Route path="patients" element={

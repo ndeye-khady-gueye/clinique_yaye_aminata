@@ -288,72 +288,81 @@ const Patients = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+      {/* Header responsive */}
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
             Patients Enregistrés
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-xs sm:text-sm lg:text-base text-gray-600 mt-1">
             Gestion des patients temporaires enregistrés au cabinet
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
-           <Button 
-             variant="outline" 
-             onClick={exportToPDF}
-            className="border-green-600 text-green-600 hover:bg-green-50 hover:text-green-700 w-full sm:w-auto"
-             disabled={patients.length === 0}
-           >
-             <Download className="mr-2 h-4 w-4" />
-             Export PDF
-           </Button>
-           <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto hover:opacity-90" onClick={() => setFormData(null)}>
-                 <Plus className="mr-2 h-4 w-4" />
-                 {formData?.id ? 'Modifier le patient' : 'Enregistrer un patient'}
-               </Button>
-             </DialogTrigger>
-             <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto p-0">
-               <PatientEnregistreForm 
-                 onSubmit={handleCreatePatient}
-                 onCancel={() => setIsFormOpen(false)}
-                 initialData={formData}
-               />
-             </DialogContent>
-           </Dialog>
-         </div>
+        
+        {/* Boutons d'action - responsive */}
+        <div className="flex flex-col xs:flex-row gap-2 sm:gap-3">
+          <Button 
+            variant="outline" 
+            onClick={exportToPDF}
+            className="border-green-600 text-green-600 hover:bg-green-50 hover:text-green-700 w-full xs:w-auto text-xs sm:text-sm"
+            disabled={patients.length === 0}
+          >
+            <Download className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden xs:inline">Export PDF</span>
+            <span className="xs:hidden">PDF</span>
+          </Button>
+          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+            <DialogTrigger asChild>
+              <Button className="w-full xs:w-auto hover:opacity-90 text-xs sm:text-sm" onClick={() => setFormData(null)}>
+                <Plus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">
+                  {formData?.id ? 'Modifier le patient' : 'Enregistrer un patient'}
+                </span>
+                <span className="xs:hidden">
+                  {formData?.id ? 'Modifier' : 'Nouveau'}
+                </span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto p-0 mx-2 sm:mx-0">
+              <PatientEnregistreForm 
+                onSubmit={handleCreatePatient}
+                onCancel={() => setIsFormOpen(false)}
+                initialData={formData}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
-      {/* Statistiques */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Total patients</CardTitle>
+      {/* Statistiques - responsive */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Total patients</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{patients.length}</div>
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">{patients.length}</div>
             <p className="text-xs text-gray-500">enregistrés</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Avec email</CardTitle>
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Avec email</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600">
               {patients.filter(p => p.email).length}
             </div>
             <p className="text-xs text-gray-500">avec email</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Nouveaux</CardTitle>
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Nouveaux</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600">
               {patients.filter(p => {
                 const createdDate = new Date(p.created_at || '');
                 const oneMonthAgo = new Date();
@@ -364,12 +373,12 @@ const Patients = () => {
             <p className="text-xs text-gray-500">ce mois</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Consultations</CardTitle>
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Consultations</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-600">
               {patients.length > 0 ? Math.floor(patients.length * 3.5) : 0}
             </div>
             <p className="text-xs text-gray-500">estimées</p>
@@ -377,147 +386,262 @@ const Patients = () => {
         </Card>
       </div>
 
-             {/* Recherche et Filtres */}
-       <Card>
-         <CardHeader>
-           <CardTitle className="flex items-center">
-             <Search className="mr-2 h-5 w-5" />
-             Recherche et Filtres
-           </CardTitle>
-           <CardDescription>
-             Recherchez et filtrez les patients enregistrés
-           </CardDescription>
-         </CardHeader>
-         <CardContent className="space-y-4">
-           {/* Barre de recherche principale */}
-           <div className="relative max-w-md">
-             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-             <Input
-               placeholder="Nom, prénom, email ou téléphone..."
-               value={searchTerm}
-               onChange={(e) => setSearchTerm(e.target.value)}
-               className="pl-10"
-             />
-           </div>
-           
-           {/* Filtres avancés */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-             <div>
-               <Label htmlFor="filter-type" className="text-sm font-medium">Type consultation</Label>
-               <Select value={filters.typeConsultation} onValueChange={(value) => setFilters(prev => ({ ...prev, typeConsultation: value }))}>
-                 <SelectTrigger>
-                   <SelectValue placeholder="Tous les types" />
-                 </SelectTrigger>
-                 <SelectContent>
-                   <SelectItem value="all">Tous les types</SelectItem>
-                   <SelectItem value="MEDECIN">Médecin</SelectItem>
-                   <SelectItem value="GYNECO">Gynécologie</SelectItem>
-                   <SelectItem value="PEDIATRIE">Pédiatrie</SelectItem>
-                   <SelectItem value="SAGE_FEMME">Sage-femme</SelectItem>
-                   <SelectItem value="ENFANT">Enfant</SelectItem>
-                   <SelectItem value="AUTRE">Autre</SelectItem>
-                 </SelectContent>
-               </Select>
-             </div>
-             
-             <div>
-               <Label htmlFor="filter-statut" className="text-sm font-medium">Statut</Label>
-               <Select value={filters.statut} onValueChange={(value) => setFilters(prev => ({ ...prev, statut: value }))}>
-                 <SelectTrigger>
-                   <SelectValue placeholder="Tous les statuts" />
-                 </SelectTrigger>
-                 <SelectContent>
-                   <SelectItem value="all">Tous les statuts</SelectItem>
-                   <SelectItem value="enregistre">Enregistré</SelectItem>
-                   <SelectItem value="en_consultation">En consultation</SelectItem>
-                   <SelectItem value="termine">Terminé</SelectItem>
-                   <SelectItem value="annule">Annulé</SelectItem>
-                 </SelectContent>
-               </Select>
-             </div>
-             
-             <div>
-               <Label htmlFor="filter-prix-min" className="text-sm font-medium">Prix min (FCFA)</Label>
-               <Input
-                 type="number"
-                 placeholder="0"
-                 value={filters.prixMin}
-                 onChange={(e) => setFilters(prev => ({ ...prev, prixMin: e.target.value }))}
-               />
-             </div>
-             
-             <div>
-               <Label htmlFor="filter-prix-max" className="text-sm font-medium">Prix max (FCFA)</Label>
-               <Input
-                 type="number"
-                 placeholder="10000"
-                 value={filters.prixMax}
-                 onChange={(e) => setFilters(prev => ({ ...prev, prixMax: e.target.value }))}
-               />
-             </div>
-           </div>
-           
-                       {/* Boutons de filtres */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-center space-x-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={clearFilters}
-                  className="text-gray-600"
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  Effacer les filtres
-                </Button>
-                <span className="text-sm text-gray-500">
-                  {filteredPatients.length} patient(s) trouvé(s)
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={exportToPDF}
-                  className="border-green-600 text-green-600 hover:bg-green-50 hover:text-green-700"
-                  disabled={filteredPatients.length === 0}
-                >
-                  <Download className="h-4 w-4 mr-1" />
-                  Export PDF
-                </Button>
-                <div className="text-sm text-gray-500">
-                  Total: {patients.length} patient(s) enregistré(s)
-                </div>
+      {/* Recherche et Filtres - responsive */}
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center text-sm sm:text-base">
+            <Search className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+            Recherche et Filtres
+          </CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
+            Recherchez et filtrez les patients enregistrés
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 px-3 sm:px-6">
+          {/* Barre de recherche principale */}
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Nom, prénom, email ou téléphone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 text-sm"
+            />
+          </div>
+          
+          {/* Filtres avancés - responsive */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div>
+              <Label htmlFor="filter-type" className="text-xs sm:text-sm font-medium">Type consultation</Label>
+              <Select value={filters.typeConsultation} onValueChange={(value) => setFilters(prev => ({ ...prev, typeConsultation: value }))}>
+                <SelectTrigger className="text-xs sm:text-sm">
+                  <SelectValue placeholder="Tous les types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les types</SelectItem>
+                  <SelectItem value="MEDECIN">Médecin</SelectItem>
+                  <SelectItem value="GYNECO">Gynécologie</SelectItem>
+                  <SelectItem value="PEDIATRIE">Pédiatrie</SelectItem>
+                  <SelectItem value="SAGE_FEMME">Sage-femme</SelectItem>
+                  <SelectItem value="ENFANT">Enfant</SelectItem>
+                  <SelectItem value="AUTRE">Autre</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="filter-statut" className="text-xs sm:text-sm font-medium">Statut</Label>
+              <Select value={filters.statut} onValueChange={(value) => setFilters(prev => ({ ...prev, statut: value }))}>
+                <SelectTrigger className="text-xs sm:text-sm">
+                  <SelectValue placeholder="Tous les statuts" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les statuts</SelectItem>
+                  <SelectItem value="enregistre">Enregistré</SelectItem>
+                  <SelectItem value="en_consultation">En consultation</SelectItem>
+                  <SelectItem value="termine">Terminé</SelectItem>
+                  <SelectItem value="annule">Annulé</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="filter-prix-min" className="text-xs sm:text-sm font-medium">Prix min (FCFA)</Label>
+              <Input
+                type="number"
+                placeholder="0"
+                value={filters.prixMin}
+                onChange={(e) => setFilters(prev => ({ ...prev, prixMin: e.target.value }))}
+                className="text-xs sm:text-sm"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="filter-prix-max" className="text-xs sm:text-sm font-medium">Prix max (FCFA)</Label>
+              <Input
+                type="number"
+                placeholder="10000"
+                value={filters.prixMax}
+                onChange={(e) => setFilters(prev => ({ ...prev, prixMax: e.target.value }))}
+                className="text-xs sm:text-sm"
+              />
+            </div>
+          </div>
+          
+          {/* Boutons de filtres - responsive */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col xs:flex-row xs:items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={clearFilters}
+                className="text-gray-600 text-xs sm:text-sm w-full xs:w-auto"
+              >
+                <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                Effacer les filtres
+              </Button>
+              <span className="text-xs sm:text-sm text-gray-500 text-center xs:text-left">
+                {filteredPatients.length} patient(s) trouvé(s)
+              </span>
+            </div>
+            
+            <div className="flex flex-col xs:flex-row xs:items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={exportToPDF}
+                className="border-green-600 text-green-600 hover:bg-green-50 hover:text-green-700 text-xs sm:text-sm w-full xs:w-auto"
+                disabled={filteredPatients.length === 0}
+              >
+                <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                Export PDF
+              </Button>
+              <div className="text-xs sm:text-sm text-gray-500 text-center xs:text-left">
+                Total: {patients.length} patient(s) enregistré(s)
               </div>
             </div>
-         </CardContent>
-       </Card>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Liste des patients */}
+      {/* Liste des patients - responsive */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Users className="mr-2 h-5 w-5" />
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center text-sm sm:text-base">
+            <Users className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
             Liste des patients enregistrés
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             {filteredPatients.length} patient(s) trouvé(s) sur {patients.length} enregistré(s)
             {searchTerm || Object.values(filters).some(f => f !== 'all' && f !== '') ? ' (avec filtres actifs)' : ''}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
+        <CardContent className="px-3 sm:px-6">
+          {/* Version mobile - Cartes */}
+          <div className="block lg:hidden space-y-3">
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="flex items-center justify-center space-x-2">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span className="text-sm">Chargement des patients enregistrés...</span>
+                </div>
+              </div>
+            ) : error ? (
+              <div className="text-center py-8 text-red-600">
+                <div className="flex items-center justify-center space-x-2">
+                  <AlertTriangle className="h-6 w-6" />
+                  <span className="text-sm">{error}</span>
+                </div>
+              </div>
+            ) : filteredPatients.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <span className="text-sm">Aucun patient enregistré trouvé</span>
+              </div>
+            ) : (
+              filteredPatients.map((patient) => (
+                <Card key={patient.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                          #{patient.id}
+                        </span>
+                        <div>
+                          <div className="font-medium text-sm">
+                            {patient.nom} {patient.prenom}
+                          </div>
+                          {patient.profession && (
+                            <div className="text-xs text-gray-500">
+                              {patient.profession}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center text-xs">
+                        <Mail className="h-3 w-3 mr-2 text-gray-400" />
+                        <span className="truncate">{patient.email || 'Non renseigné'}</span>
+                      </div>
+                      <div className="flex items-center text-xs">
+                        <Phone className="h-3 w-3 mr-2 text-gray-400" />
+                        <span>{patient.telephone || 'Non renseigné'}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span>Âge: {patient.age ? `${patient.age} ans` : '-'}</span>
+                        <span className="font-medium text-green-600">
+                          {patient.prix_consultation?.toLocaleString()} FCFA
+                        </span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-medium">Motif:</span> {patient.motif_visite}
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-medium">Type:</span> {patient.type_consultation}
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col gap-2">
+                      <Dialog open={isDetailsOpen && selectedPatient?.id === patient.id} onOpenChange={(open) => {
+                        if (!open) {
+                          setIsDetailsOpen(false);
+                          setSelectedPatient(null);
+                        }
+                      }}>
+                        <DialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleViewDetails(patient)}
+                            className="w-full text-xs"
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            Voir détails
+                          </Button>
+                        </DialogTrigger>
+                        <PatientEnregistreDetailsModal patient={patient} />
+                      </Dialog>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditPatient(patient)}
+                          className="flex-1 text-xs"
+                        >
+                          <FileText className="h-3 w-3 mr-1" />
+                          Modifier
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDeletePatient(patient.id!)}
+                          className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
+                        >
+                          <X className="h-3 w-3 mr-1" />
+                          Supprimer
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+
+          {/* Version desktop - Tableau */}
+          <div className="hidden lg:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Nom complet</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Âge</TableHead>
-                  <TableHead>Motif visite</TableHead>
-                  <TableHead>Type consultation</TableHead>
-                  <TableHead>Prix</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-xs">ID</TableHead>
+                  <TableHead className="text-xs">Nom complet</TableHead>
+                  <TableHead className="text-xs">Contact</TableHead>
+                  <TableHead className="text-xs">Âge</TableHead>
+                  <TableHead className="text-xs">Motif visite</TableHead>
+                  <TableHead className="text-xs">Type consultation</TableHead>
+                  <TableHead className="text-xs">Prix</TableHead>
+                  <TableHead className="text-xs">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -526,7 +650,7 @@ const Patients = () => {
                     <TableCell colSpan={8} className="text-center py-8">
                       <div className="flex items-center justify-center space-x-2">
                         <Loader2 className="h-6 w-6 animate-spin" />
-                        <span>Chargement des patients enregistrés...</span>
+                        <span className="text-sm">Chargement des patients enregistrés...</span>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -535,19 +659,19 @@ const Patients = () => {
                     <TableCell colSpan={8} className="text-center py-8 text-red-600">
                       <div className="flex items-center justify-center space-x-2">
                         <AlertTriangle className="h-6 w-6" />
-                        <span>{error}</span>
+                        <span className="text-sm">{error}</span>
                       </div>
                     </TableCell>
                   </TableRow>
                 ) : filteredPatients.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                      Aucun patient enregistré trouvé
+                      <span className="text-sm">Aucun patient enregistré trouvé</span>
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredPatients.map((patient) => (
-                    <TableRow key={patient.id}>
+                    <TableRow key={patient.id} className="hover:bg-gray-50">
                       <TableCell>
                         <div className="text-center">
                           <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
@@ -557,11 +681,11 @@ const Patients = () => {
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">
+                          <div className="font-medium text-sm">
                             {patient.nom} {patient.prenom}
                           </div>
                           {patient.profession && (
-                            <div className="text-sm text-gray-500 mt-1">
+                            <div className="text-xs text-gray-500 mt-1">
                               {patient.profession}
                             </div>
                           )}
@@ -569,32 +693,32 @@ const Patients = () => {
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
-                          <div className="flex items-center text-sm">
+                          <div className="flex items-center text-xs">
                             <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                            {patient.email || 'Non renseigné'}
+                            <span className="truncate max-w-[150px]">{patient.email || 'Non renseigné'}</span>
                           </div>
-                          <div className="flex items-center text-sm">
+                          <div className="flex items-center text-xs">
                             <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                            {patient.telephone || 'Non renseigné'}
+                            <span>{patient.telephone || 'Non renseigné'}</span>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        {patient.age ? `${patient.age} ans` : '-'}
+                        <span className="text-sm">{patient.age ? `${patient.age} ans` : '-'}</span>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm">{patient.motif_visite}</span>
+                        <span className="text-xs">{patient.motif_visite}</span>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm">{patient.type_consultation}</span>
+                        <span className="text-xs">{patient.type_consultation}</span>
                       </TableCell>
                       <TableCell>
-                        <span className="font-medium text-green-600">
+                        <span className="font-medium text-green-600 text-sm">
                           {patient.prix_consultation?.toLocaleString()} FCFA
                         </span>
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-col sm:flex-row gap-2">
+                        <div className="flex flex-col gap-1">
                           <Dialog open={isDetailsOpen && selectedPatient?.id === patient.id} onOpenChange={(open) => {
                             if (!open) {
                               setIsDetailsOpen(false);
@@ -606,7 +730,7 @@ const Patients = () => {
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => handleViewDetails(patient)}
-                                className="w-full sm:w-auto"
+                                className="w-full text-xs"
                               >
                                 <Eye className="h-3 w-3 mr-1" />
                                 Voir
@@ -614,24 +738,26 @@ const Patients = () => {
                             </DialogTrigger>
                             <PatientEnregistreDetailsModal patient={patient} />
                           </Dialog>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleEditPatient(patient)}
-                            className="w-full sm:w-auto"
-                          >
-                            <FileText className="h-3 w-3 mr-1" />
-                            Modifier
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDeletePatient(patient.id!)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 w-full sm:w-auto"
-                          >
-                            <X className="h-3 w-3 mr-1" />
-                            Supprimer
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditPatient(patient)}
+                              className="flex-1 text-xs"
+                            >
+                              <FileText className="h-3 w-3 mr-1" />
+                              Modifier
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDeletePatient(patient.id!)}
+                              className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
+                            >
+                              <X className="h-3 w-3 mr-1" />
+                              Supprimer
+                            </Button>
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>

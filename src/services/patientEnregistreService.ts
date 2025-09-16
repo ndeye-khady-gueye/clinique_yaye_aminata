@@ -1,3 +1,5 @@
+import { API_BASE_URL } from '@/config/environment';
+
 // Service pour la gestion des patients enregistrés temporairement
 export interface PatientEnregistre {
   id?: number;
@@ -38,7 +40,7 @@ export interface PatientEnregistreCreateData {
 export const patientEnregistreService = {
   async getAllPatientsEnregistres(): Promise<PatientEnregistre[]> {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/patients-enregistres/', {
+      const response = await fetch(`${API_BASE_URL}/patients-enregistres/`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
           'Content-Type': 'application/json',
@@ -59,7 +61,7 @@ export const patientEnregistreService = {
 
   async createPatientEnregistre(patientData: PatientEnregistreCreateData): Promise<PatientEnregistre> {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/patients-enregistres/', {
+      const response = await fetch(`${API_BASE_URL}/patients-enregistres/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
@@ -83,7 +85,7 @@ export const patientEnregistreService = {
 
   async getPatientsEnregistresAujourdhui(): Promise<PatientEnregistre[]> {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/patients-enregistres/aujourd_hui/', {
+      const response = await fetch(`${API_BASE_URL}/patients-enregistres/aujourd_hui/`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
           'Content-Type': 'application/json',
@@ -104,7 +106,7 @@ export const patientEnregistreService = {
 
   async updatePatientEnregistre(id: number, patientData: Partial<PatientEnregistre>): Promise<PatientEnregistre> {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/patients-enregistres/${id}/`, {
+      const response = await fetch(`${API_BASE_URL}/patients-enregistres/${id}/`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
@@ -127,7 +129,7 @@ export const patientEnregistreService = {
 
   async deletePatientEnregistre(id: number): Promise<void> {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/patients-enregistres/${id}/`, {
+      const response = await fetch(`${API_BASE_URL}/patients-enregistres/${id}/`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,

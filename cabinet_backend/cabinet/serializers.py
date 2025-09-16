@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import User, Patient, Service, RendezVous, Consultation, Prescription, Paiement, DossierMedical, Contact, PatientEnregistre
+from .models import User, Patient, Service, RendezVous, Consultation, Prescription, Paiement, DossierMedical, Contact, PatientEnregistre, Notification
 import re
 
 class UserSerializer(serializers.ModelSerializer):
@@ -314,6 +314,7 @@ class RendezVousSerializer(serializers.ModelSerializer):
 
 class RendezVousCreateSerializer(serializers.ModelSerializer):
     """Sérialiseur pour la création de rendez-vous (patients existants et clients/visiteurs)"""
+    service = serializers.CharField(required=False, allow_blank=True)
     
     class Meta:
         model = RendezVous
@@ -341,10 +342,54 @@ class RendezVousCreateSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         """Créer un rendez-vous"""
+        print(f"🔍 RendezVousCreateSerializer - Données reçues: {validated_data}")
+        
         # Si pas de statut spécifié, mettre en_attente par défaut
         if not validated_data.get('statut'):
             validated_data['statut'] = 'en_attente'
         
+        # Gérer le service
+        from .models import Service
+        service_data = validated_data.pop('service', None)
+        print(f"🔍 Service data: {service_data} (type: {type(service_data)})")
+        
+        if service_data:
+            # Si c'est un code de service, trouver le service correspondant
+            if isinstance(service_data, str):
+                print(f"🔍 Recherche du service avec le code: {service_data}")
+                service = Service.objects.filter(code=service_data).first()
+                if not service:
+                    print(f"🔍 Service non trouvé, création d'un nouveau service: {service_data}")
+                    # Créer le service s'il n'existe pas
+                    service = Service.objects.create(
+                        code=service_data,
+                        nom=service_data.replace('_', ' ').title(),
+                        description=f'Service {service_data}',
+                        prix=5000,
+                        duree_consultation=30,
+                        is_active=True
+                    )
+                    print(f"✅ Service créé: {service}")
+                else:
+                    print(f"✅ Service trouvé: {service}")
+                validated_data['service'] = service
+            elif isinstance(service_data, int):
+                print(f"🔍 Recherche du service avec l'ID: {service_data}")
+                # Si c'est un ID, vérifier qu'il existe
+                try:
+                    service = Service.objects.get(id=service_data)
+                    validated_data['service'] = service
+                    print(f"✅ Service trouvé par ID: {service}")
+                except Service.DoesNotExist:
+                    print(f"❌ Service non trouvé par ID, utilisation du service par défaut")
+                    # Utiliser le service par défaut
+                    validated_data['service'] = Service.get_or_create_default()
+        else:
+            print(f"🔍 Aucun service fourni, utilisation du service par défaut")
+            # Utiliser le service par défaut
+            validated_data['service'] = Service.get_or_create_default()
+        
+        print(f"🔍 Données finales avant création: {validated_data}")
         return super().create(validated_data)
 
 class RendezVousResponsableSerializer(serializers.ModelSerializer):
@@ -498,4 +543,71 @@ class ContactCreateSerializer(serializers.ModelSerializer):
         """Créer un message de contact avec statut nouveau"""
         validated_data['statut'] = 'nouveau'
         return super().create(validated_data)
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    """Sérialiseur pour les notifications"""
+    user_name = serializers.CharField(source='user.get_full_name', read_only=True)
+    user_role = serializers.CharField(source='user.get_role_display', read_only=True)
+    type_display = serializers.CharField(source='get_type_display', read_only=True)
+    priority_display = serializers.CharField(source='get_priority_display', read_only=True)
+    time_ago = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Notification
+        fields = [
+            'id', 'type', 'type_display', 'title', 'message', 'priority', 'priority_display',
+            'user', 'user_name', 'user_role', 'data', 'is_read', 'is_archived',
+            'created_at', 'read_at', 'time_ago'
+        ]
+        read_only_fields = ['id', 'created_at', 'read_at', 'time_ago']
+    
+    def get_time_ago(self, obj):
+        """Calculer le temps écoulé depuis la création"""
+        from django.utils import timezone
+        now = timezone.now()
+        diff = now - obj.created_at
+        
+        if diff.days > 0:
+            return f"{diff.days} jour{'s' if diff.days > 1 else ''}"
+        elif diff.seconds > 3600:
+            hours = diff.seconds // 3600
+            return f"{hours} heure{'s' if hours > 1 else ''}"
+        elif diff.seconds > 60:
+            minutes = diff.seconds // 60
+            return f"{minutes} minute{'s' if minutes > 1 else ''}"
+        else:
+            return "À l'instant"
+
+
+class NotificationCreateSerializer(serializers.ModelSerializer):
+    """Sérialiseur pour créer des notifications"""
+    
+    class Meta:
+        model = Notification
+        fields = ['type', 'title', 'message', 'priority', 'user', 'data']
+    
+    def create(self, validated_data):
+        """Créer une notification"""
+        return Notification.create_notification(**validated_data)
+
+
+class NotificationUpdateSerializer(serializers.ModelSerializer):
+    """Sérialiseur pour mettre à jour les notifications"""
+    
+    class Meta:
+        model = Notification
+        fields = ['is_read', 'is_archived']
+    
+    def update(self, instance, validated_data):
+        """Mettre à jour une notification"""
+        if 'is_read' in validated_data and validated_data['is_read'] and not instance.is_read:
+            instance.mark_as_read()
+        elif 'is_read' in validated_data and not validated_data['is_read'] and instance.is_read:
+            instance.mark_as_unread()
+        else:
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
+            instance.save()
+        return instance
 

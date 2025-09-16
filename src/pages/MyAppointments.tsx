@@ -5,28 +5,35 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Clock, User, Search, Plus, Edit, Check, X, FileText, Phone, Mail, Loader2, AlertTriangle, Eye, Settings, Printer, Download } from 'lucide-react';
+import { Calendar, Clock, User, Search, Edit, Check, X, FileText, Phone, Mail, Loader2, AlertTriangle, Eye, Settings, Printer, Download } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/use-toast';
-import { doctorAppointmentsService, DoctorAppointment } from '@/services/doctorAppointmentsService';
-import AppointmentForm from '@/components/forms/AppointmentForm';
+import { doctorAppointmentsService, Appointment as DoctorAppointment } from '@/services/doctorAppointmentsService';
+import PatientAppointments from './PatientAppointments';
 
 const MyAppointments = () => {
   const { user } = useAuth();
+
+  // Si c'est un patient, rediriger vers la page dédiée
+  if (user?.role === 'patient') {
+    return <PatientAppointments />;
+  }
+
+  // Pour les médecins, continuer avec la logique existante
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterDate, setFilterDate] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState<DoctorAppointment | null>(null);
   const [consultationNote, setConsultationNote] = useState('');
-  const [isAppointmentFormOpen, setIsAppointmentFormOpen] = useState(false);
   const [editingNotes, setEditingNotes] = useState('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showCompletedOnly, setShowCompletedOnly] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
   
   // États pour les données API
   const [appointments, setAppointments] = useState<DoctorAppointment[]>([]);
@@ -37,9 +44,6 @@ const MyAppointments = () => {
   useEffect(() => {
     if (user?.role === 'doctor') {
       loadDoctorAppointments();
-    } else {
-      // Pour les patients, garder les données simulées pour l'instant
-      setLoading(false);
     }
   }, [user?.role]);
 
@@ -102,6 +106,7 @@ const MyAppointments = () => {
       await loadDoctorAppointments();
       setSelectedAppointment(null);
       setConsultationNote('');
+      setIsConsultationModalOpen(false);
     } catch (error) {
       console.error('Erreur lors du marquage comme terminé:', error);
       toast({
@@ -114,7 +119,7 @@ const MyAppointments = () => {
 
   const handleCancelAppointment = async (appointmentId: number) => {
     try {
-      await doctorAppointmentsService.cancelAppointment(appointmentId, 'Annulé par le docteur');
+      await doctorAppointmentsService.cancelAppointment(appointmentId);
       
       toast({
         title: "Succès",
@@ -135,7 +140,10 @@ const MyAppointments = () => {
 
   const handleMarkAsAbsent = async (appointmentId: number) => {
     try {
-      await doctorAppointmentsService.markAsAbsent(appointmentId, 'Patient absent');
+      await doctorAppointmentsService.markAsCompleted(appointmentId, { 
+        statut: 'annule', 
+        notes: 'Patient absent' 
+      });
       
       toast({
         title: "Succès",
@@ -154,10 +162,6 @@ const MyAppointments = () => {
     }
   };
 
-  const handleCreateAppointment = (data: any) => {
-    console.log('Nouveau rendez-vous patient:', data);
-    setIsAppointmentFormOpen(false);
-  };
 
   // Fonctions pour gérer les clics sur les cartes de statistiques
   const handleCardClick = (filterType: string) => {
@@ -501,7 +505,20 @@ const MyAppointments = () => {
 
   const handleSaveAppointmentNotes = async (appointmentId: number, notes: string) => {
     try {
-      await doctorAppointmentsService.updateAppointmentNotes(appointmentId, notes);
+      // Utiliser l'API directe pour mettre à jour les notes
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`http://127.0.0.1:8000/api/rendez-vous/${appointmentId}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ notes: notes }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
       toast({
         title: "Succès",
@@ -776,52 +793,21 @@ const MyAppointments = () => {
                           </Button>
                         )}
 
-                        {/* Action Terminer avec modal - pour les RDV confirmés */}
+                        {/* Action Terminer - pour les RDV confirmés */}
                         {appointment.statut === 'confirme' && (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => setSelectedAppointment(appointment)}
-                                className="text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 text-xs px-2 py-1 xs:px-3 xs:py-1.5"
-                              >
-                                <Check className="h-3 w-3 mr-1 flex-shrink-0" />
-                                <span className="hidden xs:inline">Terminer</span>
-                                <span className="xs:hidden">✓</span>
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Terminer la consultation</DialogTitle>
-                                <DialogDescription>
-                                  Patient: {appointment.patient 
-                                    ? `${appointment.patient.user.first_name} ${appointment.patient.user.last_name}`
-                                    : appointment.client_nom || 'Patient non défini'
-                                  }
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <div>
-                                  <label className="text-sm font-medium">Compte rendu de consultation</label>
-                                  <Textarea 
-                                    placeholder="Saisissez le compte rendu de la consultation..."
-                                    value={consultationNote}
-                                    onChange={(e) => setConsultationNote(e.target.value)}
-                                    rows={4}
-                                  />
-                                </div>
-                                <div className="flex justify-end space-x-2">
-                                  <Button variant="outline" onClick={() => setSelectedAppointment(null)}>
-                                    Annuler
-                                  </Button>
-                                  <Button onClick={() => handleMarkAsCompleted(appointment.id)} className="bg-gradient-clinic">
-                                    Valider
-                                  </Button>
-                                </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => {
+                              setSelectedAppointment(appointment);
+                              setIsConsultationModalOpen(true);
+                            }}
+                            className="text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 text-xs px-2 py-1 xs:px-3 xs:py-1.5"
+                          >
+                            <Check className="h-3 w-3 mr-1 flex-shrink-0" />
+                            <span className="hidden xs:inline">Terminer</span>
+                            <span className="xs:hidden">✓</span>
+                          </Button>
                         )}
 
                         {/* Action Voir Détails */}
@@ -1186,34 +1172,6 @@ const MyAppointments = () => {
 
     return (
     <>
-      {/* Actions rapides - Responsive amélioré */}
-      <Card className="bg-gradient-clinic text-white mb-4 xs:mb-6">
-        <CardContent className="p-4 xs:p-6">
-          <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between space-y-4 xs:space-y-0">
-            <div className="flex-1">
-              <h3 className="text-lg xs:text-xl font-semibold mb-2">Besoin d'un rendez-vous ?</h3>
-              <p className="opacity-90 text-sm xs:text-base">Réservez facilement votre prochaine consultation</p>
-            </div>
-            <Dialog open={isAppointmentFormOpen} onOpenChange={setIsAppointmentFormOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  onClick={() => setIsAppointmentFormOpen(true)}
-                  className="w-full xs:w-auto text-sm xs:text-base px-4 xs:px-6 py-2 xs:py-3"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Prendre RDV
-                </Button>
-              </DialogTrigger>
-              <AppointmentForm 
-                onSubmit={handleCreateAppointment}
-                onCancel={() => setIsAppointmentFormOpen(false)}
-              />
-            </Dialog>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Statistiques personnelles - Responsive amélioré */}
       <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-3 xs:gap-4 mb-4 xs:mb-6">
@@ -1357,6 +1315,100 @@ const MyAppointments = () => {
       </div>
 
       {user?.role === 'doctor' ? <DoctorView /> : <PatientView />}
+
+      {/* Modal de consultation séparée */}
+      <Dialog open={isConsultationModalOpen} onOpenChange={setIsConsultationModalOpen}>
+        <DialogContent 
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle>Terminer la consultation</DialogTitle>
+            <DialogDescription>
+              Patient: {selectedAppointment?.patient 
+                ? `${selectedAppointment.patient.user.first_name} ${selectedAppointment.patient.user.last_name}`
+                : selectedAppointment?.client_nom || 'Patient non défini'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <div 
+            className="space-y-4"
+            onKeyDown={(e) => e.stopPropagation()}
+            onKeyUp={(e) => e.stopPropagation()}
+            onKeyPress={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onMouseUp={(e) => e.stopPropagation()}
+          >
+            <div>
+              <label className="text-sm font-medium">Compte rendu de consultation</label>
+              <Textarea 
+                placeholder="Saisissez le compte rendu de la consultation..."
+                value={consultationNote}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  setConsultationNote(e.target.value);
+                }}
+                                    onKeyDown={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                    onKeyUp={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                    onKeyPress={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                    onMouseDown={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                    onMouseUp={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                    onFocus={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                    onBlur={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                rows={4}
+                className="resize-none"
+                autoFocus={false}
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedAppointment(null);
+                  setConsultationNote('');
+                  setIsConsultationModalOpen(false);
+                }}
+                type="button"
+              >
+                Annuler
+              </Button>
+              <Button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (selectedAppointment) {
+                    handleMarkAsCompleted(selectedAppointment.id);
+                  }
+                }} 
+                className="bg-gradient-clinic"
+                type="button"
+              >
+                Valider
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

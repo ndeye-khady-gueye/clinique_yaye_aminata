@@ -49,6 +49,24 @@ class AuthViewSet(viewsets.ViewSet):
             user = serializer.validated_data['user']
             refresh = RefreshToken.for_user(user)
             
+            # Créer une notification de connexion
+            try:
+                from .models import Notification
+                Notification.create_notification(
+                    type='login',
+                    title=f'Connexion de {user.get_full_name()}',
+                    message=f'{user.get_full_name()} ({user.get_role_display()}) s\'est connecté au système',
+                    user=user,
+                    priority='medium',
+                    data={
+                        'user_id': user.id,
+                        'user_role': user.role,
+                        'login_time': timezone.now().isoformat()
+                    }
+                )
+            except Exception as e:
+                print(f"Erreur lors de la création de la notification de connexion: {e}")
+            
             return Response({
                 'success': True,
                 'message': 'Connexion réussie',
@@ -64,10 +82,30 @@ class AuthViewSet(viewsets.ViewSet):
     def logout(self, request):
         """Déconnexion utilisateur"""
         try:
+            user = request.user
             refresh_token = request.data.get('refresh_token')
             if refresh_token:
                 token = RefreshToken(refresh_token)
                 token.blacklist()
+            
+            # Créer une notification de déconnexion
+            try:
+                from .models import Notification
+                Notification.create_notification(
+                    type='logout',
+                    title=f'Déconnexion de {user.get_full_name()}',
+                    message=f'{user.get_full_name()} ({user.get_role_display()}) s\'est déconnecté du système',
+                    user=user,
+                    priority='low',
+                    data={
+                        'user_id': user.id,
+                        'user_role': user.role,
+                        'logout_time': timezone.now().isoformat()
+                    }
+                )
+            except Exception as e:
+                print(f"Erreur lors de la création de la notification de déconnexion: {e}")
+            
             return Response({'success': True, 'message': 'Déconnexion réussie'})
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -76,6 +114,34 @@ class AuthViewSet(viewsets.ViewSet):
     def me(self, request):
         """Récupérer les informations de l'utilisateur connecté"""
         return Response(UserSerializer(request.user).data)
+    
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def change_password(self, request):
+        """Changer le mot de passe de l'utilisateur connecté"""
+        current_password = request.data.get('current_password')
+        new_password = request.data.get('new_password')
+        
+        if not current_password or not new_password:
+            return Response({
+                'error': 'current_password et new_password sont requis'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = request.user
+        
+        # Vérifier le mot de passe actuel
+        if not user.check_password(current_password):
+            return Response({
+                'error': 'Mot de passe actuel incorrect'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Changer le mot de passe
+        user.set_password(new_password)
+        user.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Mot de passe mis à jour avec succès'
+        })
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def register(self, request):
@@ -208,12 +274,17 @@ class AdminViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def system_config(self, request):
         """Configuration système actuelle"""
+        # Convertir WindowsPath en string si nécessaire
+        db_name = settings.DATABASES['default'].get('NAME', 'db.sqlite3')
+        if hasattr(db_name, '__str__'):
+            db_name = str(db_name)
+            
         return Response({
             'database': {
                 'type': 'SQLite' if 'sqlite' in settings.DATABASES['default']['ENGINE'] else 'PostgreSQL',
                 'host': settings.DATABASES['default'].get('HOST', 'localhost'),
                 'port': settings.DATABASES['default'].get('PORT', 5432),
-                'name': settings.DATABASES['default'].get('NAME', 'db.sqlite3'),
+                'name': db_name,
                 'status': 'online'
             },
             'security': {
@@ -267,6 +338,298 @@ class AdminViewSet(viewsets.ViewSet):
             return Response({
                 'success': False,
                 'error': f'Erreur de connexion: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=False, methods=['get'])
+    def notifications(self, request):
+        """Récupérer toutes les notifications pour l'admin"""
+        from .serializers import NotificationSerializer
+        from .models import Notification
+        
+        # Filtres
+        notification_type = request.query_params.get('type')
+        is_read = request.query_params.get('is_read')
+        priority = request.query_params.get('priority')
+        
+        queryset = Notification.objects.filter(is_archived=False)
+        
+        if notification_type:
+            queryset = queryset.filter(type=notification_type)
+        if is_read is not None:
+            queryset = queryset.filter(is_read=is_read.lower() == 'true')
+        if priority:
+            queryset = queryset.filter(priority=priority)
+        
+        # Pagination
+        page = int(request.query_params.get('page', 1))
+        page_size = int(request.query_params.get('page_size', 20))
+        start = (page - 1) * page_size
+        end = start + page_size
+        
+        notifications = queryset[start:end]
+        serializer = NotificationSerializer(notifications, many=True)
+        
+        return Response({
+            'notifications': serializer.data,
+            'total': queryset.count(),
+            'page': page,
+            'page_size': page_size,
+            'unread_count': queryset.filter(is_read=False).count()
+        })
+    
+    @action(detail=False, methods=['post'])
+    def create_notification(self, request):
+        """Créer une nouvelle notification"""
+        from .serializers import NotificationCreateSerializer
+        
+        serializer = NotificationCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            notification = serializer.save()
+            return Response({
+                'success': True,
+                'notification': NotificationSerializer(notification).data
+            }, status=status.HTTP_201_CREATED)
+        return Response({
+            'success': False,
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['put'])
+    def mark_notification_read(self, request):
+        """Marquer une notification comme lue"""
+        from .models import Notification
+        
+        notification_id = request.data.get('notification_id')
+        if not notification_id:
+            return Response({
+                'success': False,
+                'error': 'ID de notification requis'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            notification = Notification.objects.get(id=notification_id)
+            notification.mark_as_read()
+            return Response({
+                'success': True,
+                'message': 'Notification marquée comme lue'
+            })
+        except Notification.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': 'Notification non trouvée'
+            }, status=status.HTTP_404_NOT_FOUND)
+    
+    @action(detail=False, methods=['put'])
+    def mark_all_notifications_read(self, request):
+        """Marquer toutes les notifications comme lues"""
+        from .models import Notification
+        
+        updated_count = Notification.objects.filter(is_read=False).update(is_read=True)
+        return Response({
+            'success': True,
+            'message': f'{updated_count} notifications marquées comme lues'
+        })
+    
+    @action(detail=False, methods=['delete'])
+    def delete_notification(self, request):
+        """Supprimer une notification"""
+        from .models import Notification
+        
+        notification_id = request.data.get('notification_id')
+        if not notification_id:
+            return Response({
+                'success': False,
+                'error': 'ID de notification requis'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            notification = Notification.objects.get(id=notification_id)
+            notification.delete()
+            return Response({
+                'success': True,
+                'message': 'Notification supprimée'
+            })
+        except Notification.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': 'Notification non trouvée'
+            }, status=status.HTTP_404_NOT_FOUND)
+    
+    @action(detail=False, methods=['get'])
+    def system_reports(self, request):
+        """Rapports système détaillés"""
+        try:
+            from django.db.models import Count, Q
+            from django.utils import timezone
+            from datetime import timedelta, datetime
+            from .models import Notification
+            
+            # Période de référence (7 derniers jours)
+            end_date = timezone.now()
+            start_date = end_date - timedelta(days=7)
+            
+            # Métriques utilisateurs
+            total_users = User.objects.count()
+            active_users = User.objects.filter(is_active=True).count()
+            inactive_users = total_users - active_users
+            
+            # Utilisateurs par rôle
+            users_by_role = User.objects.values('role').annotate(count=Count('id')).order_by('-count')
+            role_data = []
+            for item in users_by_role:
+                role_data.append({
+                    'role': item['role'],
+                    'count': item['count'],
+                    'percentage': round((item['count'] / total_users) * 100, 1) if total_users > 0 else 0
+                })
+            
+            # Croissance des utilisateurs (7 derniers jours)
+            user_growth = []
+            for i in range(7):
+                date = end_date - timedelta(days=i)
+                count = User.objects.filter(created_at__date=date.date()).count()
+                user_growth.append({
+                    'date': date.strftime('%Y-%m-%d'),
+                    'count': count
+                })
+            user_growth.reverse()
+            
+            # Métriques des rendez-vous
+            total_appointments = RendezVous.objects.count()
+            appointments_today = RendezVous.objects.filter(
+                date_confirmee__date=timezone.now().date()
+            ).count()
+            
+            # Rendez-vous par statut
+            appointments_by_status = RendezVous.objects.values('statut').annotate(count=Count('id'))
+            status_data = []
+            for item in appointments_by_status:
+                status_data.append({
+                    'status': item['statut'],
+                    'count': item['count']
+                })
+            
+            # Rendez-vous des 7 derniers jours
+            appointments_growth = []
+            for i in range(7):
+                date = end_date - timedelta(days=i)
+                count = RendezVous.objects.filter(date_confirmee__date=date.date()).count()
+                appointments_growth.append({
+                    'date': date.strftime('%Y-%m-%d'),
+                    'count': count
+                })
+            appointments_growth.reverse()
+            
+            # Métriques des patients
+            total_patients = Patient.objects.count()
+            
+            # Patients des 7 derniers jours
+            patients_growth = []
+            for i in range(7):
+                date = end_date - timedelta(days=i)
+                count = Patient.objects.filter(created_at__date=date.date()).count()
+                patients_growth.append({
+                    'date': date.strftime('%Y-%m-%d'),
+                    'count': count
+                })
+            patients_growth.reverse()
+            
+            # Métriques de performance (simulées)
+            response_time = 245  # ms
+            availability = 99.8  # %
+            errors_today = 12
+            
+            # Requêtes quotidiennes (simulées basées sur les données réelles)
+            daily_requests = []
+            for i in range(7):
+                date = end_date - timedelta(days=i)
+                # Estimation basée sur les données réelles
+                base_requests = 100
+                user_factor = User.objects.filter(created_at__date__lte=date.date()).count() * 0.1
+                appointment_factor = RendezVous.objects.filter(date_confirmee__date=date.date()).count() * 0.5
+                total_requests = int(base_requests + user_factor + appointment_factor)
+                
+                daily_requests.append({
+                    'date': date.strftime('%Y-%m-%d'),
+                    'requests': total_requests
+                })
+            daily_requests.reverse()
+            
+            # Notifications récentes
+            notification_stats = {
+                'total': Notification.objects.count(),
+                'unread': Notification.objects.filter(is_read=False).count(),
+                'by_type': list(Notification.objects.values('type').annotate(count=Count('id')))
+            }
+            
+            return Response({
+                'users': {
+                    'total': total_users,
+                    'active': active_users,
+                    'inactive': inactive_users,
+                    'by_role': role_data,
+                    'growth': user_growth
+                },
+                'appointments': {
+                    'total': total_appointments,
+                    'today': appointments_today,
+                    'by_status': status_data,
+                    'growth': appointments_growth
+                },
+                'patients': {
+                    'total': total_patients,
+                    'growth': patients_growth
+                },
+                'performance': {
+                    'response_time': response_time,
+                    'availability': availability,
+                    'errors_today': errors_today,
+                    'daily_requests': daily_requests
+                },
+                'notifications': notification_stats,
+                'period': {
+                    'start_date': start_date.isoformat(),
+                    'end_date': end_date.isoformat(),
+                    'days': 7
+                }
+            })
+        except Exception as e:
+            print(f"Erreur dans system_reports: {e}")
+            return Response({
+                'error': str(e),
+                'users': {
+                    'total': 0,
+                    'active': 0,
+                    'inactive': 0,
+                    'by_role': [],
+                    'growth': []
+                },
+                'appointments': {
+                    'total': 0,
+                    'today': 0,
+                    'by_status': [],
+                    'growth': []
+                },
+                'patients': {
+                    'total': 0,
+                    'growth': []
+                },
+                'performance': {
+                    'response_time': 0,
+                    'availability': 0,
+                    'errors_today': 0,
+                    'daily_requests': []
+                },
+                'notifications': {
+                    'total': 0,
+                    'unread': 0,
+                    'by_type': []
+                },
+                'period': {
+                    'start_date': '',
+                    'end_date': '',
+                    'days': 0
+                }
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @csrf_exempt_method_decorator
@@ -376,6 +739,38 @@ class PatientViewSet(viewsets.ModelViewSet):
         else:
             return Patient.objects.all()
     
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def profile(self, request):
+        """Récupérer le profil du patient connecté"""
+        try:
+            patient = Patient.objects.get(user=request.user)
+            serializer = PatientSerializer(patient)
+            return Response(serializer.data)
+        except Patient.DoesNotExist:
+            return Response({'error': 'Profil patient non trouvé'}, status=status.HTTP_404_NOT_FOUND)
+    
+    @action(detail=False, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
+    def update_profile(self, request):
+        """Mettre à jour le profil du patient connecté"""
+        try:
+            patient = Patient.objects.get(user=request.user)
+            print(f"🔍 Données reçues pour mise à jour profil: {request.data}")
+            print(f"🔍 Patient trouvé: {patient}")
+            
+            serializer = PatientSerializer(patient, data=request.data, partial=True)
+            print(f"🔍 Serializer créé: {serializer}")
+            
+            if serializer.is_valid():
+                print("✅ Serializer valide, sauvegarde...")
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                print(f"❌ Erreurs de validation: {serializer.errors}")
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Patient.DoesNotExist:
+            print("❌ Patient non trouvé")
+            return Response({'error': 'Profil patient non trouvé'}, status=status.HTTP_404_NOT_FOUND)
+    
     @action(detail=True, methods=['get'])
     def dossier_medical(self, request, pk=None):
         """Récupérer le dossier médical d'un patient"""
@@ -405,6 +800,68 @@ class RendezVousViewSet(viewsets.ModelViewSet):
     serializer_class = RendezVousSerializer
     permission_classes = [CanManageAppointments]
     
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.action == 'create':
+            # Permettre aux clients non connectés de créer des demandes
+            permission_classes = [permissions.AllowAny]
+        elif self.action == 'list':
+            # Permettre aux patients de voir leurs rendez-vous
+            permission_classes = [permissions.IsAuthenticated]
+        else:
+            # Autres actions nécessitent une authentification
+            permission_classes = [CanManageAppointments]
+        
+        return [permission() for permission in permission_classes]
+    
+    def list(self, request, *args, **kwargs):
+        """
+        Liste des rendez-vous avec filtrage selon l'utilisateur
+        """
+        queryset = self.get_queryset()
+        
+        # Si c'est un patient, ne montrer que ses rendez-vous
+        if request.user.role == 'patient':
+            queryset = queryset.filter(
+                Q(client_email=request.user.email) | 
+                Q(patient__user=request.user)
+            )
+        
+        # Appliquer les filtres de recherche
+        search = request.query_params.get('search', None)
+        if search:
+            queryset = queryset.filter(
+                Q(client_nom__icontains=search) |
+                Q(docteur__first_name__icontains=search) |
+                Q(docteur__last_name__icontains=search) |
+                Q(service__nom__icontains=search)
+            )
+        
+        # Appliquer le filtre de statut
+        statut = request.query_params.get('statut', None)
+        if statut:
+            queryset = queryset.filter(statut=statut)
+        
+        # Appliquer le filtre de date
+        date_debut = request.query_params.get('date_debut', None)
+        if date_debut:
+            queryset = queryset.filter(date_confirmee__date__gte=date_debut)
+        
+        date_fin = request.query_params.get('date_fin', None)
+        if date_fin:
+            queryset = queryset.filter(date_confirmee__date__lte=date_fin)
+        
+        # Pagination
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     def get_serializer_class(self):
         if self.action == 'create':
             return RendezVousCreateSerializer
@@ -588,6 +1045,116 @@ class RendezVousViewSet(viewsets.ModelViewSet):
                 'success': True, 
                 'message': 'Rendez-vous annulé et notification envoyée'
             })
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def create(self, request, *args, **kwargs):
+        """Créer un rendez-vous avec notification"""
+        response = super().create(request, *args, **kwargs)
+        
+        if response.status_code == 201:
+            # Créer une notification pour la demande de RDV
+            try:
+                from .models import Notification
+                rdv_data = response.data
+                
+                # Déterminer le type de notification
+                if request.user.is_authenticated:
+                    notification_type = 'appointment_created'
+                    priority = 'medium'
+                else:
+                    notification_type = 'appointment_request'
+                    priority = 'high'
+                
+                Notification.create_notification(
+                    type=notification_type,
+                    title=f'{"Demande de" if notification_type == "appointment_request" else "Nouveau"} RDV - {rdv_data.get("client_nom", "Client")}',
+                    message=f'{"Demande de" if notification_type == "appointment_request" else "Nouveau"} rendez-vous pour {rdv_data.get("client_nom", "Client")} le {rdv_data.get("date_rdv", "")}',
+                    user=request.user if request.user.is_authenticated else None,
+                    priority=priority,
+                    data={
+                        'appointment_id': rdv_data.get('id'),
+                        'client_nom': rdv_data.get('client_nom'),
+                        'client_email': rdv_data.get('client_email'),
+                        'date_rdv': rdv_data.get('date_rdv'),
+                        'service': rdv_data.get('service'),
+                        'statut': rdv_data.get('statut')
+                    }
+                )
+            except Exception as e:
+                print(f"Erreur lors de la création de la notification de RDV: {e}")
+        
+        return response
+    
+    def update(self, request, *args, **kwargs):
+        """Mettre à jour un rendez-vous avec notification"""
+        response = super().update(request, *args, **kwargs)
+        
+        if response.status_code == 200:
+            # Créer une notification pour la modification de RDV
+            try:
+                from .models import Notification
+                rdv_data = response.data
+                
+                Notification.create_notification(
+                    type='appointment_updated',
+                    title=f'RDV modifié - {rdv_data.get("client_nom", "Client")}',
+                    message=f'Rendez-vous modifié pour {rdv_data.get("client_nom", "Client")} le {rdv_data.get("date_rdv", "")}',
+                    user=request.user,
+                    priority='medium',
+                    data={
+                        'appointment_id': rdv_data.get('id'),
+                        'client_nom': rdv_data.get('client_nom'),
+                        'client_email': rdv_data.get('client_email'),
+                        'date_rdv': rdv_data.get('date_rdv'),
+                        'service': rdv_data.get('service'),
+                        'statut': rdv_data.get('statut'),
+                        'updated_by': request.user.get_full_name()
+                    }
+                )
+            except Exception as e:
+                print(f"Erreur lors de la création de la notification de modification RDV: {e}")
+        
+        return response
+    
+    def destroy(self, request, *args, **kwargs):
+        """Supprimer un rendez-vous avec notification"""
+        try:
+            rdv = self.get_object()
+            rdv_data = {
+                'id': rdv.id,
+                'client_nom': rdv.client_nom,
+                'client_email': rdv.client_email,
+                'date_rdv': rdv.date_rdv.isoformat() if rdv.date_rdv else None,
+                'service': rdv.service.nom if rdv.service else None,
+                'statut': rdv.statut
+            }
+            
+            response = super().destroy(request, *args, **kwargs)
+            
+            if response.status_code == 204:
+                # Créer une notification pour la suppression de RDV
+                try:
+                    from .models import Notification
+                    Notification.create_notification(
+                        type='appointment_cancelled',
+                        title=f'RDV supprimé - {rdv_data.get("client_nom", "Client")}',
+                        message=f'Rendez-vous supprimé pour {rdv_data.get("client_nom", "Client")} le {rdv_data.get("date_rdv", "")}',
+                        user=request.user,
+                        priority='medium',
+                        data={
+                            'appointment_id': rdv_data.get('id'),
+                            'client_nom': rdv_data.get('client_nom'),
+                            'client_email': rdv_data.get('client_email'),
+                            'date_rdv': rdv_data.get('date_rdv'),
+                            'service': rdv_data.get('service'),
+                            'deleted_by': request.user.get_full_name()
+                        }
+                    )
+                except Exception as e:
+                    print(f"Erreur lors de la création de la notification de suppression RDV: {e}")
+            
+            return response
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1063,6 +1630,27 @@ class RendezVousResponsableViewSet(viewsets.ModelViewSet):
             'realises': realises,
             'annules': annules,
         })
+    
+    @action(detail=False, methods=['post'])
+    def supprimer_rendez_vous(self, request):
+        """Supprimer un rendez-vous"""
+        rdv_id = request.data.get('rendez_vous_id')
+        if not rdv_id:
+            return Response({'error': 'ID du rendez-vous requis'}, status=400)
+        
+        try:
+            rdv = RendezVous.objects.get(id=rdv_id)
+            rdv.delete()
+            
+            return Response({
+                'success': True,
+                'message': 'Rendez-vous supprimé avec succès'
+            })
+            
+        except RendezVous.DoesNotExist:
+            return Response({'error': 'Rendez-vous non trouvé'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
     
     def _envoyer_notification_confirmation(self, rdv):
         """Envoyer une notification de confirmation par email"""

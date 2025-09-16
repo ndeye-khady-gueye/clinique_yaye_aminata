@@ -60,7 +60,8 @@ const ContactManagement = () => {
 
   const loadMessages = async () => {
     try {
-      const response = await contactApi.getMessages(user?.token || "");
+      const token = localStorage.getItem('authToken');
+      const response = await contactApi.getMessages(token || "");
       setMessages(response.results || response);
     } catch (error) {
       console.error('Erreur lors du chargement des messages:', error);
@@ -76,7 +77,8 @@ const ContactManagement = () => {
 
   const loadStats = async () => {
     try {
-      const response = await contactApi.getMessageStats(user?.token || "");
+      const token = localStorage.getItem('authToken');
+      const response = await contactApi.getMessageStats(token || "");
       setStats(response);
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error);
@@ -85,16 +87,17 @@ const ContactManagement = () => {
 
   const handleStatusChange = async (messageId: number, newStatus: string) => {
     try {
+      const token = localStorage.getItem('authToken');
       let response;
       switch (newStatus) {
         case 'lu':
-          response = await contactApi.markAsRead(messageId, user?.token || "");
+          response = await contactApi.markAsRead(messageId, token || "");
           break;
         case 'repondu':
-          response = await contactApi.markAsReplied(messageId, user?.token || "");
+          response = await contactApi.markAsReplied(messageId, token || "");
           break;
         case 'traite':
-          response = await contactApi.markAsProcessed(messageId, user?.token || "");
+          response = await contactApi.markAsProcessed(messageId, token || "");
           break;
         default:
           return;
@@ -174,69 +177,69 @@ const ContactManagement = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Gestion des Messages de Contact</h1>
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Gestion des Messages de Contact</h1>
       </div>
 
       {/* Statistiques */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center">
-                <Mail className="h-8 w-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.total_messages}</p>
+                <Mail className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 flex-shrink-0" />
+                <div className="ml-2 sm:ml-4 min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Total</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{stats.total_messages}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center">
-                <Mail className="h-8 w-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Nouveaux</p>
-                  <p className="text-2xl font-bold text-blue-600">{stats.nouveaux_messages}</p>
+                <Mail className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 flex-shrink-0" />
+                <div className="ml-2 sm:ml-4 min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Nouveaux</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600">{stats.nouveaux_messages}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center">
-                <Eye className="h-8 w-8 text-yellow-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Lus</p>
-                  <p className="text-2xl font-bold text-yellow-600">{stats.messages_lus}</p>
+                <Eye className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600 flex-shrink-0" />
+                <div className="ml-2 sm:ml-4 min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Lus</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-600">{stats.messages_lus}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center">
-                <Reply className="h-8 w-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Répondus</p>
-                  <p className="text-2xl font-bold text-green-600">{stats.messages_repondus}</p>
+                <Reply className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 flex-shrink-0" />
+                <div className="ml-2 sm:ml-4 min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Répondus</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600">{stats.messages_repondus}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center">
-                <CheckCircle className="h-8 w-8 text-gray-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Traités</p>
-                  <p className="text-2xl font-bold text-gray-600">{stats.messages_traites}</p>
+                <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-gray-600 flex-shrink-0" />
+                <div className="ml-2 sm:ml-4 min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Traités</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-600">{stats.messages_traites}</p>
                 </div>
               </div>
             </CardContent>
@@ -246,8 +249,8 @@ const ContactManagement = () => {
 
       {/* Filtres */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -255,13 +258,13 @@ const ContactManagement = () => {
                   placeholder="Rechercher dans les messages..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 text-sm"
                 />
               </div>
             </div>
-            <div className="w-full md:w-48">
+            <div className="w-full sm:w-48">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="text-sm">
                   <SelectValue placeholder="Filtrer par statut" />
                 </SelectTrigger>
                 <SelectContent>
@@ -278,90 +281,93 @@ const ContactManagement = () => {
       </Card>
 
       {/* Liste des messages */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {loading ? (
           <Card>
-            <CardContent className="p-6">
-              <p className="text-center text-gray-500">Chargement des messages...</p>
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-center text-gray-500 text-sm sm:text-base">Chargement des messages...</p>
             </CardContent>
           </Card>
         ) : filteredMessages.length === 0 ? (
           <Card>
-            <CardContent className="p-6">
-              <p className="text-center text-gray-500">Aucun message trouvé</p>
+            <CardContent className="p-4 sm:p-6">
+              <p className="text-center text-gray-500 text-sm sm:text-base">Aucun message trouvé</p>
             </CardContent>
           </Card>
         ) : (
           filteredMessages.map((message) => (
             <Card key={message.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{message.nom}</h3>
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start space-y-4 lg:space-y-0">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{message.nom}</h3>
                       {getStatusBadge(message.statut)}
                     </div>
-                    <p className="text-sm text-gray-600 mb-1">{message.email}</p>
-                    <p className="text-sm text-gray-600 mb-2">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1 break-all">{message.email}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-2">
                       <Clock className="inline w-3 h-3 mr-1" />
                       {formatDate(message.created_at)}
                     </p>
-                    <h4 className="font-medium text-gray-900 mb-2">{message.sujet}</h4>
-                    <p className="text-gray-700 line-clamp-2">{message.message}</p>
+                    <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">{message.sujet}</h4>
+                    <p className="text-gray-700 line-clamp-2 text-sm sm:text-base">{message.message}</p>
                     {message.date_heure_souhaitee && (
-                      <p className="text-sm text-blue-600 mt-2">
+                      <p className="text-xs sm:text-sm text-blue-600 mt-2">
                         <Clock className="inline w-3 h-3 mr-1" />
                         Date souhaitée: {formatDate(message.date_heure_souhaitee)}
                       </p>
                     )}
                   </div>
                   
-                  <div className="flex flex-col gap-2 ml-4">
+                  <div className="flex flex-col gap-2 lg:ml-4">
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button 
                           variant="outline" 
                           size="sm"
                           onClick={() => setSelectedMessage(message)}
+                          className="w-full sm:w-auto"
                         >
-                          <Eye className="w-4 h-4 mr-1" />
-                          Voir
+                          <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                          <span className="hidden xs:inline">Voir</span>
+                          <span className="xs:hidden">Voir</span>
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
+                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                          <DialogTitle>Détails du message</DialogTitle>
+                          <DialogTitle className="text-base sm:text-lg">Détails du message</DialogTitle>
                         </DialogHeader>
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                           <div>
-                            <label className="text-sm font-medium text-gray-700">Nom</label>
-                            <p className="text-gray-900">{message.nom}</p>
+                            <label className="text-xs sm:text-sm font-medium text-gray-700">Nom</label>
+                            <p className="text-gray-900 text-sm sm:text-base">{message.nom}</p>
                           </div>
                           <div>
-                            <label className="text-sm font-medium text-gray-700">Email/Téléphone</label>
-                            <p className="text-gray-900">{message.email}</p>
+                            <label className="text-xs sm:text-sm font-medium text-gray-700">Email/Téléphone</label>
+                            <p className="text-gray-900 text-sm sm:text-base break-all">{message.email}</p>
                           </div>
                           <div>
-                            <label className="text-sm font-medium text-gray-700">Sujet</label>
-                            <p className="text-gray-900">{message.sujet}</p>
+                            <label className="text-xs sm:text-sm font-medium text-gray-700">Sujet</label>
+                            <p className="text-gray-900 text-sm sm:text-base">{message.sujet}</p>
                           </div>
                           <div>
-                            <label className="text-sm font-medium text-gray-700">Message</label>
-                            <p className="text-gray-900 whitespace-pre-wrap">{message.message}</p>
+                            <label className="text-xs sm:text-sm font-medium text-gray-700">Message</label>
+                            <p className="text-gray-900 whitespace-pre-wrap text-sm sm:text-base">{message.message}</p>
                           </div>
                           {message.date_heure_souhaitee && (
                             <div>
-                              <label className="text-sm font-medium text-gray-700">Date souhaitée</label>
-                              <p className="text-gray-900">{formatDate(message.date_heure_souhaitee)}</p>
+                              <label className="text-xs sm:text-sm font-medium text-gray-700">Date souhaitée</label>
+                              <p className="text-gray-900 text-sm sm:text-base">{formatDate(message.date_heure_souhaitee)}</p>
                             </div>
                           )}
                           <div>
-                            <label className="text-sm font-medium text-gray-700">Notes</label>
+                            <label className="text-xs sm:text-sm font-medium text-gray-700">Notes</label>
                             <Textarea
                               placeholder="Ajouter des notes..."
                               value={notes}
                               onChange={(e) => setNotes(e.target.value)}
                               rows={3}
+                              className="text-sm"
                             />
                           </div>
                         </div>
@@ -374,9 +380,11 @@ const ContactManagement = () => {
                           size="sm"
                           variant="outline"
                           onClick={() => handleStatusChange(message.id, 'lu')}
+                          className="w-full sm:w-auto"
                         >
                           <Eye className="w-3 h-3 mr-1" />
-                          Marquer lu
+                          <span className="hidden xs:inline">Marquer lu</span>
+                          <span className="xs:hidden">Lu</span>
                         </Button>
                       )}
                       {message.statut === 'lu' && (
@@ -384,9 +392,11 @@ const ContactManagement = () => {
                           size="sm"
                           variant="outline"
                           onClick={() => handleStatusChange(message.id, 'repondu')}
+                          className="w-full sm:w-auto"
                         >
                           <Reply className="w-3 h-3 mr-1" />
-                          Marquer répondu
+                          <span className="hidden xs:inline">Marquer répondu</span>
+                          <span className="xs:hidden">Répondu</span>
                         </Button>
                       )}
                       {message.statut === 'repondu' && (
@@ -394,9 +404,11 @@ const ContactManagement = () => {
                           size="sm"
                           variant="outline"
                           onClick={() => handleStatusChange(message.id, 'traite')}
+                          className="w-full sm:w-auto"
                         >
                           <Archive className="w-3 h-3 mr-1" />
-                          Marquer traité
+                          <span className="hidden xs:inline">Marquer traité</span>
+                          <span className="xs:hidden">Traité</span>
                         </Button>
                       )}
                     </div>
