@@ -1,31 +1,36 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import consultations from '@/assets/images/consultations.jpg';
+import grosPlan from '@/assets/images/gros-plan-d-un-garcon-se-faisant-examiner.jpg';
+import vacciner from '@/assets/images/vacciner.jpg';
+import infirmiere from '@/assets/images/infirmiere-afro-americaine-et-femme-enceinte-parlant.jpg';
+import photoMadameDaouda from '@/assets/images/photo-madame-daouda.jpg';
 
 const Services = () => {
   const services = [
     {
       title: "Consultations de routine",
       description: "Un petit souci de santé 7 jrs sur 7 pour vous écouter et vous rassurer",
-      image: "/lovable-uploads/consultations.jpg",
+      image: consultations,
       featured: false
     },
     {
       title: "Maladies chroniques",
       description: "Ensemble, on veille sur vous, jours après jours",
-      image: "/lovable-uploads/gros-plan-d-un-garcon-se-faisant-examiner.jpg",
+      image: grosPlan,
       featured: true
     },
     {
       title: "Vaccinations",
       description: "Un petit piqûre pour une grande protection",
-      image: "/lovable-uploads/vacciner.jpg",
+      image: vacciner,
       featured: false
     },
     {
       title: "Bilans de santé",
       description: "Juste un petit contrôle pour prendre soin de vous",
-      image: "/lovable-uploads/infirmiere-afro-americaine-et-femme-enceinte-parlant.jpg",
+      image: infirmiere,
       featured: false
     },
     

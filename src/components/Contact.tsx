@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { contactApi } from "@/services/api";
+import contactImage from "@/assets/images/contact.png";
 
 const Contact = () => {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -337,7 +338,7 @@ const Contact = () => {
             {/* Image de fond avec bordure bleue */}
             <div className="relative h-64 sm:h-80 lg:h-[600px] rounded-2xl overflow-hidden border-2 sm:border-4 border-primary transform lg:-translate-x-8 lg:translate-y-8">
               <img
-                src="/lovable-uploads/contact.png"
+                src={contactImage}
                 alt="Contact"
                 className="w-full h-full object-cover"
               />

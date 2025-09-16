@@ -9,6 +9,7 @@ import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/c
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { User, Calendar, Phone, MapPin, FileText, Stethoscope, DollarSign, Clock } from 'lucide-react';
+import logo from '@/assets/images/Logo_page-0001.jpg';
 
 interface PatientFormProps {
   onSubmit: (data: any) => void;
@@ -93,7 +94,7 @@ const PatientForm = ({ onSubmit, onCancel, initialData }: PatientFormProps) => {
         {/* En-tête Cabinet avec logo à gauche */}
         <div className="flex items-start justify-between mb-6 p-6 rounded-lg" style={{ backgroundColor: '#F4E6F7' }}>
           <img
-            src="/lovable-uploads/Logo_page-0001.jpg"
+            src={logo}
             alt="Logo Cabinet Yaye Aminata"
             className="h-20 w-20 mr-6"
           />

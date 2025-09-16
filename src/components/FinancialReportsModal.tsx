@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Download, Printer, Calendar, DollarSign } from 'lucide-react';
+import logo from '@/assets/images/Logo_page-0001.jpg';
 
 interface FinancialReportsModalProps {
   onClose: () => void;
@@ -62,7 +63,7 @@ const FinancialReportsModal = ({ onClose }: FinancialReportsModalProps) => {
         {/* En-tête Cabinet */}
         <div className="flex items-start justify-between mb-6 p-4 rounded-lg" style={{ backgroundColor: '#F4E6F7' }}>
           <img
-            src="/lovable-uploads/Logo_page-0001.jpg"
+            src={logo}
             alt="Logo Cabinet Yaye Aminata"
             className="h-16 w-16 mr-4"
           />

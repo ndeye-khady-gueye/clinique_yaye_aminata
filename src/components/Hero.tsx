@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import heroImage from '@/assets/images/2149117843.jpg';
 
 const Hero = () => {
   const scrollToSection = (sectionId: string) => {
@@ -13,7 +14,7 @@ const Hero = () => {
       id="accueil"
       className="relative h-screen bg-cover bg-center bg-no-repeat bg-animated"
       style={{
-        backgroundImage: "url('/lovable-uploads/2149117843.jpg')",
+        backgroundImage: `url(${heroImage})`,
       }}
     >
       {/* Overlay pour améliorer la lisibilité sur mobile */}

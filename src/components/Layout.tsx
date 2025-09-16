@@ -4,6 +4,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import ThemeToggle from '@/components/ThemeToggle';
+import logo from '@/assets/images/Logo_page-0001.jpg';
 import { 
   Heart, 
   LogOut, 
@@ -102,7 +103,7 @@ const Layout = () => {
             <div className="flex items-center space-x-2 sm:space-x-3">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center overflow-hidden">
                 <img
-                  src="/lovable-uploads/Logo_page-0001.jpg"
+                  src={logo}
                   alt="Logo Clinique"
                   className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
                 />

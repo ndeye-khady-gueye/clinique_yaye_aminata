@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import femmes from '@/assets/images/femmes.jpg';
 
 const scrollToSection = (id: string) => {
   const element = document.getElementById(id);
@@ -16,7 +17,7 @@ const About = () => {
           {/* Image animée */}
           <div className="relative fade-in-left order-2 lg:order-1">
             <img 
-              src="/lovable-uploads/femmes.jpg" 
+              src={femmes}
               alt="Consultation médicale" 
               className="rounded-lg shadow-lg w-full h-64 sm:h-80 object-cover"
             />

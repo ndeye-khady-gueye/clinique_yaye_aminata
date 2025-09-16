@@ -2,6 +2,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, Clock, Shield, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
+import yaye from '@/assets/images/yaye.jpg';
+import photoMadameDaouda from '@/assets/images/photo-madame-daouda.jpg';
 
 const Team = () => {
   const [stats, setStats] = useState({
@@ -55,7 +57,7 @@ const Team = () => {
         "Spécialisée en santé sexuelle et reproductive",
         "Soins accessibles aux populations vulnérables"
       ],
-      image: "/lovable-uploads/photo-madame-daouda.jpg"
+      image: photoMadameDaouda
     }
   ];
 
@@ -127,7 +129,7 @@ const Team = () => {
           {/* Image de fond */}
           <div className="absolute inset-0">
             <img 
-              src="/lovable-uploads/yaye.jpg" 
+              src={yaye}
               alt="Consultations médicales"
               className="w-full h-full object-cover"
             />

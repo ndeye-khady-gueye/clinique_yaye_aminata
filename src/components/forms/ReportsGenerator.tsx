@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { FileText, Download, Printer, Calendar, BarChart3, Building2 } from 'lucide-react';
+import logo from '@/assets/images/Logo_page-0001.jpg';
 
 interface ReportsGeneratorProps {
   onClose: () => void;
@@ -125,7 +126,7 @@ const ReportsGenerator = ({ onClose }: ReportsGeneratorProps) => {
         {/* En-tête Cabinet */}
         <div className="flex items-start justify-between mb-6 p-4 rounded-lg" style={{ backgroundColor: '#F4E6F7' }}>
           <img
-            src="/lovable-uploads/Logo_page-0001.jpg"
+            src={logo}
             alt="Logo Cabinet Yaye Aminata"
             className="h-16 w-16 mr-4"
           />

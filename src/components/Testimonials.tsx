@@ -1,13 +1,17 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Star, Quote, Heart, Shield, Clock } from "lucide-react";
+import video from '@/assets/images/Video.mp4';
+import femmes from '@/assets/images/femmes.jpg';
+import consultations from '@/assets/images/consultations.jpg';
+import grosPlan from '@/assets/images/gros-plan-d-un-garcon-se-faisant-examiner.jpg';
 
 const Testimonials = () => {
   const testimonials = [
     {
       name: "Fatou Diop",
       role: "Patiente",
-      image: "/lovable-uploads/femmes.jpg",
+      image: femmes,
       rating: 5,
       comment: "L'équipe du Cabinet Yaye Aminata est exceptionnelle. J'ai toujours reçu des soins de qualité avec beaucoup d'attention et de professionnalisme. Je recommande vivement !",
       service: "Suivi de grossesse"
@@ -15,7 +19,7 @@ const Testimonials = () => {
     {
       name: "Mamadou Sall",
       role: "Professeur",
-      image: "/lovable-uploads/consultations.jpg",
+      image: consultations,
       rating: 5,
       comment: "Grâce au service de consultation, ma santé s'est considérablement améliorée. Les médecins sont très compétents et à l'écoute de mes besoins.",
       service: "Consultation générale"
@@ -23,7 +27,7 @@ const Testimonials = () => {
     {
       name: "Aissatou Ba",
       role: "Mère de famille",
-      image: "/lovable-uploads/gros-plan-d-un-garcon-se-faisant-examiner.jpg",
+      image: grosPlan,
       rating: 5,
       comment: "Le service planning familial est remarquable. L'équipe est à l'écoute et propose des solutions adaptées à chaque situation.",
       service: "Planning familial"
@@ -91,7 +95,7 @@ const Testimonials = () => {
                       muted
                       loop
                     >
-                      <source src="/lovable-uploads/Video.mp4" type="video/mp4" />
+                      <source src={video} type="video/mp4" />
                       Votre navigateur ne supporte pas la vidéo.
                     </video>
                   </div>

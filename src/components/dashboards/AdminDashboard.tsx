@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Shield, Settings, Users, BarChart3 } from 'lucide-react';
+import lolo2 from '@/assets/images/lolo2.jpg';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -23,17 +24,13 @@ const AdminDashboard = () => {
         {/* Photo de l'équipe */}
         <div className="flex justify-center mb-4">
           <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg border-2 border-primary/20">
-            <img 
-              src="/lovable-uploads/lolo2.jpg" 
-              alt="Photo de l'équipe" 
-              className="w-full h-full object-cover"
+              <img 
+                src={lolo2}
+                alt="Photo de l'équipe" 
+                className="w-full h-full object-cover"
               onError={(e) => {
-                // Si l'image ne charge pas, afficher l'icône par défaut
-                e.currentTarget.style.display = 'none';
-                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                if (fallback) {
-                  fallback.style.display = 'flex';
-                }
+                // Fallback vers l'image du dossier public
+                e.currentTarget.src = '/lolo2.jpg';
               }}
             />
             <div className="w-full h-full bg-gradient-clinic flex items-center justify-center" style={{ display: 'none' }}>
