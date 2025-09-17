@@ -1,5 +1,4 @@
-import apiService from './api';
-
+import { apiService } from './api';
 import { API_BASE_URL } from '@/config/environment';
 
 // Types pour les rendez-vous
@@ -187,6 +186,59 @@ class DoctorAppointmentsService {
     } catch (error) {
       console.error('Erreur lors de la récupération des rendez-vous:', error);
       return [];
+// TODO: Vérifier - Version alternative du service
+// const API_BASE_URL = 'http://127.0.0.1:8000';
+// 
+// class DoctorAppointmentsService {
+//   private async makeRequest(endpoint: string, options: RequestInit = {}) {
+//     const token = localStorage.getItem('authToken');
+//     
+//     if (!token) {
+//       throw new Error('Token d\'authentification manquant. Veuillez vous reconnecter.');
+//     }
+//     
+//     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+//       ...options,
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${token}`,
+//         ...options.headers,
+//       },
+//     });
+//
+//     if (!response.ok) {
+//       if (response.status === 401) {
+//         // Token expiré ou invalide
+//         localStorage.removeItem('authToken');
+//         localStorage.removeItem('userData');
+//         window.location.href = '/login';
+//         throw new Error('Session expirée. Veuillez vous reconnecter.');
+//       }
+//       throw new Error(`HTTP error! status: ${response.status}`);
+//     }
+//
+//     return response.json();
+//   }
+//
+//   // Récupérer tous les rendez-vous du docteur
+//   async getMyAppointments() {
+//     try {
+//       const data = await this.makeRequest('/api/rendez-vous/');
+//       return data.results || data;
+//     } catch (error) {
+//       console.error('Erreur lors de la récupération des rendez-vous:', error);
+//       throw error;
+//     }
+//   }
+//
+//   // Récupérer les rendez-vous d'aujourd'hui
+//   async getTodayAppointments() {
+//     try {
+//       const data = await this.makeRequest('/api/rendez-vous/aujourd_hui/');
+//       return data.results || data;
+//     } catch (error) {
+//       console.error('Erreur lors de la récupération des rendez-vous du jour:', error);
+//       throw error;
     }
   }
 
@@ -198,6 +250,17 @@ class DoctorAppointmentsService {
     } catch (error) {
       console.error('Erreur lors de la récupération des rendez-vous de la semaine:', error);
       return [];
+    }
+  }
+
+  // TODO: Vérifier - Version alternative
+  // async getThisWeekAppointments() {
+  //   try {
+  //     const data = await this.makeRequest('/api/rendez-vous/cette_semaine/');
+  //     return data.results || data;
+  //   } catch (error) {
+  //     console.error('Erreur lors de la récupération des rendez-vous de la semaine:', error);
+  //     throw error;
     }
   }
 
@@ -214,12 +277,42 @@ class DoctorAppointmentsService {
     }
   }
 
+  // TODO: Vérifier - Version alternative
+  // async markAsCompleted(appointmentId: number) {
+  //   try {
+  //     const data = await this.makeRequest(`/api/rendez-vous/${appointmentId}/marquer_realise/`, {
+  //       method: 'POST',
+  //     });
+  //     return data;
+  //   } catch (error) {
+  //     console.error('Erreur lors de la réalisation du rendez-vous:', error);
+  //     throw error;
+      throw error;
+    }
+  }
+
   // Annuler un rendez-vous
   async cancelAppointment(appointmentId: number): Promise<any> {
     try {
       return await this.request(`/rendez-vous/${appointmentId}/annuler/`, {
         method: 'POST',
       });
+    } catch (error) {
+      console.error('Erreur lors de l\'annulation du rendez-vous:', error);
+      throw error;
+    }
+  }
+
+  // TODO: Vérifier - Version alternative
+  // async cancelAppointment(appointmentId: number) {
+  //   try {
+  //     const data = await this.makeRequest(`/api/rendez-vous/${appointmentId}/annuler/`, {
+  //       method: 'POST',
+  //     });
+  //     return data;
+  //   } catch (error) {
+  //     console.error('Erreur lors de l\'annulation du rendez-vous:', error);
+  //     throw error;
     } catch (error) {
       console.error('Erreur lors de l\'annulation du rendez-vous:', error);
       throw error;
@@ -256,6 +349,20 @@ class DoctorAppointmentsService {
     }
   }
 
+  // TODO: Vérifier - Version alternative
+  // async markAsAbsent(appointmentId: number) {
+  //   try {
+  //     const data = await this.makeRequest(`/api/rendez-vous/${appointmentId}/marquer_absent/`, {
+  //       method: 'POST',
+  //     });
+  //     return data;
+  //   } catch (error) {
+  //     console.error('Erreur lors du marquage d\'absence:', error);
+  //     throw error;
+      throw error;
+    }
+  }
+
   // Récupérer les prescriptions du médecin
   async getMyPrescriptions(): Promise<Prescription[]> {
     try {
@@ -282,6 +389,21 @@ class DoctorAppointmentsService {
       });
     } catch (error) {
       console.error('Erreur lors de la création de la prescription:', error);
+      throw error;
+    }
+  }
+
+  // TODO: Vérifier - Version alternative
+  // async updateAppointmentNotes(appointmentId: number, notes: string) {
+  //   try {
+  //     const data = await this.makeRequest(`/api/rendez-vous/${appointmentId}/`, {
+  //       method: 'PUT',
+  //       body: JSON.stringify({ notes }),
+  //     });
+  //     return data;
+  //   } catch (error) {
+  //     console.error('Erreur lors de la mise à jour des notes:', error);
+  //     throw error;
       throw error;
     }
   }
@@ -318,6 +440,18 @@ class DoctorAppointmentsService {
       return await this.request(`/patients/${patientId}/dossier_medical/`);
     } catch (error) {
       console.error('Erreur lors de la récupération du dossier médical:', error);
+      throw error;
+    }
+  }
+
+  // TODO: Vérifier - Version alternative
+  // async getDoctorStatistics() {
+  //   try {
+  //     const data = await this.makeRequest('/api/statistiques/docteur/');
+  //     return data;
+  //   } catch (error) {
+  //     console.error('Erreur lors de la récupération des statistiques:', error);
+  //     throw error;
       throw error;
     }
   }

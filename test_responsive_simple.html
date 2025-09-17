@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Responsive - Clinique Yaye Aminata</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .breakpoint-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #4299e1;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+        
+        .grid-test {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        @media (min-width: 475px) {
+            .grid-test {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 640px) {
+            .grid-test {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .grid-test {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        .card {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            background: #4299e1;
+            color: white;
+        }
+        
+        @media (max-width: 640px) {
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+        
+        .table-test {
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .table-test table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        
+        .table-test th,
+        .table-test td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .table-test th {
+            background: #f7fafc;
+            font-weight: 600;
+        }
+        
+        .hidden-mobile {
+            display: none;
+        }
+        
+        @media (min-width: 640px) {
+            .hidden-mobile {
+                display: table-cell;
+            }
+        }
+        
+        .status-success {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .responsive-text {
+            font-size: 14px;
+        }
+        
+        @media (min-width: 475px) {
+            .responsive-text {
+                font-size: 16px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .responsive-text {
+                font-size: 18px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .responsive-text {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="breakpoint-indicator" id="breakpointIndicator">
+        Mobile
+    </div>
+    
+    <div class="container">
+        <h1 class="responsive-text" style="text-align: center; margin-bottom: 30px; color: #2d3748;">
+            🎯 Test des Améliorations Responsive
+        </h1>
+        
+        <div class="test-card">
+            <h2>✅ Améliorations Appliquées</h2>
+            <ul style="margin: 15px 0; padding-left: 20px;">
+                <li>Grilles responsive adaptatives (1 colonne mobile → 4 colonnes desktop)</li>
+                <li>Boutons qui s'adaptent à la taille d'écran</li>
+                <li>Tableaux avec scroll horizontal sur mobile</li>
+                <li>Colonnes masquées sur petits écrans</li>
+                <li>Typographie responsive</li>
+                <li>Espacements adaptatifs</li>
+            </ul>
+        </div>
+        
+        <div class="test-card">
+            <h2>📱 Test des Grilles Responsive</h2>
+            <p>Redimensionnez la fenêtre pour voir les grilles s'adapter :</p>
+            <div class="grid-test">
+                <div class="card">
+                    <h3>Card 1</h3>
+                    <p>Contenu responsive</p>
+                </div>
+                <div class="card">
+                    <h3>Card 2</h3>
+                    <p>Adaptation automatique</p>
+                </div>
+                <div class="card">
+                    <h3>Card 3</h3>
+                    <p>Mobile First</p>
+                </div>
+                <div class="card">
+                    <h3>Card 4</h3>
+                    <p>Fluide</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-card">
+            <h2>🔘 Test des Boutons Responsive</h2>
+            <p>Boutons qui s'adaptent à la taille d'écran :</p>
+            <div>
+                <button class="btn">Voir détails</button>
+                <button class="btn">Paramètres</button>
+                <button class="btn">Télécharger</button>
+                <button class="btn">Supprimer</button>
+            </div>
+        </div>
+        
+        <div class="test-card">
+            <h2>📊 Test des Tableaux Responsive</h2>
+            <p>Tableau avec colonnes masquées sur mobile :</p>
+            <div class="table-test">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th class="hidden-mobile">Email</th>
+                            <th>Date</th>
+                            <th class="hidden-mobile">Service</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jean Dupont</td>
+                            <td class="hidden-mobile">jean@email.com</td>
+                            <td>15 Jan 2024</td>
+                            <td class="hidden-mobile">Cardiologie</td>
+                            <td><span class="status-success">Confirmé</span></td>
+                            <td><button class="btn" style="padding: 4px 8px; font-size: 12px;">Voir</button></td>
+                        </tr>
+                        <tr>
+                            <td>Marie Martin</td>
+                            <td class="hidden-mobile">marie@email.com</td>
+                            <td>16 Jan 2024</td>
+                            <td class="hidden-mobile">Médecine générale</td>
+                            <td><span class="status-success">En attente</span></td>
+                            <td><button class="btn" style="padding: 4px 8px; font-size: 12px;">Modifier</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="test-card">
+            <h2>📏 Breakpoints Actuels</h2>
+            <p>Breakpoint détecté : <strong id="currentBreakpoint">Mobile</strong></p>
+            <p>Largeur de l'écran : <strong id="screenWidth">320px</strong></p>
+            <div style="margin-top: 15px;">
+                <div style="background: #e2e8f0; height: 20px; border-radius: 10px; position: relative;">
+                    <div id="breakpointBar" style="background: #4299e1; height: 100%; border-radius: 10px; width: 0%; transition: width 0.3s;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 12px; color: #666;">
+                    <span>320px</span>
+                    <span>640px</span>
+                    <span>768px</span>
+                    <span>1024px</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-card">
+            <h2>🎯 Instructions de Test</h2>
+            <ul style="margin: 15px 0; padding-left: 20px;">
+                <li><strong>Mobile (< 640px)</strong> : Redimensionnez à 375px - Contenu 1 colonne, boutons pleine largeur</li>
+                <li><strong>Tablet (640px - 768px)</strong> : Redimensionnez à 768px - Grilles 2-3 colonnes</li>
+                <li><strong>Desktop (768px+)</strong> : Redimensionnez à 1200px - Grilles multi-colonnes</li>
+                <li><strong>Test tactile</strong> : Vérifiez que les boutons sont assez grands (44px minimum)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        function updateBreakpointIndicator() {
+            const width = window.innerWidth;
+            const indicator = document.getElementById('breakpointIndicator');
+            const currentBreakpoint = document.getElementById('currentBreakpoint');
+            const screenWidth = document.getElementById('screenWidth');
+            const breakpointBar = document.getElementById('breakpointBar');
+            
+            let breakpoint = 'Mobile';
+            let barWidth = 0;
+            
+            if (width >= 1024) {
+                breakpoint = 'Desktop (1024px+)';
+                barWidth = 100;
+            } else if (width >= 768) {
+                breakpoint = 'Tablet (768px+)';
+                barWidth = 75;
+            } else if (width >= 640) {
+                breakpoint = 'SM (640px+)';
+                barWidth = 50;
+            } else if (width >= 475) {
+                breakpoint = 'XS (475px+)';
+                barWidth = 25;
+            } else {
+                breakpoint = 'Mobile (< 475px)';
+                barWidth = 10;
+            }
+            
+            indicator.textContent = breakpoint;
+            currentBreakpoint.textContent = breakpoint;
+            screenWidth.textContent = width + 'px';
+            breakpointBar.style.width = barWidth + '%';
+        }
+        
+        // Mise à jour initiale
+        updateBreakpointIndicator();
+        
+        // Mise à jour lors du redimensionnement
+        window.addEventListener('resize', updateBreakpointIndicator);
+        
+        console.log('🚀 Test Responsive - Clinique Yaye Aminata');
+        console.log('📱 Breakpoint actuel:', window.innerWidth + 'px');
+        console.log('✅ Toutes les améliorations responsive sont actives');
+    </script>
+</body>
+</html>
