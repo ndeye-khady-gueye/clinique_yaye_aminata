@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import AppointmentForm from '@/components/forms/AppointmentForm';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from '@/hooks/use-toast';
@@ -509,8 +509,13 @@ const RendezVousManagement: React.FC = () => {
             </DialogTrigger>
             <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
-                  <span className="text-base sm:text-lg">Liste Complète des Rendez-vous</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
+                  <div>
+                    <DialogTitle className="text-base sm:text-lg">Liste Complète des Rendez-vous</DialogTitle>
+                    <DialogDescription>
+                      Consultez et gérez tous les rendez-vous du système. Vous pouvez confirmer, modifier ou supprimer les rendez-vous.
+                    </DialogDescription>
+                  </div>
                   <Button 
                     onClick={generatePDF}
                     variant="outline"
@@ -522,7 +527,7 @@ const RendezVousManagement: React.FC = () => {
                     <span className="hidden xs:inline">Télécharger PDF</span>
                     <span className="xs:hidden">PDF</span>
                   </Button>
-                </DialogTitle>
+                </div>
               </DialogHeader>
               {listLoading ? (
                 <div className="flex items-center justify-center h-32">
@@ -722,6 +727,9 @@ const RendezVousManagement: React.FC = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Confirmer le rendez-vous</DialogTitle>
+                <DialogDescription>
+                  Assignez un médecin et confirmez ce rendez-vous. Le patient sera notifié par email.
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
@@ -772,6 +780,9 @@ const RendezVousManagement: React.FC = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Modifier le rendez-vous</DialogTitle>
+                <DialogDescription>
+                  Modifiez les détails de ce rendez-vous. Le patient sera notifié des changements.
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
@@ -1011,6 +1022,9 @@ const RendezVousManagement: React.FC = () => {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Confirmer le rendez-vous</DialogTitle>
+                        <DialogDescription>
+                          Assignez un médecin et confirmez ce rendez-vous. Le patient sera notifié par email.
+                        </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
                         <div>
@@ -1120,6 +1134,9 @@ const RendezVousManagement: React.FC = () => {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Modifier le rendez-vous</DialogTitle>
+                        <DialogDescription>
+                          Modifiez les détails de ce rendez-vous. Le patient sera notifié des changements.
+                        </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
                         <div>
@@ -1248,6 +1265,9 @@ const RendezVousManagement: React.FC = () => {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Détails de la demande de rendez-vous</DialogTitle>
+            <DialogDescription>
+              Consultez les informations complètes de cette demande de rendez-vous.
+            </DialogDescription>
           </DialogHeader>
           {selectedDemande && (
             <div className="space-y-4">

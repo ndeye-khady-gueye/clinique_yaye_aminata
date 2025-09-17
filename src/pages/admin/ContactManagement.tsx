@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { contactApi } from "@/services/api";
@@ -336,6 +336,9 @@ const ContactManagement = () => {
                       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle className="text-base sm:text-lg">Détails du message</DialogTitle>
+                          <DialogDescription>
+                            Consultez et gérez les détails de ce message de contact.
+                          </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-3 sm:space-y-4">
                           <div>

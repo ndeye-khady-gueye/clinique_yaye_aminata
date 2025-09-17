@@ -38,7 +38,7 @@ import {
 import { patientEnregistreService, PatientEnregistre } from '@/services/patientEnregistreService';
 import { toast } from 'sonner';
 import PatientEnregistreForm from '@/components/forms/PatientEnregistreForm';
-import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import jsPDF from 'jspdf';
 import { toPng } from 'html-to-image';
 
@@ -493,6 +493,12 @@ const ReceptionistDashboard = () => {
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Ajouter un nouveau patient</DialogTitle>
+                <DialogDescription>
+                  Remplissez le formulaire ci-dessous pour enregistrer un nouveau patient dans le système.
+                </DialogDescription>
+              </DialogHeader>
               <PatientEnregistreForm
                 onSubmit={handleCreatePatient}
                 onCancel={() => setIsFormOpen(false)}

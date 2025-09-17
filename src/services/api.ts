@@ -220,7 +220,8 @@ class ApiService {
           body: JSON.stringify({ refresh_token: refreshToken }),
         });
       } catch (error) {
-        console.error('Logout error:', error);
+        console.error('Logout API error:', error);
+        // Ne pas re-lancer l'erreur, on continue le nettoyage local
       }
     }
 

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { 
   Calendar, 
@@ -262,6 +262,9 @@ const PatientAppointmentsDashboard = () => {
                         <DialogContent className="max-w-2xl">
                           <DialogHeader>
                             <DialogTitle>Détails du Rendez-vous</DialogTitle>
+                            <DialogDescription>
+                              Consultez les informations complètes de ce rendez-vous.
+                            </DialogDescription>
                           </DialogHeader>
                           {selectedAppointment && (
                             <div className="space-y-6">

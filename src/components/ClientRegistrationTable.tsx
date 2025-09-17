@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Users, Calendar, Search, Plus, Clock, AlertTriangle, Eye } from 'lucide-react';
 import PatientEnregistreForm from './forms/PatientEnregistreForm';
 import { patientEnregistreService } from '@/services/patientEnregistreService';
@@ -190,10 +190,18 @@ const ClientRegistrationTable = () => {
                 Nouveau Client
               </Button>
             </DialogTrigger>
-                         <PatientEnregistreForm 
-               onSubmit={handleAddClient}
-               onCancel={() => setIsFormOpen(false)}
-             />
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Enregistrer un nouveau client</DialogTitle>
+                <DialogDescription>
+                  Remplissez le formulaire ci-dessous pour enregistrer un nouveau client dans le système.
+                </DialogDescription>
+              </DialogHeader>
+              <PatientEnregistreForm 
+                onSubmit={handleAddClient}
+                onCancel={() => setIsFormOpen(false)}
+              />
+            </DialogContent>
           </Dialog>
         </CardTitle>
         <CardDescription>

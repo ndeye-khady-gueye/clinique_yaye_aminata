@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Users, Search, Plus, Eye, Calendar, FileText, Phone, Mail, Loader2, AlertTriangle, X, Download } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import PatientEnregistreForm from '@/components/forms/PatientEnregistreForm';
@@ -325,6 +325,17 @@ const Patients = () => {
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto p-0 mx-2 sm:mx-0">
+              <DialogHeader className="p-6 pb-0">
+                <DialogTitle>
+                  {formData?.id ? 'Modifier le patient' : 'Ajouter un nouveau patient'}
+                </DialogTitle>
+                <DialogDescription>
+                  {formData?.id 
+                    ? 'Modifiez les informations du patient sélectionné.'
+                    : 'Remplissez le formulaire ci-dessous pour enregistrer un nouveau patient dans le système.'
+                  }
+                </DialogDescription>
+              </DialogHeader>
               <PatientEnregistreForm 
                 onSubmit={handleCreatePatient}
                 onCancel={() => setIsFormOpen(false)}

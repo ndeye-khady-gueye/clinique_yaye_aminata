@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -438,6 +438,9 @@ const AppointmentManagementDashboard = () => {
                           <DialogContent className="max-w-2xl">
                             <DialogHeader>
                               <DialogTitle>Détails du Rendez-vous</DialogTitle>
+                              <DialogDescription>
+                                Consultez les informations complètes de ce rendez-vous.
+                              </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
@@ -519,6 +522,9 @@ const AppointmentManagementDashboard = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmer le Rendez-vous</DialogTitle>
+            <DialogDescription>
+              Confirmez ce rendez-vous en assignant une date et un médecin. Le patient sera notifié.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>

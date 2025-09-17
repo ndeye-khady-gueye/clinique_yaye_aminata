@@ -15,7 +15,7 @@ const Contact = () => {
   const [showCursor, setShowCursor] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const fullText = "Contactez-nous";
+  const fullText = "Prendre Rendez-vous";
   
   const [formData, setFormData] = useState({
     nom: "",
@@ -95,12 +95,12 @@ const Contact = () => {
 
     // Validation du sujet
     if (!formData.sujet) {
-      newErrors.sujet = "Le sujet est requis";
+      newErrors.sujet = "Le type de consultation est requis";
     }
 
     // Validation du message
     if (!formData.message) {
-      newErrors.message = "Le message est requis";
+      newErrors.message = "La description de votre demande est requise";
     }
 
     // Validation de la date et heure (optionnelle)
@@ -224,8 +224,8 @@ const Contact = () => {
             </span>
           </h2>
           <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Pour toute question ou information supplémentaire, n'hésitez pas à nous 
-            contacter. Nous sommes là pour vous aider.
+            Prenez rendez-vous facilement en remplissant le formulaire ci-dessous. 
+            Nous vous contacterons rapidement pour confirmer votre rendez-vous.
           </p>
         </div>
 
@@ -271,7 +271,7 @@ const Contact = () => {
                       <SelectTrigger className={`h-10 sm:h-12 lg:h-14 text-sm sm:text-base lg:text-lg border-2 ${
                         errors.sujet ? 'border-red-500' : 'border-gray-200'
                       } focus:border-primary rounded-lg`}>
-                        <SelectValue placeholder="Sujet du message" />
+                        <SelectValue placeholder="Type de consultation" />
                       </SelectTrigger>
                       <SelectContent>
                         {services.map((service) => (
@@ -308,7 +308,7 @@ const Contact = () => {
                   <div>
                     <Textarea
                       id="message"
-                      placeholder="Votre message"
+                      placeholder="Décrivez brièvement votre demande de consultation"
                       value={formData.message}
                       onChange={(e) => handleInputChange("message", e.target.value)}
                       rows={4}
@@ -326,7 +326,7 @@ const Contact = () => {
                     disabled={isSubmitting}
                     className="w-full h-10 sm:h-12 lg:h-14 bg-gradient-clinic hover:opacity-90 text-white text-sm sm:text-base lg:text-lg font-semibold rounded-lg transition-all duration-300 disabled:opacity-50"
                   >
-                    {isSubmitting ? "Envoi en cours..." : "Envoyer"}
+                    {isSubmitting ? "Envoi en cours..." : "Demander un rendez-vous"}
                   </Button>
                 </div>
               </CardContent>

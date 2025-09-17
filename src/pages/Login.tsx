@@ -182,7 +182,7 @@ const Login = () => {
                       <Input
                         id="identifier"
                         type="text"
-                        placeholder="votre@email.com ou 771234567"
+                        placeholder="   votre@email.com ou 771234567"
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
                         className="input-responsive pl-10"
@@ -212,7 +212,7 @@ const Login = () => {
                       <Input
                         id="password"
                         type="password"
-                        placeholder="••••••••"
+                        placeholder="   ••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="input-responsive pl-10"

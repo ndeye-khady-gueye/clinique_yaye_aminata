@@ -12,34 +12,54 @@ const Team = () => {
     experience: 0
   });
 
-  // Animation des chiffres avec mouvement continu
+  // Animation des chiffres avec défilement continu
   useEffect(() => {
-    const animateNumbers = () => {
-      setStats({
-        satisfaction: Math.floor(Math.random() * 20) + 85, // 85-105%
-        disponibilite: Math.floor(Math.random() * 4) + 22, // 22-26h
-        experience: Math.floor(Math.random() * 3) + 14 // 14-17+
-      });
+    const finalValues = {
+      satisfaction: 100,
+      disponibilite: 24,
+      experience: 15
     };
     
-    // Animation initiale
-    const initialTimer = setTimeout(() => {
-      setStats({
-        satisfaction: 98,
-        disponibilite: 24,
-        experience: 15
-      });
-    }, 500);
+    // Démarrer l'animation après 1 seconde
+    const timer = setTimeout(() => {
+      let currentSatisfaction = 0;
+      let currentDisponibilite = 0;
+      let currentExperience = 0;
+      let isAnimating = true;
+      
+      const animate = () => {
+        if (!isAnimating) return;
+        
+        // Incrémenter les valeurs progressivement
+        if (currentSatisfaction < finalValues.satisfaction) {
+          currentSatisfaction += 2;
+        }
+        if (currentDisponibilite < finalValues.disponibilite) {
+          currentDisponibilite += 1;
+        }
+        if (currentExperience < finalValues.experience) {
+          currentExperience += 1;
+        }
+        
+        setStats({
+          satisfaction: Math.min(currentSatisfaction, finalValues.satisfaction),
+          disponibilite: Math.min(currentDisponibilite, finalValues.disponibilite),
+          experience: Math.min(currentExperience, finalValues.experience)
+        });
+        
+        // Continuer l'animation indéfiniment
+        setTimeout(animate, 100); // 100ms entre chaque étape
+      };
+      
+      animate();
+      
+      // Nettoyer l'animation au démontage du composant
+      return () => {
+        isAnimating = false;
+      };
+    }, 1000);
     
-    // Animation continue toutes les 200ms (rapide)
-    const intervalTimer = setInterval(() => {
-      animateNumbers();
-    }, 200);
-    
-    return () => {
-      clearTimeout(initialTimer);
-      clearInterval(intervalTimer);
-    };
+    return () => clearTimeout(timer);
   }, []);
 
 

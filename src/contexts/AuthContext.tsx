@@ -108,8 +108,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await apiService.logout();
     } catch (error) {
       console.error('Logout error:', error);
+      // Même en cas d'erreur, on nettoie l'état local
+    } finally {
+      // Nettoyer l'état local dans tous les cas
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      setUser(null);
     }
-    setUser(null);
   };
 
   return (
